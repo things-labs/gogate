@@ -1,16 +1,16 @@
 package models
 
 import (
-	"errors"
-
 	"github.com/jinzhu/gorm"
 	"github.com/json-iterator/go"
 )
 
+const default_js_node_list = `{"NodeDscList":[]}`
+
 type Product struct {
 	gorm.Model
-	ProductId   uint32 `gorm:"UNIQUE;NOT NULL"`                                                         // 产品Id编号
-	NodeList    string `gorm:'NOT NULL;default:"{\"NodeDscList\":[{\"InTrunk\":[],\"OutTrunk\":[]}]}"'` // 节点表
+	ProductId   uint32 `gorm:"UNIQUE;NOT NULL"` // 产品Id编号
+	NodeList    string // 节点表
 	Description string
 }
 
@@ -38,9 +38,7 @@ func AddProduct(pID uint32, node []*NodeDsc, desc string) error {
 	_, err := LookupProduct(pID)
 	if err != nil {
 		newPdt := &Product{ProductId: pID, Description: desc}
-		if node != nil {
-			newPdt.SetNodeDscList(node)
-		}
+		newPdt.SetNodeDscList(node)
 		return devDb.Create(newPdt).Error
 	}
 
@@ -51,12 +49,16 @@ func AddProduct(pID uint32, node []*NodeDsc, desc string) error {
 func (this *Product) AddProduct() error {
 	_, err := LookupProduct(this.ProductId)
 	if err != nil {
+		if len(this.NodeList) == 0 {
+			this.NodeList = default_js_node_list
+		}
 		return devDb.Create(this).Error
 	}
 
 	return nil
 }
 
+// 更新产品描述
 func UpdateProductDescritption(pID uint32, Newdesc string) error {
 	o, err := LookupProduct(pID)
 	if err != nil {
@@ -66,7 +68,17 @@ func UpdateProductDescritption(pID uint32, Newdesc string) error {
 	return devDb.Model(o).Update("description", Newdesc).Error
 }
 
-// 删除一个产品
+//获取产品描述
+func GetProductDescription(pID uint32) (string, error) {
+	o, err := LookupProduct(pID)
+	if err != nil {
+		return "", err
+	}
+
+	return o.Description, nil
+}
+
+// 根据产品Id删除一个产品
 func DeleteProduct(pID uint32) error {
 	o, err := LookupProduct(pID)
 	if err != nil {
@@ -74,7 +86,6 @@ func DeleteProduct(pID uint32) error {
 	}
 
 	return devDb.Unscoped().Delete(o).Error
-
 }
 
 // 根据产品Id获得产品的所有节点描述,不含保留默认节点0
@@ -89,10 +100,6 @@ func LookupProductDeviceNodeDscList(pID uint32) ([]*NodeDsc, error) {
 
 // 获得产品的所有节点描述,不含保留默认节点0
 func (this *Product) GetDeviceNodeDscList() ([]*NodeDsc, error) {
-	if len(this.NodeList) == 0 {
-		return nil, errors.New("no device node")
-	}
-
 	tb := &NodeTables{}
 	if err := jsoniter.UnmarshalFromString(this.NodeList, tb); err != nil {
 		return nil, err
@@ -105,9 +112,14 @@ func (this *Product) GetDeviceNodeDscList() ([]*NodeDsc, error) {
 func (this *Product) SetNodeDscList(dsc []*NodeDsc) error {
 	var err error
 
-	tb := &NodeTables{NodeDscList: dsc}
-	this.NodeList, err = jsoniter.MarshalToString(tb)
-	if err != nil {
+	tb := &NodeTables{}
+	if dsc == nil {
+		tb.NodeDscList = []*NodeDsc{}
+	} else {
+		tb.NodeDscList = dsc
+	}
+
+	if this.NodeList, err = jsoniter.MarshalToString(tb); err != nil {
 		return err
 	}
 
@@ -116,8 +128,17 @@ func (this *Product) SetNodeDscList(dsc []*NodeDsc) error {
 
 // 设置节点描述的输入输出集
 func (this *NodeDsc) SetTrunk(inTrunk, outTrunk []uint16) {
-	this.InTrunk = append(this.InTrunk, inTrunk...)
-	this.OutTrunk = append(this.OutTrunk, outTrunk...)
+	if inTrunk == nil {
+		this.InTrunk = []uint16{}
+	} else {
+		this.InTrunk = inTrunk
+	}
+
+	if outTrunk == nil {
+		this.OutTrunk = []uint16{}
+	} else {
+		this.OutTrunk = outTrunk
+	}
 }
 
 // 获得节点描述的输入输出集
