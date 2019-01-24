@@ -5,12 +5,12 @@ import (
 	"github.com/json-iterator/go"
 )
 
-const default_js_node_list = `{"NodeDscList":[]}`
+const _default_product_node_list = `{"NodeDscList":[]}`
 
 type Product struct {
 	gorm.Model
-	ProductId   uint32 `gorm:"UNIQUE;NOT NULL"` // 产品Id编号
-	NodeList    string // 节点表
+	ProductId   uint32 `gorm:"UNIQUE;NOT NULL"`   // 产品Id编号
+	NodeList    string `gorm:"type:varchar(511)"` // 节点表
 	Description string
 }
 
@@ -50,7 +50,7 @@ func (this *Product) AddProduct() error {
 	_, err := LookupProduct(this.ProductId)
 	if err != nil {
 		if len(this.NodeList) == 0 {
-			this.NodeList = default_js_node_list
+			this.NodeList = _default_product_node_list
 		}
 		return devDb.Create(this).Error
 	}
@@ -98,7 +98,7 @@ func LookupProductDeviceNodeDscList(pID uint32) ([]*NodeDsc, error) {
 	return pdt.GetDeviceNodeDscList()
 }
 
-// 获得产品的所有节点描述,不含保留默认节点0
+// 获取产品的所有节点描述,不含保留默认节点0
 func (this *Product) GetDeviceNodeDscList() ([]*NodeDsc, error) {
 	tb := &NodeTables{}
 	if err := jsoniter.UnmarshalFromString(this.NodeList, tb); err != nil {
@@ -127,7 +127,7 @@ func (this *Product) SetNodeDscList(dsc []*NodeDsc) error {
 }
 
 // 设置节点描述的输入输出集
-func (this *NodeDsc) SetTrunk(inTrunk, outTrunk []uint16) {
+func (this *NodeDsc) SetTrunkID(inTrunk, outTrunk []uint16) {
 	if inTrunk == nil {
 		this.InTrunk = []uint16{}
 	} else {
@@ -141,7 +141,7 @@ func (this *NodeDsc) SetTrunk(inTrunk, outTrunk []uint16) {
 	}
 }
 
-// 获得节点描述的输入输出集
-func (this *NodeDsc) GetTrunk() (inTrunk, outTrunk []uint16) {
+// 获取节点描述的输入输出集
+func (this *NodeDsc) GetTrunkID() (inTrunk, outTrunk []uint16) {
 	return this.InTrunk, this.OutTrunk
 }

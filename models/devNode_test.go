@@ -5,128 +5,328 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jinzhu/gorm"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 var (
-	tsDev1 = DeviceInfo{IeeeAddr: 33445566, NwkAddr: 1234, Capacity: 1, ProductId: 100}
-	tsDev2 = DeviceInfo{IeeeAddr: 11223344, NwkAddr: 5678, Capacity: 2, ProductId: 100}
+	tsDevNode = DeviceNodeInfo{
+		ID:           6655,
+		NwkAddr:      1234,
+		NodeNo:       5,
+		IeeeAddr:     33445566,
+		InTrunkList:  _default_trunkid_list,
+		OutTrunkList: _default_trunkid_list,
+		SrcBindList:  _default_bind_list,
+		DstBindList:  _default_bind_list,
+	}
 )
 
-func TestDevll(t *testing.T) {
-	Convey("设备表", t, func() {
-
-		// Convey("增加更新设备信息", func() {
-		// 	Isneed, err := AddDevll(tsDev1.IeeeAddr, tsDev1.NwkAddr, tsDev1.Capacity, tsDev1.ProductId-1)
-		// 	So(Isneed, ShouldBeTrue)
-		// 	So(err, ShouldBeNil)
-
-		// 	Isneed, err = AddDevll(tsDev1.IeeeAddr, tsDev1.NwkAddr, tsDev1.Capacity, tsDev1.ProductId)
-		// 	So(Isneed, ShouldBeTrue)
-		// 	So(err, ShouldBeNil)
-
-		// 	Isneed, err = AddDevll(tsDev1.IeeeAddr, tsDev1.NwkAddr, tsDev1.Capacity, tsDev1.ProductId)
-		// 	So(Isneed, ShouldBeFalse)
-		// 	So(err, ShouldBeNil)
-
-		// 	Isneed, err = AddDevll(tsDev2.IeeeAddr, tsDev2.NwkAddr, tsDev2.Capacity, tsDev2.ProductId)
-		// 	So(Isneed, ShouldBeFalse)
-		// 	So(err, ShouldBeNil)
-		// })
-
-		// Convey("用nwkAddr查找设备", func() {
-		// 	dev, err := LookupDevllByNwkAddr(tsDev1.NwkAddr)
-		// 	So(err, ShouldBeNil)
-		// 	So(dev.GetIeeeAddr(), ShouldEqual, tsDev1.IeeeAddr)
-		// 	So(dev.GetNwkAddr(), ShouldEqual, tsDev1.NwkAddr)
-		// 	So(dev.GetCapacity(), ShouldEqual, tsDev1.Capacity)
-		// 	So(dev.GetProductID(), ShouldEqual, tsDev1.ProductId)
-		// 	So(dev.GetID(), ShouldBeGreaterThan, 0)
-
-		// 	_, err = LookupDevllByNwkAddr(0xffff)
-		// 	So(err, ShouldNotBeNil)
-		// })
-
-		// Convey("用ieeeAddr查找设备", func() {
-		// 	dev, err := LookupDevllByIeeeAddr(tsDev1.IeeeAddr)
-		// 	So(err, ShouldBeNil)
-		// 	So(dev.GetIeeeAddr(), ShouldEqual, tsDev1.IeeeAddr)
-		// 	So(dev.GetNwkAddr(), ShouldEqual, tsDev1.NwkAddr)
-		// 	So(dev.GetCapacity(), ShouldEqual, tsDev1.Capacity)
-		// 	So(dev.GetProductID(), ShouldEqual, tsDev1.ProductId)
-
-		// 	_, err = LookupDevllByIeeeAddr(0xffff)
-		// 	So(err, ShouldNotBeNil)
-		// })
-
-		// Convey("删除设备", func() {
-		// 	Isneed, err := DeleteDevll(tsDev1.IeeeAddr)
-		// 	So(Isneed, ShouldBeTrue)
-		// 	So(err, ShouldBeNil)
-
-		// 	Isneed, err = DeleteDevll(0xffff)
-		// 	So(Isneed, ShouldBeFalse)
-		// 	So(err, ShouldBeNil)
-		// })
-
-	})
-}
-
-var inTrunkStr = `{"trunkID":[6,7,8,9]}`
-var outTrunkStr = `{"trunkID":[3,4,5,6]}`
-var bindListStr = `{"id":[1,2,3,4]}`
-var inTrunkSlice = []uint16{6, 7, 8, 9}
-var outTrunkSlice = []uint16{3, 4, 5, 6}
-var bindListSlice = []uint{1, 2, 3, 4}
-
-var nodeInfo0 = &DeviceNodeInfo{
-	NwkAddr:      1234,
-	NodeNo:       1,
-	IeeeAddr:     1122334455667788,
-	InTrunkList:  inTrunkStr,
-	OutTrunkList: outTrunkStr,
-	DstBindList:  bindListStr,
-}
-
-func TestNbiNode(t *testing.T) {
-	Convey("节点表", t, func() {
-		Convey("获取绑定id列表,json字符串转换成Id列表", func() {
-			l, err := nodeInfo0.GetDstBindList()
+func TestparseInternalJsonString(t *testing.T) {
+	Convey("解析内部的jsonString", t, func() {
+		Convey("解析内部的jsonString - 列表均为空", func() {
+			err := tsDevNode.parseInternalJsonString()
 			So(err, ShouldBeNil)
-			So(reflect.DeepEqual(l, bindListSlice), ShouldBeTrue)
+			So(len(tsDevNode.inTrunk), ShouldBeZeroValue)
+			So(len(tsDevNode.outTrunk), ShouldBeZeroValue)
+			So(len(tsDevNode.srcBind), ShouldBeZeroValue)
+			So(len(tsDevNode.dstBind), ShouldBeZeroValue)
 		})
-		Convey("设置绑定id列表,id列表转换成json字符串", func() {
-			actual := &DeviceNodeInfo{}
-			err := actual.setDstBindList(bindListSlice)
+
+		Convey("解析内部的jsonString - 列表均有值", func() {
+			expTK := []uint16{1, 2, 3, 4}
+			expTK1 := []uint16{5, 6, 7, 8}
+			exp := []uint{1, 3, 5, 7}
+			exp1 := []uint{2, 4, 6, 8}
+			tsDevNode.InTrunkList = `{"trunkID":[1,2,3,4]}`
+			tsDevNode.OutTrunkList = `{"trunkID":[5,6,7,8]}`
+			tsDevNode.SrcBindList = `{"id":[1,3,5,7]}`
+			tsDevNode.DstBindList = `{"id":[2,4,6,8]}`
+
+			err := tsDevNode.parseInternalJsonString()
 			So(err, ShouldBeNil)
-			So(strings.Compare(actual.DstBindList, nodeInfo0.DstBindList), ShouldBeZeroValue)
+			So(reflect.DeepEqual(tsDevNode.inTrunk, expTK), ShouldBeTrue)
+			So(reflect.DeepEqual(tsDevNode.outTrunk, expTK1), ShouldBeTrue)
+			So(reflect.DeepEqual(tsDevNode.srcBind, exp), ShouldBeTrue)
+			So(reflect.DeepEqual(tsDevNode.dstBind, exp1), ShouldBeTrue)
 		})
 
-		Convey("添加新的绑定到id列表", func() {
+		Convey("获取设备节点Id列表 - 列表值空字符串或错误Json格式", func() {
+			tsDevNode.InTrunkList = ""
+			tsDevNode.OutTrunkList = ""
+			tsDevNode.SrcBindList = ""
+			tsDevNode.DstBindList = ""
 
-		})
-		Convey("从绑定id列表删除一个绑定", func() {
-
-		})
-		Convey("获得节点输入输出集列表", func() {
-			lin, lout, err := nodeInfo0.GetTrunkIDList()
-			So(err, ShouldBeNil)
-			So(reflect.DeepEqual(lin, inTrunkSlice), ShouldBeTrue)
-			So(reflect.DeepEqual(lout, outTrunkSlice), ShouldBeTrue)
-		})
-
-		Convey("设置节点输入输出集列表", func() {
-			actual := &DeviceNodeInfo{}
-			err := actual.SetTrunkIDlist(inTrunkSlice, outTrunkSlice)
-			So(err, ShouldBeNil)
-			So(strings.Compare(actual.InTrunkList, nodeInfo0.InTrunkList), ShouldBeZeroValue)
-			So(strings.Compare(actual.OutTrunkList, nodeInfo0.OutTrunkList), ShouldBeZeroValue)
+			err := tsDevNode.parseInternalJsonString()
+			So(err, ShouldNotBeNil)
 		})
 	})
 }
 
-func TestNBI(t *testing.T) {
-	Convey("节点增删改查", t, func() {
+func TestGetDeviceNodeInfo(t *testing.T) {
+	Convey("获取设备节点属性", t, func() {
+		tsDevNode.InTrunkList = `{"trunkID":[1,2,3,4]}`
+		tsDevNode.OutTrunkList = `{"trunkID":[1,2,3,4]}`
+		tsDevNode.SrcBindList = `{"id":[1,2,3,4]}`
+		tsDevNode.DstBindList = `{"id":[1,2,3,4]}`
+		expTK := []uint16{1, 2, 3, 4}
+		exp := []uint{1, 2, 3, 4}
+		err := tsDevNode.parseInternalJsonString()
+		So(err, ShouldBeNil)
+
+		Convey("获取id", func() {
+			So(tsDevNode.GetID(), ShouldEqual, 6655)
+		})
+		Convey("获取网络地址", func() {
+			So(tsDevNode.GetNwkAddr(), ShouldEqual, 1234)
+		})
+		Convey("获取ieee地址", func() {
+			So(tsDevNode.GetIeeeAddr(), ShouldEqual, 33445566)
+		})
+		Convey("获取节点号", func() {
+			So(tsDevNode.GetNodeNum(), ShouldEqual, 5)
+		})
+		Convey("获取输入输出集", func() {
+			inTk1, outTk1 := tsDevNode.GetTrunkIDList()
+			So(reflect.DeepEqual(inTk1, expTK), ShouldBeTrue)
+			So(reflect.DeepEqual(outTk1, expTK), ShouldBeTrue)
+		})
+		Convey("获取源绑定表", func() {
+			bd := tsDevNode.GetSrcBindList()
+			So(reflect.DeepEqual(bd, exp), ShouldBeTrue)
+		})
+
+		Convey("获取目标绑定表", func() {
+			bd := tsDevNode.GetDstBindList()
+			So(reflect.DeepEqual(bd, exp), ShouldBeTrue)
+		})
+	})
+}
+
+func TestSetTrunkIDList(t *testing.T) {
+	Convey("设置设备节点集id列表", t, func() {
+		spareTk := []uint16{}
+
+		Convey("设置设备节点Id列表 - 列表均为空", func() {
+			err := tsDevNode.SetTrunkIDlist(spareTk, spareTk)
+			So(err, ShouldBeNil)
+			So(strings.Compare(tsDevNode.InTrunkList, _default_trunkid_list), ShouldBeZeroValue)
+			So(strings.Compare(tsDevNode.InTrunkList, _default_trunkid_list), ShouldBeZeroValue)
+		})
+
+		Convey("设置设备节点Id列表 - 列表均有值", func() {
+			expTK := []uint16{1, 2, 3, 4}
+			expStr := `{"trunkID":[1,2,3,4]}`
+
+			err := tsDevNode.SetTrunkIDlist(expTK, expTK)
+			So(err, ShouldBeNil)
+			So(strings.Compare(tsDevNode.InTrunkList, expStr), ShouldBeZeroValue)
+			So(strings.Compare(tsDevNode.OutTrunkList, expStr), ShouldBeZeroValue)
+		})
+
+		Convey("设置设备节点Id列表 - 列表为nil", func() {
+			err := tsDevNode.SetTrunkIDlist(nil, nil)
+			So(err, ShouldBeNil)
+			So(strings.Compare(tsDevNode.InTrunkList, _default_trunkid_list), ShouldBeZeroValue)
+			So(strings.Compare(tsDevNode.OutTrunkList, _default_trunkid_list), ShouldBeZeroValue)
+		})
+	})
+}
+
+func TestSetBindList(t *testing.T) {
+	Convey("设置设备节点绑定列表", t, func() {
+		spare := []uint{}
+		exp := []uint{1, 2, 3, 4}
+		expStr := `{"id":[1,2,3,4]}`
+
+		Convey("设置设备节点: 目的绑定列表 - 列表均为空", func() {
+			err := tsDevNode.setDstBindList(spare)
+			So(err, ShouldBeNil)
+			So(strings.Compare(tsDevNode.DstBindList, _default_bind_list), ShouldBeZeroValue)
+		})
+
+		Convey("设置设备节点: 目的绑定列表 - 列表均有值", func() {
+			err := tsDevNode.setDstBindList(exp)
+			So(err, ShouldBeNil)
+			So(strings.Compare(tsDevNode.DstBindList, expStr), ShouldBeZeroValue)
+		})
+
+		Convey("设置设备节点: 目的绑定列表 - 列表为nil", func() {
+			err := tsDevNode.setDstBindList(nil)
+			So(err, ShouldBeNil)
+			So(strings.Compare(tsDevNode.DstBindList, _default_bind_list), ShouldBeZeroValue)
+		})
+
+		Convey("设置设备节点: 源绑定列表 - 列表均为空", func() {
+			err := tsDevNode.setSrcBindList(spare)
+			So(err, ShouldBeNil)
+			So(strings.Compare(tsDevNode.SrcBindList, _default_bind_list), ShouldBeZeroValue)
+		})
+
+		Convey("设置设备节点: 源绑定列表 - 列表均有值", func() {
+			err := tsDevNode.setSrcBindList(exp)
+			So(err, ShouldBeNil)
+			So(strings.Compare(tsDevNode.SrcBindList, expStr), ShouldBeZeroValue)
+		})
+
+		Convey("设置设备节点: 绑定源列表 - 列表为nil", func() {
+			err := tsDevNode.setSrcBindList(nil)
+			So(err, ShouldBeNil)
+			So(strings.Compare(tsDevNode.SrcBindList, _default_bind_list), ShouldBeZeroValue)
+		})
+	})
+}
+
+func TestGetDeviceInfo(t *testing.T) {
+	var dev = &DeviceInfo{
+		Model: gorm.Model{
+			ID: 1,
+		},
+		IeeeAddr:  11223344,
+		NwkAddr:   5566,
+		Capacity:  2,
+		ProductId: 3000,
+	}
+
+	Convey("获取设备信息", t, func() {
+		Convey("获取设备ieee地址", func() {
+			So(dev.GetIeeeAddr(), ShouldEqual, 11223344)
+		})
+		Convey("获取设备网络地址", func() {
+			So(dev.GetNwkAddr(), ShouldEqual, 5566)
+		})
+		Convey("获取设备能力", func() {
+			So(dev.GetCapacity(), ShouldEqual, 2)
+		})
+		Convey("获取设备产品id", func() {
+			So(dev.GetProductID(), ShouldEqual, 3000)
+		})
+
+		Convey("获取设备数据据ID值", func() {
+			So(dev.GetID(), ShouldEqual, 1)
+		})
+	})
+}
+
+var tsDev = &DeviceInfo{
+	IeeeAddr:  11223344,
+	NwkAddr:   5566,
+	Capacity:  2,
+	ProductId: 3000,
+}
+
+var tsDev0 = &DeviceInfo{
+	IeeeAddr:  55667788,
+	NwkAddr:   1122,
+	Capacity:  1,
+	ProductId: 3000,
+}
+
+func TestDevice(t *testing.T) {
+	Convey("设备表和设备节点表", t, func() {
+		Convey("创建设备和所有的节点", func() {
+			err := UpdateDeviceAndANode(11223344, 5566, 2, 3000)
+			So(err, ShouldBeNil)
+
+			err = UpdateDeviceAndANode(55667788, 1122, 1, 3000)
+			So(err, ShouldBeNil)
+
+			err = UpdateDeviceAndANode(11111111, 1111, 2, 3000)
+			So(err, ShouldBeNil)
+
+			err = UpdateDeviceAndANode(22222222, 2222, 1, 3000)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("通过网络地址查询设备", func() {
+			oDev, err := LookupDeviceByNwkAddr(5566)
+			So(err, ShouldBeNil)
+			So(oDev.IeeeAddr, ShouldEqual, tsDev.IeeeAddr)
+			So(oDev.Capacity, ShouldEqual, tsDev.Capacity)
+			So(oDev.ProductId, ShouldEqual, tsDev.ProductId)
+		})
+
+		Convey("通过ieee地址查询设备", func() {
+			oDev, err := LookupDeviceByIeeeAddr(11223344)
+			So(err, ShouldBeNil)
+			So(oDev.NwkAddr, ShouldEqual, tsDev.NwkAddr)
+			So(oDev.Capacity, ShouldEqual, tsDev.Capacity)
+			So(oDev.ProductId, ShouldEqual, tsDev.ProductId)
+		})
+
+		Convey("通过网络地址,节点查询设备节点", func() {
+			oDevNode, err := LookupDeviceNodeByNN(5566, 0)
+			So(err, ShouldBeNil)
+			So(oDevNode.ID, ShouldBeGreaterThan, 0)
+		})
+
+		Convey("通过Ieee地址,节点查询设备节点", func() {
+			oDevNode, err := LookupDeviceNodeByIN(11223344, 1)
+			So(err, ShouldBeNil)
+			So(oDevNode.ID, ShouldBeGreaterThan, 0)
+		})
+
+		Convey("通过ID查询设备节点", func() {
+			o1, _ := LookupDeviceNodeByNN(5566, 0)
+
+			o2, err := LookupDeviceNodeByID(o1.ID)
+
+			So(err, ShouldBeNil)
+			So(reflect.DeepEqual(o1, o2), ShouldBeTrue)
+		})
+
+		Convey("更新设备能力属性", func() {
+			testDev, err := LookupDeviceByNwkAddr(5566)
+			So(err, ShouldBeNil)
+
+			err = testDev.updateCapacity(1)
+			So(err, ShouldBeNil)
+			err = testDev.updateCapacity(tsDev.Capacity)
+		})
+
+		Convey("更新设备和设备所有设备节点的网络地址", func() {
+			testDev, err := LookupDeviceByNwkAddr(5566)
+			So(err, ShouldBeNil)
+
+			err = testDev.updateDeviceAndNodeNwkAddr(7788)
+			So(err, ShouldBeNil)
+			testDev.updateDeviceAndNodeNwkAddr(5566)
+		})
+
+		Convey("绑定两个互补的设备节点", func() {
+			err := BindDeviceNode(11223344, 2, 55667788, 3, 3)
+			So(err, ShouldBeNil)
+			err = BindDeviceNode(11223344, 2, 11223344, 3, 3)
+			So(err, ShouldBeNil)
+			err = BindDeviceNode(55667788, 2, 55667788, 3, 3)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("根据网络址,节点号查找绑定表的所有设备节点", func() {
+			devnodes, err := BindFindDeviceNodeByNN(5566, 2, 3)
+			So(err, ShouldBeNil)
+			So(len(devnodes), ShouldEqual, 2)
+		})
+
+		Convey("根据ieee地址,节点号查找绑定表的所有设备节点", func() {
+			devnodes, err := BindFindDeviceNodeByIN(11223344, 2, 3)
+			So(err, ShouldBeNil)
+			So(len(devnodes), ShouldEqual, 2)
+		})
+
+		Convey("解除两个设备节点的绑定", func() {
+			err := UnBindDeviceNode(11223344, 2, 55667788, 3, 3)
+			So(err, ShouldBeNil)
+			err = UnBindDeviceNode(11223344, 2, 11223344, 3, 3)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("删除设备", func() {
+			err := DeleteDeveiceAndNode(11111111)
+			So(err, ShouldBeNil)
+			err = DeleteDeveiceAndNode(22222222)
+			So(err, ShouldBeNil)
+		})
 
 	})
 }
