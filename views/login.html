@@ -5,25 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
     <title>登陆</title>
-    <link rel="stylesheet" href="/static/css/mui.min.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/login.css">
 </head>
 <body>
-    <div class="loginIpt">
-        <div class="inputNum">
-            <input type="number" name="" placeholder="请输入手机号" id="phoneNum">
-        </div>
-        <div class="inputTex">
-            <input type="password" name="" placeholder="请输入密码" id="password">
-        </div>
-    </div>
-    <button class="sub">登录</button>
-    <div class="zhuce"><a href="register.html">还没有账号，立即注册></a></div>
-    <div class="showTishi"></div>
-
-    
-    <script type="text/javascript" src="/staticjs/jquery-2.0.3.min.js"></script>
-    <script type="text/javascript" src="/static/js/mui.js"></script>
-    <script src="js/login.js"></script>
+<form>
+  <div class="form-group">
+    <label for="account">Account</label>
+    <input type="account" class="form-control" name="username" id="Inputaccount" placeholder="admin">
+  </div>
+  <div class="form-group">
+    <label for="password">Password</label>
+    <input type="password" class="form-control" name="password" id="InputPassword" placeholder="admin">
+  </div>
+  <button type="submit" class="btn btn-default">Submit</button>
+</form>
 </body>
 </html>

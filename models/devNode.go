@@ -84,7 +84,7 @@ func init() {
 	//devDb.LogMode(misc.APPCfg.MustBool(goconfig.DEFAULT_SECTION, "ormDbLog", false))
 	//devDb.LogMode(true)
 
-	devDb.AutoMigrate(&Product{}, &DeviceInfo{})
+	devDb.AutoMigrate(&DeviceInfo{})
 	if devDb.Error != nil {
 		panic("models: gorm AutoMigrate failed," + err.Error())
 	}

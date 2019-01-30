@@ -1,13 +1,12 @@
 package npis
 
 import (
-	"github.com/Unknwon/goconfig"
 	"github.com/astaxie/beego/logs"
+	"github.com/slzm40/gomo/misc"
 	"github.com/slzm40/gomo/npi"
 	"github.com/tarm/serial"
 )
 
-const UART_CFG_PATH = "./conf/usart.conf" // 串口配置的路径
 var nobj *npi.NpiObj
 
 func DoneCmd(cmd uint16) {
@@ -39,18 +38,16 @@ func DoneCmd(cmd uint16) {
 	}
 }
 func NpiAppInit() error {
-	var bcfg *goconfig.ConfigFile
 	var err error
 
-	if bcfg, err = goconfig.LoadConfigFile(UART_CFG_PATH); err != nil {
-		logs.Error("Npi Init: Load usart config file failed!")
-		return err
-	}
+	bcfg := misc.APPCfg
 
 	usartcfg := &serial.Config{}
+
 	if usartcfg.Name, err = bcfg.GetValue("COM0", "Name"); err != nil {
 		return err
 	}
+
 	usartcfg.Baud = bcfg.MustInt("COM0", "Name", 115200)
 	usartcfg.Size = byte(bcfg.MustInt("COM0", "DataBit", 8))
 	usartcfg.Parity = serial.Parity(bcfg.MustInt("COM0", "Parity", 'N'))
@@ -58,7 +55,7 @@ func NpiAppInit() error {
 
 	logs.Debug("usarcfg: %#v", usartcfg)
 
-	if nobj, err = npi.NpiNew(usartcfg); err != nil {
+	if nobj, err = npi.NewNpi(usartcfg); err != nil {
 		logs.Error("npi new failed", err)
 		return err
 	}
