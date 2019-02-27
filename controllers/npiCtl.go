@@ -10,6 +10,11 @@ type NpiController struct {
 	beego.Controller
 }
 
+func (this *NpiController) Get() {
+	this.Data["json"] = `{"status":"Get success"}`
+	this.ServeJSON()
+}
+
 func (this *NpiController) Post() {
 	if jsoniter.Valid(this.Ctx.Input.RequestBody) {
 		var any jsoniter.Any = jsoniter.Get(this.Ctx.Input.RequestBody)
@@ -18,6 +23,6 @@ func (this *NpiController) Post() {
 		npis.DoneCmd(uint16(cmd))
 	}
 
-	this.Data["json"] = `{"status":"success"}`
+	this.Data["json"] = `{"status":"post success"}`
 	this.ServeJSON()
 }

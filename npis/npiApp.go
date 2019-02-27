@@ -7,41 +7,54 @@ import (
 	"github.com/tarm/serial"
 )
 
-var nobj *npi.NpiObj
+const (
+	zb_state_idle = iota
+	zb_state_nwkFormation
+)
+
+type ZigbeeMonitor struct {
+	*npi.Monitor
+	state int
+}
+
+var ZbMonitor *ZigbeeMonitor
 
 func DoneCmd(cmd uint16) {
 	var err error
 
-	logs.Info("0x%04x", cmd)
+	logs.Info("cmd request: 0x%04x", cmd)
 
-	pdu := &npi.Npi_pdu{}
 	switch cmd {
 	case npi.MT_SYS_PING:
-		pdu.Sys_PingReq_Pack()
-		if rsp, err := nobj.SendSynchData(pdu); err != nil {
+		if Capabilities, err := ZbMonitor.Sys_Ping(); err != nil {
 			logs.Error(err)
 		} else {
-			if Capabilities, err := rsp.Sys_PingSRspParse(); err != nil {
-				logs.Error(err)
-			} else {
-				logs.Debug("0x%04x", Capabilities)
-			}
+			logs.Debug("Capabilities: 0x%04x", Capabilities)
 		}
+
 	case npi.MT_SYS_RESET_REQ:
-		pdu.Sys_ResetReq_Pack(npi.MT_SYS_RESET_HARD)
-		if err = nobj.SendAsynchData(pdu); err != nil {
+		if err = ZbMonitor.Sys_ResetReq(npi.MT_SYS_RESET_HARD); err != nil {
 			logs.Error(err)
 		}
+
 	case npi.MT_APP_CNF_BDB_START_COMMISSIONING:
-		pdu.Appcfg_BdbStartCommissioningReq_Pack(0x04)
-		//		if err = nobj.
+		if status, err := ZbMonitor.Appcfg_BdbStartCommissioningReq(0x04); err != nil {
+			logs.Error(err)
+		} else {
+			logs.Debug("Appcfg_BdbStartCommissioningReq %t", status)
+		}
+	case 100:
+		ZbMonitor.Close()
 	}
 }
+
 func NpiAppInit() error {
-	var err error
+	var (
+		err error
+		m   *npi.Monitor
+	)
 
 	bcfg := misc.APPCfg
-
 	usartcfg := &serial.Config{}
 
 	if usartcfg.Name, err = bcfg.GetValue("COM0", "Name"); err != nil {
@@ -55,10 +68,30 @@ func NpiAppInit() error {
 
 	logs.Debug("usarcfg: %#v", usartcfg)
 
-	if nobj, err = npi.NewNpi(usartcfg); err != nil {
+	if m, err = npi.NewNpiMonitor(usartcfg); err != nil {
 		logs.Error("npi new failed", err)
 		return err
 	}
 
+	ZbMonitor = &ZigbeeMonitor{
+		Monitor: m,
+		state:   zb_state_idle,
+	}
+
+	ZbMonitor.AddAsyncCbs(map[uint16]func(*npi.Npdu){
+		npi.MT_AF_DATA_CONFIRM:                        Af_DataConfirm,
+		npi.MT_AF_INCOMING_MSG:                        Af_IncomingMsgParse,
+		npi.MT_ZDO_MGMT_PERMIT_JOIN_RSP:               Zdo_MgmtPermitJoinRsp,
+		npi.MT_ZDO_STATE_CHANGE_IND:                   Zdo_StateChangeInd,
+		npi.MT_ZDO_END_DEV_ANNCE:                      Zdo_enddeviceAnnceInd,
+		npi.MT_ZDO_LEAVE_IND:                          Zdo_LeaveInd,
+		npi.MT_SYS_RESET_IND:                          Sys_ResetInd,
+		npi.MT_APP_CNF_BDB_COMMISSIONING_NOTIFICATION: Appcfg_BdbCommissioningNotice,
+	})
+
 	return nil
+}
+
+func ZigbeeNetworkFromationBoot() {
+
 }
