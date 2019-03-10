@@ -2,6 +2,7 @@ package npis
 
 import (
 	"github.com/astaxie/beego/logs"
+	"github.com/slzm40/gomo/ltl"
 	"github.com/slzm40/gomo/misc"
 	"github.com/slzm40/gomo/npi"
 	"github.com/tarm/serial"
@@ -12,47 +13,16 @@ const (
 	zb_state_nwkFormation
 )
 
-type ZigbeeMonitor struct {
-	*npi.Monitor
-	state int
+type LtlApp struct {
+	*ltl.Ltl_t
+	*MiddleMonitor
 }
 
-var ZbMonitor *ZigbeeMonitor
-
-func DoneCmd(cmd uint16) {
-	var err error
-
-	logs.Info("cmd request: 0x%04x", cmd)
-
-	switch cmd {
-	case npi.MT_SYS_PING:
-		if Capabilities, err := ZbMonitor.Sys_Ping(); err != nil {
-			logs.Error(err)
-		} else {
-			logs.Debug("Capabilities: 0x%04x", Capabilities)
-		}
-
-	case npi.MT_SYS_RESET_REQ:
-		if err = ZbMonitor.Sys_ResetReq(npi.MT_SYS_RESET_HARD); err != nil {
-			logs.Error(err)
-		}
-
-	case npi.MT_APP_CNF_BDB_START_COMMISSIONING:
-		if status, err := ZbMonitor.Appcfg_BdbStartCommissioningReq(0x04); err != nil {
-			logs.Error(err)
-		} else {
-			logs.Debug("Appcfg_BdbStartCommissioningReq %t", status)
-		}
-	case 100:
-		ZbMonitor.Close()
-	}
-}
+var Ltlapps *LtlApp
 
 func NpiAppInit() error {
-	var (
-		err error
-		m   *npi.Monitor
-	)
+	var err error
+	var m *npi.Monitor
 
 	bcfg := misc.APPCfg
 	usartcfg := &serial.Config{}
@@ -73,12 +43,12 @@ func NpiAppInit() error {
 		return err
 	}
 
-	ZbMonitor = &ZigbeeMonitor{
-		Monitor: m,
-		state:   zb_state_idle,
+	mid := &MiddleMonitor{
+		IncommingMsgPkt: make(chan *ltl.MoIncomingMsgPkt, ltl.Incomming_msg_size_max),
+		Monitor:         m,
 	}
 
-	ZbMonitor.AddAsyncCbs(map[uint16]func(*npi.Npdu){
+	mid.AddAsyncCbs(map[uint16]func(*npi.Npdu){
 		npi.MT_AF_DATA_CONFIRM:                        Af_DataConfirm,
 		npi.MT_AF_INCOMING_MSG:                        Af_IncomingMsgParse,
 		npi.MT_ZDO_MGMT_PERMIT_JOIN_RSP:               Zdo_MgmtPermitJoinRsp,
@@ -89,9 +59,13 @@ func NpiAppInit() error {
 		npi.MT_APP_CNF_BDB_COMMISSIONING_NOTIFICATION: Appcfg_BdbCommissioningNotice,
 	})
 
+	Ltlapps = &LtlApp{
+		Ltl_t: &ltl.Ltl_t{
+			WriteCloseMsgComming: mid,
+		},
+		MiddleMonitor: mid,
+	}
+
+	Ltlapps.Start()
 	return nil
-}
-
-func ZigbeeNetworkFromationBoot() {
-
 }

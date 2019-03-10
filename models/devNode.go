@@ -92,7 +92,6 @@ func init() {
 	if !devDb.HasTable("device_node_infos") {
 		devDb.Raw(deviceNodeInfos_Sql).Scan(&DeviceNodeInfo{})
 	}
-
 }
 
 // 根据网络地址,节点号找到设备节点

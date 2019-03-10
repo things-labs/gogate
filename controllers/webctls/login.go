@@ -1,4 +1,4 @@
-package controllers
+package webctls
 
 import (
 	"crypto/md5"

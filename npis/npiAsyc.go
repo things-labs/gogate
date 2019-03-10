@@ -38,7 +38,7 @@ func Zdo_MgmtPermitJoinRsp(pdu *npi.Npdu) {
 }
 
 func Zdo_StateChangeInd(pdu *npi.Npdu) {
-	o, err := npi.Zdo_StateChangeInd(pdu)
+	o, err := npi.Zdo_StateChangeIndParse(pdu)
 	if err != nil {
 		logs.Error(err)
 		return

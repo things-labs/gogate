@@ -21,7 +21,6 @@ var product map[uint32]*Product = map[uint32]*Product{
 
 // 根据产品id查找产品
 func LookupProduct(pID uint32) (*Product, error) {
-
 	o, exists := product[pID]
 	if !exists {
 		return nil, errors.New("product no exist")

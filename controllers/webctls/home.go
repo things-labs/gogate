@@ -1,4 +1,4 @@
-package controllers
+package webctls
 
 import (
 	"github.com/astaxie/beego"
