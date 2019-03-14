@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/astaxie/beego"
-	_ "github.com/slzm40/gogate/models"
+	_ "github.com/slzm40/gogate/models/pdtModels"
 	_ "github.com/slzm40/gogate/routers"
 	_ "github.com/slzm40/gomo/misc"
 )

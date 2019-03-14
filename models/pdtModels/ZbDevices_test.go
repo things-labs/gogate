@@ -1,4 +1,4 @@
-package models
+package pdtModels
 
 import (
 	"reflect"
@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	tsDevNode = DeviceNodeInfo{
+	tsDevNode = ZbDeviceNodeInfo{
 		ID:           6655,
 		NwkAddr:      1234,
 		NodeNo:       5,
@@ -178,7 +178,7 @@ func TestSetBindList(t *testing.T) {
 }
 
 func TestGetDeviceInfo(t *testing.T) {
-	var dev = &DeviceInfo{
+	var dev = &ZbDeviceInfo{
 		Model: gorm.Model{
 			ID: 1,
 		},
@@ -208,14 +208,14 @@ func TestGetDeviceInfo(t *testing.T) {
 	})
 }
 
-var tsDev = &DeviceInfo{
+var tsDev = &ZbDeviceInfo{
 	IeeeAddr:  11223344,
 	NwkAddr:   5566,
 	Capacity:  2,
 	ProductId: 3000,
 }
 
-var tsDev0 = &DeviceInfo{
+var tsDev0 = &ZbDeviceInfo{
 	IeeeAddr:  55667788,
 	NwkAddr:   1122,
 	Capacity:  1,
@@ -225,21 +225,21 @@ var tsDev0 = &DeviceInfo{
 func TestDevice(t *testing.T) {
 	Convey("设备表和设备节点表", t, func() {
 		Convey("创建设备和所有的节点", func() {
-			err := UpdateDeviceAndANode(11223344, 5566, 2, 3000)
+			err := UpdateZbDeviceAndANode(11223344, 5566, 2, 3000)
 			So(err, ShouldBeNil)
 
-			err = UpdateDeviceAndANode(55667788, 1122, 1, 3000)
+			err = UpdateZbDeviceAndANode(55667788, 1122, 1, 3000)
 			So(err, ShouldBeNil)
 
-			err = UpdateDeviceAndANode(11111111, 1111, 2, 3000)
+			err = UpdateZbDeviceAndANode(11111111, 1111, 2, 3000)
 			So(err, ShouldBeNil)
 
-			err = UpdateDeviceAndANode(22222222, 2222, 1, 3000)
+			err = UpdateZbDeviceAndANode(22222222, 2222, 1, 3000)
 			So(err, ShouldBeNil)
 		})
 
 		Convey("通过网络地址查询设备", func() {
-			oDev, err := LookupDeviceByNwkAddr(5566)
+			oDev, err := LookupZbDeviceByNwkAddr(5566)
 			So(err, ShouldBeNil)
 			So(oDev.IeeeAddr, ShouldEqual, tsDev.IeeeAddr)
 			So(oDev.Capacity, ShouldEqual, tsDev.Capacity)
@@ -247,7 +247,7 @@ func TestDevice(t *testing.T) {
 		})
 
 		Convey("通过ieee地址查询设备", func() {
-			oDev, err := LookupDeviceByIeeeAddr(11223344)
+			oDev, err := LookupZbDeviceByIeeeAddr(11223344)
 			So(err, ShouldBeNil)
 			So(oDev.NwkAddr, ShouldEqual, tsDev.NwkAddr)
 			So(oDev.Capacity, ShouldEqual, tsDev.Capacity)
@@ -255,28 +255,28 @@ func TestDevice(t *testing.T) {
 		})
 
 		Convey("通过网络地址,节点查询设备节点", func() {
-			oDevNode, err := LookupDeviceNodeByNN(5566, 0)
+			oDevNode, err := LookupZbDeviceNodeByNN(5566, 0)
 			So(err, ShouldBeNil)
 			So(oDevNode.ID, ShouldBeGreaterThan, 0)
 		})
 
 		Convey("通过Ieee地址,节点查询设备节点", func() {
-			oDevNode, err := LookupDeviceNodeByIN(11223344, 1)
+			oDevNode, err := LookupZbDeviceNodeByIN(11223344, 1)
 			So(err, ShouldBeNil)
 			So(oDevNode.ID, ShouldBeGreaterThan, 0)
 		})
 
 		Convey("通过ID查询设备节点", func() {
-			o1, _ := LookupDeviceNodeByNN(5566, 0)
+			o1, _ := LookupZbDeviceNodeByNN(5566, 0)
 
-			o2, err := LookupDeviceNodeByID(o1.ID)
+			o2, err := LookupZbDeviceNodeByID(o1.ID)
 
 			So(err, ShouldBeNil)
 			So(reflect.DeepEqual(o1, o2), ShouldBeTrue)
 		})
 
 		Convey("更新设备能力属性", func() {
-			testDev, err := LookupDeviceByNwkAddr(5566)
+			testDev, err := LookupZbDeviceByNwkAddr(5566)
 			So(err, ShouldBeNil)
 
 			err = testDev.updateCapacity(1)
@@ -285,46 +285,46 @@ func TestDevice(t *testing.T) {
 		})
 
 		Convey("更新设备和设备所有设备节点的网络地址", func() {
-			testDev, err := LookupDeviceByNwkAddr(5566)
+			testDev, err := LookupZbDeviceByNwkAddr(5566)
 			So(err, ShouldBeNil)
 
-			err = testDev.updateDeviceAndNodeNwkAddr(7788)
+			err = testDev.updateZbDeviceAndNodeNwkAddr(7788)
 			So(err, ShouldBeNil)
-			testDev.updateDeviceAndNodeNwkAddr(5566)
+			testDev.updateZbDeviceAndNodeNwkAddr(5566)
 		})
 
 		Convey("绑定两个互补的设备节点", func() {
-			err := BindDeviceNode(11223344, 2, 55667788, 3, 3)
+			err := BindZbDeviceNode(11223344, 2, 55667788, 3, 3)
 			So(err, ShouldBeNil)
-			err = BindDeviceNode(11223344, 2, 11223344, 3, 3)
+			err = BindZbDeviceNode(11223344, 2, 11223344, 3, 3)
 			So(err, ShouldBeNil)
-			err = BindDeviceNode(55667788, 2, 55667788, 3, 3)
+			err = BindZbDeviceNode(55667788, 2, 55667788, 3, 3)
 			So(err, ShouldBeNil)
 		})
 
 		Convey("根据网络址,节点号查找绑定表的所有设备节点", func() {
-			devnodes, err := BindFindDeviceNodeByNN(5566, 2, 3)
+			devnodes, err := BindFindZbDeviceNodeByNN(5566, 2, 3)
 			So(err, ShouldBeNil)
 			So(len(devnodes), ShouldEqual, 2)
 		})
 
 		Convey("根据ieee地址,节点号查找绑定表的所有设备节点", func() {
-			devnodes, err := BindFindDeviceNodeByIN(11223344, 2, 3)
+			devnodes, err := BindFindZbDeviceNodeByIN(11223344, 2, 3)
 			So(err, ShouldBeNil)
 			So(len(devnodes), ShouldEqual, 2)
 		})
 
 		Convey("解除两个设备节点的绑定", func() {
-			err := UnBindDeviceNode(11223344, 2, 55667788, 3, 3)
+			err := UnZbBindDeviceNode(11223344, 2, 55667788, 3, 3)
 			So(err, ShouldBeNil)
-			err = UnBindDeviceNode(11223344, 2, 11223344, 3, 3)
+			err = UnZbBindDeviceNode(11223344, 2, 11223344, 3, 3)
 			So(err, ShouldBeNil)
 		})
 
 		Convey("删除设备", func() {
-			err := DeleteDeveiceAndNode(11111111)
+			err := DeleteZbDeveiceAndNode(11111111)
 			So(err, ShouldBeNil)
-			err = DeleteDeveiceAndNode(22222222)
+			err = DeleteZbDeveiceAndNode(22222222)
 			So(err, ShouldBeNil)
 		})
 
