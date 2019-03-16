@@ -2,7 +2,8 @@ package pdtModels
 
 // 产品类型
 const (
-	ProductTypes_Zigbee = iota // zigbee产品
+	ProductTypes_General = iota // 通用产品
+	ProductTypes_Zigbee         // zigbee产品
 	ProductTypes_Modbus
 )
 

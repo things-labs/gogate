@@ -13,18 +13,18 @@ const (
 	_DB_DRIVE = "sqlite3"
 )
 
-type DeviceInfo struct {
+type GeneralDeviceInfo struct {
 	ID        uint
-	Sn        string
 	ProductId int
+	Sn        string
 }
 
 const (
-	deviceInfo_sql = `CREATE TABLE "device_infos" (
+	generaldeviceInfo_sql = `CREATE TABLE "general_device_infos" (
 			"id" integer primary key autoincrement,
-			"sn" bigint NOT NULL,
 			"product_id" integer NOT NULL,
-			UNIQUE(sn,product_id) ON CONFLICT FAIL)`
+			"sn" bigint NOT NULL,
+			UNIQUE(product_id,sn) ON CONFLICT FAIL)`
 )
 
 var devDb *gorm.DB
@@ -54,52 +54,18 @@ func init() {
 		devDb.Raw(zbDeviceNodeInfos_Sql).Scan(&ZbDeviceNodeInfo{})
 	}
 	if !devDb.HasTable("device_infos") {
-		devDb.Raw(deviceInfo_sql).Scan(&DeviceInfo{})
+		devDb.Raw(generaldeviceInfo_sql).Scan(&GeneralDeviceInfo{})
 	}
 }
 
-// 是否对应产品的设备
-func HasDevice(sn string, pid int) bool {
+// 是否有通用对应的设备
+func HasGeneralDevice(pid int, sn string) bool {
 	_, ok := LookupProduct(pid)
 	if !ok {
 		return false
 	}
 
-	// switch p.Types {
-	// case ProductTypes_Zigbee:
-	// 	return hasZbDevice(sn, pid)
-	// }
-
-	return hasGeneralDevice(sn, pid)
-}
-
-// 创建对应产品的设备
-func CreateDevice(sn string, pid int) error {
-	_, ok := LookupProduct(pid)
-	if !ok {
-		return ErrProductNotExist
-	}
-
-	// switch p.Types {
-	// case ProductTypes_Zigbee:
-	// 	return createZbDevice(sn, pid)
-	// }
-
-	return createGeneralDevice(sn, pid)
-}
-
-// 删除对应产品的设备
-func DeleteDevice(sn string, pid int) error {
-	_, ok := LookupProduct(pid)
-	if !ok {
-		return ErrProductNotExist
-	}
-	return deleteGeneralDevice(sn, pid)
-}
-
-// 是否有通用对应的设备
-func hasGeneralDevice(sn string, pid int) bool {
-	if devDb.Where(&DeviceInfo{Sn: sn, ProductId: pid}).First(&DeviceInfo{}).RecordNotFound() {
+	if devDb.Where(&GeneralDeviceInfo{ProductId: pid, Sn: sn}).First(&GeneralDeviceInfo{}).RecordNotFound() {
 		return false
 	}
 
@@ -107,21 +73,42 @@ func hasGeneralDevice(sn string, pid int) bool {
 }
 
 // 创建通用设备
-func (this *DeviceInfo) createGeneralDevice() error {
-	return devDb.Create(this).Error
+func CreateGeneralDevice(pid int, sn string) error {
+	_, ok := LookupProduct(pid)
+	if !ok {
+		return ErrProductNotExist
+	}
+
+	return (&GeneralDeviceInfo{ProductId: pid, Sn: sn}).CreateGeneralDevice()
 }
 
 // 创建通用设备
-func createGeneralDevice(sn string, pid int) error {
-	return (&DeviceInfo{Sn: sn, ProductId: pid}).createGeneralDevice()
+func (this *GeneralDeviceInfo) CreateGeneralDevice() error {
+	return devDb.Create(this).Error
 }
 
 // 删除通用设备
-func (this *DeviceInfo) deleteGeneralDevice() error {
-	return devDb.Unscoped().Delete(this).Error
+func DeleteGeneralDevice(pid int, sn string) error {
+	_, ok := LookupProduct(pid)
+	if !ok {
+		return ErrProductNotExist
+	}
+	return (&GeneralDeviceInfo{ProductId: pid, Sn: sn}).DeleteGeneralDevice()
 }
 
 // 删除通用设备
-func deleteGeneralDevice(sn string, pid int) error {
-	return (&DeviceInfo{Sn: sn, ProductId: pid}).deleteGeneralDevice()
+func (this *GeneralDeviceInfo) DeleteGeneralDevice() error {
+	return devDb.Where(this).Unscoped().Delete(this).Error
+}
+
+// 查找通用设备
+func FindGeneralDevice(pid int) []GeneralDeviceInfo {
+	_, ok := LookupProduct(pid)
+	if !ok {
+		return []GeneralDeviceInfo{}
+	}
+
+	devs := []GeneralDeviceInfo{}
+	devDb.Where(&GeneralDeviceInfo{ProductId: pid}).Find(devs)
+	return devs
 }
