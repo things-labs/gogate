@@ -1,119 +1,204 @@
 package elinkctls
 
 import (
-	"github.com/astaxie/beego/logs"
-	"github.com/json-iterator/go"
+	"strconv"
+
 	"github.com/slzm40/gogate/models/pdtModels"
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/elink/channel/ctrl"
+
+	"github.com/astaxie/beego/logs"
+	"github.com/json-iterator/go"
+	"github.com/slzm40/easyjms"
 )
 
 type DevicesCtrlController struct {
 	ctrl.CtrlController
 }
 
-//// 获取设备列表
-//func (this *DevicesCtrlController) Get() {
+// 获取设备列表
+func (this *DevicesCtrlController) Get() {
+	spid := this.Input.Param.Get("productID")
+	if spid == "" { // never happen but deal,may be other used
+		this.ErrorResponse(elink.CodeErrSysInternal)
+		return
+	}
 
-//}
-type Xpayload struct {
-	ProductID uint32 `json :"productID"`
-	Sn        string `json:"sn"`
+	pid, err := strconv.ParseInt(spid, 10, 0)
+	if err != nil { //never happen but deal
+		this.ErrorResponse(elink.CodeErrSysInternal)
+		return
+	}
+
+	pInfo, exist := pdtModels.LookupProduct(int(pid))
+	if !exist {
+		this.ErrorResponse(200)
+		return
+	}
+	// 根据不同的设备类型分发
+	switch pInfo.Types {
+	case pdtModels.ProductTypes_General: // 获取通用设备
+		getGernalDevices(int(pid), this)
+	default:
+		this.ErrorResponse(303)
+	}
 }
 
 // 添加设备
 func (this *DevicesCtrlController) Post() {
-	dealAddOrDelDevice(false, this)
+	dealAddDelGernalDevices(false, this)
 }
 
 // 删除设备
 func (this *DevicesCtrlController) Delete() {
-	dealAddOrDelDevice(true, this)
+	dealAddDelGernalDevices(true, this)
 }
 
-func dealAddOrDelDevice(isDel bool, dc *DevicesCtrlController) {
+// 获取通用设备
+func getGernalDevices(pid int, dc *DevicesCtrlController) {
 	var err error
-	var sn []string
-	var snSuc []string = []string{}
 
-	code := int(1)
+	code := elink.CodeErrSysInternal
 	req := ctrl.CtrlRequest{}
-	if err = jsoniter.Unmarshal(dc.Input.Payload, &req); err != nil {
+	if err := jsoniter.Unmarshal(dc.Input.Payload, &req); err != nil {
+		dc.ErrorResponse(elink.CodeErrSysInvalidParameter)
 		return
 	}
 
-	logs.Info(req.Payload)
-	pid, ok := req.Payload["productID"].(int)
-	if !ok {
-		pid = 0
+	py := []byte{}
+	devs := pdtModels.FindGeneralDevice(pid)
+
+	sns := make([]string, 0, len(devs))
+	for _, v := range devs {
+		sns = append(sns, v.Sn)
 	}
-	sn = req.Payload["sn"].([]interface{})
 
-	logs.Info(pid, sn)
-	return
-	//	logs.Debug(reflect.TypeOf(v.Payload["sn"]).Kind())
-	//	return
-	//	any := jsoniter.Wrap(req.Payload)
-	//	if err = any.LastError(); err != nil {
-	//		logs.Error(err)
-	//		return
+	if py, err = jsoniter.Marshal(struct {
+		ProductID int      `json:"productID"`
+		Sn        []string `json:"sn"`
+	}{pid, sns}); err != nil {
+		dc.ErrorResponse(elink.CodeErrSysInternal)
+		return
+	}
+	ctrl.WriteCtrlResponse(dc.Input, req.PacketID, code, py)
+}
 
-	//	pid := any.Get("productID").ToInt()
-	//	snAny := any.Get("sn")
-	//	snType := snAny.ValueType()
+func dealAddDelGernalDevices(isDel bool, dc *DevicesCtrlController) {
+	spid := dc.Input.Param.Get("productID")
+	if spid == "" { // never happen but deal,may be other used
+		dc.ErrorResponse(elink.CodeErrSysInternal)
+		return
+	}
 
-	//	if snType == jsoniter.ArrayValue {
-	//		vals := reflect.ValueOf(snAny.GetInterface())
-	//		logs.Info(vals.Kind())
-	//		for i := 0; i < vals.Len(); i++ {
-	//			logs.Info(vals.Index(i).Kind())
-	//			s := reflect.ValueOf(vals.Index(i)).String()
-	//			logs.Info(s)
-	//			sn = append(sn, s)
-	//			return
-	//		}
-	//	}
+	pid, err := strconv.ParseInt(spid, 10, 0)
+	if err != nil { //never happen but deal
+		dc.ErrorResponse(elink.CodeErrSysInternal)
+		return
+	}
 
-	if pid == 0 || len(sn) == 0 {
-		code = elink.CodeErrSysInvalidParameter
-	} else if !pdtModels.HasProduct(pid) {
-		code = 200
+	pInfo, exist := pdtModels.LookupProduct(int(pid))
+	if !exist {
+		dc.ErrorResponse(200)
+		return
+	}
+
+	// 根据不同的设备类型分发
+	switch pInfo.Types {
+	case pdtModels.ProductTypes_General: // 通用设备处理s
+		addDelGernalDevices(isDel, int(pid), dc)
+	default:
+		dc.ErrorResponse(303)
+	}
+}
+
+// 添加或删除通用设备
+func addDelGernalDevices(isDel bool, pid int, dc *DevicesCtrlController) {
+	var sn []string
+
+	code := elink.CodeErrSysInternal
+	req := ctrl.CtrlRequest{}
+	if err := jsoniter.Unmarshal(dc.Input.Payload, &req); err != nil {
+		dc.ErrorResponse(elink.CodeErrSysInvalidParameter)
+		return
+	}
+
+	ejs, err := easyjms.NewFromJson(req.Payload)
+	if err != nil {
+		dc.ErrorResponse(elink.CodeErrSysInvalidParameter)
+		return
+	}
+
+	snjs := ejs.Get("sn")
+	isArray := snjs.IsArray()
+	if isArray {
+		sn = snjs.MustStringArray()
 	} else {
-		for _, v := range sn {
-			if !pdtModels.HasDevice(v, pid) {
-				if isDel {
-					err = pdtModels.DeleteDevice(v, pid)
-				} else {
-					err = pdtModels.CreateDevice(v, pid)
-				}
-				if err != nil {
+		sn = append(sn, snjs.MustString())
+	}
+
+	snSuc := []string{}
+	py := []byte{}
+	if len(sn) == 0 {
+		dc.ErrorResponse(elink.CodeErrSysInvalidParameter)
+		return
+	}
+
+	// 处理要添加或删除的设备
+	for _, v := range sn {
+		if pdtModels.HasGeneralDevice(pid, v) { // 设备存在
+			if isDel {
+				if err = pdtModels.DeleteGeneralDevice(pid, v); err != nil {
 					logs.Debug(err)
 					continue
 				}
-				snSuc = append(snSuc, v)
 			}
-			code = elink.CodeSuccess
+		} else { // 设备不存在
+			if !isDel {
+				if err = pdtModels.CreateGeneralDevice(pid, v); err != nil {
+					logs.Debug(err)
+					continue
+				}
+			}
+		}
+		snSuc = append(snSuc, v)
+	}
+
+	code = elink.CodeSuccess
+	if isArray {
+		if len(snSuc) == 0 {
+			if isDel {
+				code = 302
+			} else {
+				code = 301
+			}
+		} else if py, err = jsoniter.Marshal(struct {
+			ProductID int      `json:"productID"`
+			Sn        []string `json:"sn"`
+		}{pid, snSuc}); err != nil {
+			dc.ErrorResponse(elink.CodeErrSysInternal)
+			return
+		}
+	} else {
+		var osn string
+
+		if len(snSuc) > 0 {
+			osn = snSuc[0]
+		}
+
+		if osn == "" {
+			if isDel {
+				code = 302
+			} else {
+				code = 301
+			}
+		} else if py, err = jsoniter.Marshal(struct {
+			ProductID int    `json:"productID"`
+			Sn        string `json:"sn"`
+		}{pid, osn}); err != nil {
+			dc.ErrorResponse(elink.CodeErrSysInternal)
+			return
 		}
 	}
-	rsp := ctrl.CtrlResponse{
-		PacketID: req.PacketID,
-	}
 
-	rsp.Code = code
-	if rsp.Code != elink.CodeSuccess {
-		msg := elink.CodeErrorMessage(code)
-		rsp.CodeDetail = msg.Detail
-		rsp.Message = msg.Message
-	} else {
-		rsp.Payload = make(map[string]interface{})
-		rsp.Payload["productID"] = pid
-		rsp.Payload["sn"] = snSuc
-	}
-
-	out, err := jsoniter.Marshal(rsp)
-	if err != nil {
-		logs.Error(err)
-	}
-
-	elink.WriteResponse(dc.Input.Client, dc.Input.Topic, out)
+	ctrl.WriteCtrlResponse(dc.Input, req.PacketID, code, py)
 }

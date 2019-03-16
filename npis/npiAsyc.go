@@ -13,9 +13,9 @@ func Af_DataConfirm(pdu *npi.Npdu) {
 		return
 	}
 
-	logs.Debug("%#v", o)
-
+	logs.Debug("af data confirm: %#v", o)
 }
+
 func Af_IncomingMsgParse(pdu *npi.Npdu) {
 	o, err := npi.Af_IncomingMsgParse(pdu)
 	if err != nil {
@@ -30,52 +30,56 @@ func Af_IncomingMsgParse(pdu *npi.Npdu) {
 func Zdo_MgmtPermitJoinRsp(pdu *npi.Npdu) {
 	o, err := npi.Zdo_MgmtPermitJoinRspParse(pdu)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("zdo permit join rsp: %s", err)
 		return
 	}
 
-	logs.Debug("%#v", o)
+	logs.Debug("zdo permit join rsp: %#v", o)
 }
 
 func Zdo_StateChangeInd(pdu *npi.Npdu) {
 	o, err := npi.Zdo_StateChangeIndParse(pdu)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("zdo state indicate: %s", err)
 		return
 	}
-
-	logs.Debug("%#v", o)
+	if o == 0x09 {
+		ZbApps.IsNetworkFormation = true
+	} else {
+		ZbApps.IsNetworkFormation = false
+	}
+	logs.Debug("zdo state indicate: %#v", o)
 }
 
-func Zdo_enddeviceAnnceInd(pdu *npi.Npdu) {
+func Zdo_EnddeviceAnnceInd(pdu *npi.Npdu) {
 	o, err := npi.Zdo_EnddeviceAnnceIndParse(pdu)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("enddevice annce: %s", err)
 		return
 	}
 
-	logs.Debug("%#v", o)
+	logs.Debug("enddevice annce: %#v", o)
 }
 
 func Zdo_LeaveInd(pdu *npi.Npdu) {
 	o, err := npi.Zdo_LeaveIndParse(pdu)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("levae indicate: %s", err)
 		return
 	}
 
-	logs.Debug("%#v", o)
+	logs.Debug("levae indicate: %#v", o)
 }
 
 /** SYS **/
 func Sys_ResetInd(pdu *npi.Npdu) {
 	o, err := npi.Sys_ResetIndParse(pdu)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("reset indicate: %s", err)
 		return
 	}
 
-	logs.Debug("%#v", o)
+	logs.Debug("reset indicate: %#v", o)
 }
 
 /** APPCFG **/
@@ -86,5 +90,5 @@ func Appcfg_BdbCommissioningNotice(pdu *npi.Npdu) {
 		return
 	}
 
-	logs.Debug("%#v", o)
+	logs.Debug("bdb notice: %#v", o)
 }

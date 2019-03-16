@@ -1,24 +1,26 @@
 package npis
 
 import (
-	"github.com/astaxie/beego/logs"
+	"errors"
+	"time"
+
 	"github.com/slzm40/gomo/ltl"
 	"github.com/slzm40/gomo/misc"
 	"github.com/slzm40/gomo/npi"
+
+	"github.com/astaxie/beego/logs"
 	"github.com/tarm/serial"
 )
 
-const (
-	zb_state_idle = iota
-	zb_state_nwkFormation
-)
+const Incomming_msg_size_max = 256
 
-type LtlApp struct {
+type ZbnpiApp struct {
+	IsNetworkFormation bool
 	*ltl.Ltl_t
 	*MiddleMonitor
 }
 
-var Ltlapps *LtlApp
+var ZbApps *ZbnpiApp
 
 func NpiAppInit() error {
 	var err error
@@ -44,7 +46,7 @@ func NpiAppInit() error {
 	}
 
 	mid := &MiddleMonitor{
-		IncommingMsgPkt: make(chan *ltl.MoIncomingMsgPkt, ltl.Incomming_msg_size_max),
+		IncommingMsgPkt: make(chan *ltl.MoIncomingMsgPkt, Incomming_msg_size_max),
 		Monitor:         m,
 	}
 
@@ -53,19 +55,38 @@ func NpiAppInit() error {
 		npi.MT_AF_INCOMING_MSG:                        Af_IncomingMsgParse,
 		npi.MT_ZDO_MGMT_PERMIT_JOIN_RSP:               Zdo_MgmtPermitJoinRsp,
 		npi.MT_ZDO_STATE_CHANGE_IND:                   Zdo_StateChangeInd,
-		npi.MT_ZDO_END_DEV_ANNCE:                      Zdo_enddeviceAnnceInd,
+		npi.MT_ZDO_END_DEV_ANNCE:                      Zdo_EnddeviceAnnceInd,
 		npi.MT_ZDO_LEAVE_IND:                          Zdo_LeaveInd,
 		npi.MT_SYS_RESET_IND:                          Sys_ResetInd,
 		npi.MT_APP_CNF_BDB_COMMISSIONING_NOTIFICATION: Appcfg_BdbCommissioningNotice,
 	})
 
-	Ltlapps = &LtlApp{
+	ZbApps = &ZbnpiApp{
 		Ltl_t: &ltl.Ltl_t{
 			WriteCloseMsgComming: mid,
 		},
 		MiddleMonitor: mid,
 	}
 
-	Ltlapps.Start()
+	ZbApps.Start()
+	ZbApps.MiddleMonitor.Start()
+
+	return ZbApps.NetworkFormation()
+}
+
+// 建立zigbee的网络
+func (this *ZbnpiApp) NetworkFormation() error {
+	for trycnt := 0; ; trycnt++ {
+		if ok, err := this.Appcfg_BdbStartCommissioningReq(0x04); err != nil || !ok {
+			if trycnt == 10 {
+				return errors.New("npis: Formation network failed")
+			}
+			time.Sleep(time.Millisecond * 500)
+			continue
+		} else {
+			break
+		}
+	}
+
 	return nil
 }

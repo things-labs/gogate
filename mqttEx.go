@@ -26,7 +26,7 @@ const (
 var MqClinet mqtt.Client
 
 func init() {
-	elink.RegisterTopicInfo(misc.Mac(), gatewayProductKey)
+	elink.RegisterTopicInfo(misc.Mac(), gatewayProductKey) // 注册网关产品Key
 
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(mqtt_broker_address) // broker

@@ -15,7 +15,8 @@ type LoginController struct {
 }
 
 func (this *LoginController) Get() {
-	this.TplName = "login.html"
+	logs.Debug(this.Ctx.Input.Param(":id"))
+	//this.TplName = "login.html"
 }
 
 func (this *LoginController) Post() {

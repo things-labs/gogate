@@ -15,10 +15,7 @@ type MiddleMonitor struct {
 
 func (this *MiddleMonitor) WriteMsg(DstAddr uint16, Data []byte) error {
 	ok, err := this.Af_DataReq(DstAddr, 0xabcd, 0xaa, 0xaa, 0, 0, 0x1e, Data)
-	if err != nil {
-		return err
-	}
-	if !ok {
+	if err != nil || !ok {
 		return errors.New("response faield")
 	}
 
