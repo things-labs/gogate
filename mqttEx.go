@@ -118,7 +118,7 @@ func HeartBeatStatus() {
 	if err != nil {
 		logs.Error("HeartBeatStatus:", err)
 	} else {
-		s := fmt.Sprintf("data/0/%s/heartbeat/annce/time", mac)
+		s := fmt.Sprintf("data/0/%s/gateway.heartbeat/patch/time", mac)
 		MqClinet.Publish(s, 0, false, out)
 	}
 }

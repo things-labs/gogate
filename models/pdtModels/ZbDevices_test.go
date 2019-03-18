@@ -156,16 +156,16 @@ var tsDev0 = &ZbDeviceInfo{
 func TestDevice(t *testing.T) {
 	Convey("设备表和设备节点表", t, func() {
 		Convey("创建设备和所有的节点", func() {
-			err := UpdateZbDeviceAndANode(11223344, 5566, 2, 80000)
+			err := UpdateZbDeviceAndNode(11223344, 5566, 2, 80000)
 			So(err, ShouldBeNil)
 
-			err = UpdateZbDeviceAndANode(55667788, 1122, 1, 80000)
+			err = UpdateZbDeviceAndNode(55667788, 1122, 1, 80000)
 			So(err, ShouldBeNil)
 
-			err = UpdateZbDeviceAndANode(11111111, 1111, 2, 80000)
+			err = UpdateZbDeviceAndNode(11111111, 1111, 2, 80000)
 			So(err, ShouldBeNil)
 
-			err = UpdateZbDeviceAndANode(22222222, 2222, 1, 80000)
+			err = UpdateZbDeviceAndNode(22222222, 2222, 1, 80000)
 			So(err, ShouldBeNil)
 		})
 

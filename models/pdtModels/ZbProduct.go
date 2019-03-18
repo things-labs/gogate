@@ -1,7 +1,7 @@
 package pdtModels
 
 import (
-	"errors"
+	"github.com/slzm40/gomo/ltl"
 )
 
 type NodeDsc struct {
@@ -16,6 +16,10 @@ type ZbProduct struct {
 
 var zbProduct map[int]*ZbProduct = map[int]*ZbProduct{
 	// ProductID: 节点列表,节点描述
+	ProductID_Switch: &ZbProduct{[]NodeDsc{
+		{[]uint16{ltl.Trunk_Basic, ltl.Trunk_Onoff}, []uint16{}}}, "swtich"}, // 开关
+
+	// 例子
 	80000: &ZbProduct{[]NodeDsc{
 		{[]uint16{}, []uint16{}},             // 节点1 集描述
 		{[]uint16{1, 2}, []uint16{3, 4}},     // 节点2 集描述
@@ -27,7 +31,7 @@ var zbProduct map[int]*ZbProduct = map[int]*ZbProduct{
 func LookupZbProduct(pID int) (*ZbProduct, error) {
 	o, exists := zbProduct[pID]
 	if !exists {
-		return nil, errors.New("product no exist")
+		return nil, ErrProductNotExist
 	}
 
 	return o, nil

@@ -7,6 +7,12 @@ const (
 	ProductTypes_Modbus
 )
 
+// 所有的产品id列表, 必需注册到DeviceProductInfos, zigbee的产品需要另外注册到zigbee的设备产品里
+const (
+	ProductID_Basic  = 20000
+	ProductID_Switch = ProductID_Basic + iota // 单开智能开关
+)
+
 type ProductInfo struct {
 	Number           int    // 编号  用于识别相同的类型走的通道
 	Types            int    // 类型
@@ -18,7 +24,7 @@ type ProductInfo struct {
 }
 
 var DeviceProductInfos map[int]*ProductInfo = map[int]*ProductInfo{
-	20000: &ProductInfo{0, ProductTypes_Zigbee, "smart zigbee", "sws01", "创1开关", "一开智能开关", "lchtime"},
+	20000: &ProductInfo{0, ProductTypes_General, "smart zigbee", "sws01", "创1开关", "一开智能开关", "lchtime"},
 	20001: &ProductInfo{0, ProductTypes_Zigbee, "smart zigbee", "sws02", "创2开关", "二开智能开关", "lchtime"},
 	20002: &ProductInfo{0, ProductTypes_Zigbee, "smart zigbee", "sws03", "创3开关", "三开智能开关", "lchtime"},
 	20003: &ProductInfo{0, ProductTypes_Zigbee, "smart zigbee", "wsd00", "创2温湿度", "简易温湿度传感器", "lchtime"},

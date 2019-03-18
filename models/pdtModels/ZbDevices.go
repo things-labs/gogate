@@ -28,6 +28,7 @@ type ZbDeviceNodeInfo struct {
 	IeeeAddr     uint64 //`gorm:"NOT NULL"`
 	NodeNo       uint16 //`gorm:"UNIQUE;NOT NULL"`
 	NwkAddr      uint16 //`gorm:"UNIQUE;NOT NULL"`
+	ProductId    int
 	InTrunkList  string // 输入集表
 	OutTrunkList string // 输出集表
 	SrcBindList  string // 源绑定表 : 谁绑定了本设备
@@ -45,6 +46,7 @@ const zbDeviceNodeInfos_Sql = `CREATE TABLE "zb_device_node_infos" (
 	"ieee_addr" bigint NOT NULL,
 	"node_no" integer NOT NULL,
 	"nwk_addr" integer NOT NULL,
+	"product_id" integer,
 	"in_trunk_list" varchar(255),
 	"out_trunk_list" varchar(255),
 	"src_bind_list" varchar(255),
@@ -473,9 +475,10 @@ func (this *ZbDeviceInfo) createZbDeveiceAndNode() error {
 	//创建除保留节点(0)外的所有节点
 	for i, v := range devNode {
 		dnode := &ZbDeviceNodeInfo{
-			IeeeAddr: this.IeeeAddr,
-			NodeNo:   uint16(i + 1),
-			NwkAddr:  this.NwkAddr,
+			IeeeAddr:  this.IeeeAddr,
+			NodeNo:    uint16(i + 1),
+			NwkAddr:   this.NwkAddr,
+			ProductId: this.ProductId,
 		}
 
 		dnode.InTrunkList = strings.Replace(
@@ -570,7 +573,7 @@ func (this *ZbDeviceInfo) deleteZbDeveiceAndNode() error {
 }
 
 // 添加设备信息,包括所有设备节点,如果已存在,则更新相应参数
-func UpdateZbDeviceAndANode(ieeeAddr uint64, nwkAddr uint16, capacity byte, productID int) error {
+func UpdateZbDeviceAndNode(ieeeAddr uint64, nwkAddr uint16, capacity byte, productID int) error {
 	var err error
 
 	dev, err := LookupZbDeviceByIeeeAddr(ieeeAddr)

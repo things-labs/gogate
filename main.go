@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/astaxie/beego/logs"
 	"github.com/slzm40/gogate/npis"
 
 	"github.com/astaxie/beego"
@@ -12,7 +11,6 @@ import (
 )
 
 func main() {
-	logs.EnableFuncCallDepth(false)
 	if npis.NpiAppInit() != nil {
 		panic("main: npi app init failed")
 	}

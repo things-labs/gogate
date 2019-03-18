@@ -44,9 +44,9 @@ func Zdo_StateChangeInd(pdu *npi.Npdu) {
 		return
 	}
 	if o == 0x09 {
-		ZbApps.IsNetworkFormation = true
+		ZbApps.isNetworkFormation = true
 	} else {
-		ZbApps.IsNetworkFormation = false
+		ZbApps.isNetworkFormation = false
 	}
 	logs.Debug("zdo state indicate: %#v", o)
 }

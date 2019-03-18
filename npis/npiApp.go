@@ -15,7 +15,7 @@ import (
 const Incomming_msg_size_max = 256
 
 type ZbnpiApp struct {
-	IsNetworkFormation bool
+	isNetworkFormation bool
 	*ltl.Ltl_t
 	*MiddleMonitor
 }
@@ -89,4 +89,8 @@ func (this *ZbnpiApp) NetworkFormation() error {
 	}
 
 	return nil
+}
+
+func IsNetworkFormation() bool {
+	return ZbApps.isNetworkFormation
 }

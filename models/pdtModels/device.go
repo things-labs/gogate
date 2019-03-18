@@ -43,18 +43,18 @@ func init() {
 	}
 	//default disable
 	//devDb.LogMode(misc.APPCfg.MustBool(goconfig.DEFAULT_SECTION, "ormDbLog", false))
-	//devDb.LogMode(true)
+	devDb.LogMode(true)
 
 	devDb.AutoMigrate(&ZbDeviceInfo{})
 	if devDb.Error != nil {
 		panic("pdtModels: gorm AutoMigrate failed," + err.Error())
 	}
 
-	if !devDb.HasTable("device_node_infos") {
-		devDb.Raw(zbDeviceNodeInfos_Sql).Scan(&ZbDeviceNodeInfo{})
-	}
-	if !devDb.HasTable("device_infos") {
+	if !devDb.HasTable("general_device_infos") {
 		devDb.Raw(generaldeviceInfo_sql).Scan(&GeneralDeviceInfo{})
+	}
+	if !devDb.HasTable("zb_device_node_infos") {
+		devDb.Raw(zbDeviceNodeInfos_Sql).Scan(&ZbDeviceNodeInfo{})
 	}
 }
 
@@ -65,10 +65,10 @@ func HasGeneralDevice(pid int, sn string) bool {
 		return false
 	}
 
-	if devDb.Where(&GeneralDeviceInfo{ProductId: pid, Sn: sn}).First(&GeneralDeviceInfo{}).RecordNotFound() {
+	if devDb.Where(&GeneralDeviceInfo{ProductId: pid, Sn: sn}).
+		First(&GeneralDeviceInfo{}).RecordNotFound() {
 		return false
 	}
-
 	return true
 }
 
@@ -78,7 +78,6 @@ func CreateGeneralDevice(pid int, sn string) error {
 	if !ok {
 		return ErrProductNotExist
 	}
-
 	return (&GeneralDeviceInfo{ProductId: pid, Sn: sn}).CreateGeneralDevice()
 }
 
@@ -107,8 +106,7 @@ func FindGeneralDevice(pid int) []GeneralDeviceInfo {
 	if !ok {
 		return []GeneralDeviceInfo{}
 	}
-
 	devs := []GeneralDeviceInfo{}
-	devDb.Where(&GeneralDeviceInfo{ProductId: pid}).Find(devs)
+	devDb.Where(&GeneralDeviceInfo{ProductId: pid}).Find(&devs)
 	return devs
 }
