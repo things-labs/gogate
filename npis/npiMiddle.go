@@ -10,7 +10,11 @@ import (
 // npi与ltl的中间层
 type MiddleMonitor struct {
 	*npi.Monitor
-	IncommingMsgPkt chan *ltl.MoIncomingMsgPkt
+	IncommingMsgPkt chan *ltl.IncomingMsgPkt
+}
+
+func (this *MiddleMonitor) writeIncommingMsg(msg *ltl.IncomingMsgPkt) {
+	this.IncommingMsgPkt <- msg
 }
 
 func (this *MiddleMonitor) WriteMsg(DstAddr uint16, Data []byte) error {
@@ -22,6 +26,6 @@ func (this *MiddleMonitor) WriteMsg(DstAddr uint16, Data []byte) error {
 	return nil
 }
 
-func (this *MiddleMonitor) IncommingMsg() <-chan *ltl.MoIncomingMsgPkt {
+func (this *MiddleMonitor) IncommingMsg() <-chan *ltl.IncomingMsgPkt {
 	return this.IncommingMsgPkt
 }

@@ -2,6 +2,7 @@ package npis
 
 import (
 	"github.com/astaxie/beego/logs"
+	"github.com/slzm40/gomo/ltl"
 	"github.com/slzm40/gomo/npi"
 )
 
@@ -16,14 +17,18 @@ func Af_DataConfirm(pdu *npi.Npdu) {
 	logs.Debug("af data confirm: %#v", o)
 }
 
-func Af_IncomingMsgParse(pdu *npi.Npdu) {
+func Af_IncomingMsg(pdu *npi.Npdu) {
 	o, err := npi.Af_IncomingMsgParse(pdu)
 	if err != nil {
 		logs.Error(err)
 		return
 	}
 
-	logs.Debug("%#v", o)
+	ZbApps.writeIncommingMsg(&ltl.IncomingMsgPkt{
+		IsBroadCast: o.WasBroadcast > 0,
+		SrcAddr:     o.SrcAddr,
+		ApduData:    o.Data,
+	})
 }
 
 /** ZDO **/
