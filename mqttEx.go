@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	mqtt_broker_address  = "mqtt.lchtime.com:1883"
+	mqtt_broker_address  = "mqtt.lchtime.cn:1883"
 	mqtt_broker_password = "52399399"
 )
 

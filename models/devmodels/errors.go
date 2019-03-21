@@ -1,4 +1,4 @@
-package pdtModels
+package devmodels
 
 import (
 	"errors"

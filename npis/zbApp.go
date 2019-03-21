@@ -22,7 +22,7 @@ type ZbnpiApp struct {
 
 var ZbApps *ZbnpiApp
 
-func NpiAppInit() error {
+func ZbAppInit() error {
 	var err error
 	var m *npi.Monitor
 
@@ -46,13 +46,13 @@ func NpiAppInit() error {
 	}
 
 	mid := &MiddleMonitor{
-		IncommingMsgPkt: make(chan *ltl.MoIncomingMsgPkt, Incomming_msg_size_max),
+		IncommingMsgPkt: make(chan *ltl.IncomingMsgPkt, Incomming_msg_size_max),
 		Monitor:         m,
 	}
 
 	mid.AddAsyncCbs(map[uint16]func(*npi.Npdu){
 		npi.MT_AF_DATA_CONFIRM:                        Af_DataConfirm,
-		npi.MT_AF_INCOMING_MSG:                        Af_IncomingMsgParse,
+		npi.MT_AF_INCOMING_MSG:                        Af_IncomingMsg,
 		npi.MT_ZDO_MGMT_PERMIT_JOIN_RSP:               Zdo_MgmtPermitJoinRsp,
 		npi.MT_ZDO_STATE_CHANGE_IND:                   Zdo_StateChangeInd,
 		npi.MT_ZDO_END_DEV_ANNCE:                      Zdo_EnddeviceAnnceInd,
@@ -62,13 +62,11 @@ func NpiAppInit() error {
 	})
 
 	ZbApps = &ZbnpiApp{
-		Ltl_t: &ltl.Ltl_t{
-			WriteCloseMsgComming: mid,
-		},
+		Ltl_t:         &ltl.Ltl_t{mid},
 		MiddleMonitor: mid,
 	}
 
-	ZbApps.Start()
+	go ZbApps.ServerInApdu(ZbApps)
 	ZbApps.MiddleMonitor.Start()
 
 	return ZbApps.NetworkFormation()

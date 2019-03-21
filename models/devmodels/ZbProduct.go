@@ -1,4 +1,4 @@
-package pdtModels
+package devmodels
 
 import (
 	"github.com/slzm40/gomo/ltl"
@@ -17,7 +17,7 @@ type ZbProduct struct {
 var zbProduct map[int]*ZbProduct = map[int]*ZbProduct{
 	// ProductID: 节点列表,节点描述
 	ProductID_Switch: &ZbProduct{[]NodeDsc{
-		{[]uint16{ltl.Trunk_Basic, ltl.Trunk_Onoff}, []uint16{}}}, "swtich"}, // 开关
+		{[]uint16{ltl.TrunkID_GeneralBasic, ltl.TrunkID_GeneralOnoff}, []uint16{}}}, "swtich"}, // 开关
 
 	// 例子
 	80000: &ZbProduct{[]NodeDsc{

@@ -1,6 +1,6 @@
-package pdtModels
+package devmodels
 
-// 产品类型
+// 设备产品类型
 const (
 	ProductTypes_General = iota // 通用产品
 	ProductTypes_Zigbee         // zigbee产品
@@ -9,7 +9,8 @@ const (
 
 // 所有的产品id列表, 必需注册到DeviceProductInfos, zigbee的产品需要另外注册到zigbee的设备产品里
 const (
-	ProductID_Basic  = 20000
+	ProductID_Basic = 20000
+	ProductID_M
 	ProductID_Switch = ProductID_Basic + iota // 单开智能开关
 )
 

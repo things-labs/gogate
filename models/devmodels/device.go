@@ -1,4 +1,4 @@
-package pdtModels
+package devmodels
 
 import (
 	"os"
@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	_DB_NAME  = "data/pdtModels.db"
+	_DB_NAME  = "data/devmodels.db"
 	_DB_DRIVE = "sqlite3"
 )
 

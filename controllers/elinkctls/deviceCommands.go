@@ -3,7 +3,7 @@ package elinkctls
 import (
 	"strconv"
 
-	"github.com/slzm40/gogate/models/pdtModels"
+	"github.com/slzm40/gogate/models/devmodels"
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/elink/channel/ctrl"
 
@@ -46,14 +46,14 @@ func (this *DevCommandCtrlController) Post() {
 		return
 	}
 
-	pInfo, exist := pdtModels.LookupProduct(int(pid))
+	pInfo, exist := devmodels.LookupProduct(int(pid))
 	if !exist {
 		this.ErrorResponse(200)
 		return
 	}
 
 	switch pInfo.Types {
-	case pdtModels.ProductTypes_Zigbee:
+	case devmodels.ProductTypes_Zigbee:
 		ZbDeviceCommandDeal(int(pid), this)
 	default:
 		this.ErrorResponse(303)
@@ -72,7 +72,7 @@ func ZbDeviceCommandDeal(pid int, dc *DevCommandCtrlController) {
 
 	//pdtModels.LookupZbDeviceNodeByIN(bpl.Sn, bpl.NodeNo)
 	switch pid {
-	case pdtModels.ProductID_Switch:
+	case devmodels.ProductID_Switch:
 		cmd := bpl.Params.Command
 		if cmd == "off" {
 			cmdID = 0

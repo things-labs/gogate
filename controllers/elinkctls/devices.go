@@ -3,7 +3,7 @@ package elinkctls
 import (
 	"strconv"
 
-	"github.com/slzm40/gogate/models/pdtModels"
+	"github.com/slzm40/gogate/models/devmodels"
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/elink/channel/ctrl"
 
@@ -37,7 +37,7 @@ func (this *DevicesCtrlController) Get() {
 		return
 	}
 
-	pInfo, exist := pdtModels.LookupProduct(int(pid))
+	pInfo, exist := devmodels.LookupProduct(int(pid))
 	if !exist {
 		code = 200
 		return
@@ -45,7 +45,7 @@ func (this *DevicesCtrlController) Get() {
 
 	// 根据不同的设备类型分发
 	switch pInfo.Types {
-	case pdtModels.ProductTypes_General: // 获取通用设备
+	case devmodels.ProductTypes_General: // 获取通用设备
 		getGernalDevices(int(pid), this)
 	default:
 		code = 202
@@ -64,7 +64,7 @@ func (this *DevicesCtrlController) Delete() {
 
 // 获取通用设备列表
 func getGernalDevices(pid int, dc *DevicesCtrlController) {
-	devs := pdtModels.FindGeneralDevice(pid)
+	devs := devmodels.FindGeneralDevice(pid)
 	sns := make([]string, 0, len(devs))
 	for _, v := range devs {
 		sns = append(sns, v.Sn)
@@ -96,7 +96,7 @@ func dealAddDelGernalDevices(isDel bool, dc *DevicesCtrlController) {
 		return
 	}
 
-	pInfo, exist := pdtModels.LookupProduct(int(pid))
+	pInfo, exist := devmodels.LookupProduct(int(pid))
 	if !exist {
 		dc.ErrorResponse(200)
 		return
@@ -104,7 +104,7 @@ func dealAddDelGernalDevices(isDel bool, dc *DevicesCtrlController) {
 
 	// 根据不同的设备类型分发
 	switch pInfo.Types {
-	case pdtModels.ProductTypes_General: // 通用设备处理s
+	case devmodels.ProductTypes_General: // 通用设备处理s
 		addDelGernalDevices(isDel, int(pid), dc)
 	default:
 		dc.ErrorResponse(202)
@@ -149,16 +149,16 @@ func addDelGernalDevices(isDel bool, pid int, dc *DevicesCtrlController) {
 	py := []byte{}
 	// 处理要添加或删除的设备
 	for _, v := range sn {
-		if pdtModels.HasGeneralDevice(pid, v) { // 设备存在
+		if devmodels.HasGeneralDevice(pid, v) { // 设备存在
 			if isDel {
-				if err = pdtModels.DeleteGeneralDevice(pid, v); err != nil {
+				if err = devmodels.DeleteGeneralDevice(pid, v); err != nil {
 					logs.Debug(err)
 					continue
 				}
 			}
 		} else { // 设备不存在
 			if !isDel {
-				if err = pdtModels.CreateGeneralDevice(pid, v); err != nil {
+				if err = devmodels.CreateGeneralDevice(pid, v); err != nil {
 					logs.Debug(err)
 					continue
 				}

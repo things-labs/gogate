@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	if npis.NpiAppInit() != nil {
+	if npis.ZbAppInit() != nil {
 		panic("main: npi app init failed")
 	}
 
