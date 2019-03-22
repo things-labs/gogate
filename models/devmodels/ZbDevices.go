@@ -2,7 +2,6 @@ package devmodels
 
 import (
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -27,7 +26,7 @@ type ZbDeviceInfo struct {
 type ZbDeviceNodeInfo struct {
 	ID           uint   //`gorm:"primary_key"`
 	Sn           string //`gorm:"NOT NULL"`
-	NodeNo       uint16 //`gorm:"UNIQUE;NOT NULL"`
+	NodeNo       byte   //`gorm:"UNIQUE;NOT NULL"`
 	NwkAddr      uint16 //`gorm:"UNIQUE;NOT NULL"`
 	ProductId    int
 	InTrunkList  string // 输入集表
@@ -68,8 +67,26 @@ func joinInternalString(s []string) string {
 	return strings.Join(s, ",")
 }
 
-// 根据网络地址,节点号找到设备节点
-func LookupZbDeviceNodeByNN(nwkAddr, nodeNum uint16) (*ZbDeviceNodeInfo, error) {
+// 是否用指定的设备
+func HasZbDevice(sn string, pid int) bool {
+	if !HasZbProduct(pid) {
+		return false
+	}
+	if devDb.Where(&ZbDeviceInfo{Sn: sn}).First(&ZbDeviceInfo{}).RecordNotFound() {
+		return false
+	}
+	return true
+}
+
+func HasZbDeviceNode(nwkAddr uint16, nodeNum byte) bool {
+	if devDb.Where((&ZbDeviceNodeInfo{NwkAddr: nwkAddr, NodeNo: nodeNum})).RecordNotFound() {
+		return false
+	}
+	return true
+}
+
+// 根据nwkAddr,nodeNum找到设备节点
+func LookupZbDeviceNodeByNN(nwkAddr uint16, nodeNum byte) (*ZbDeviceNodeInfo, error) {
 	o := &ZbDeviceNodeInfo{}
 	if devDb.Where(&ZbDeviceNodeInfo{
 		NwkAddr: nwkAddr,
@@ -81,8 +98,8 @@ func LookupZbDeviceNodeByNN(nwkAddr, nodeNum uint16) (*ZbDeviceNodeInfo, error) 
 	return o, nil
 }
 
-// 根据ieee地址,节点号找到设备节点
-func LookupZbDeviceNodeByIN(sn string, nodeNum uint16) (*ZbDeviceNodeInfo, error) {
+// 根据sn,nodeNum找到设备节点
+func LookupZbDeviceNodeByIN(sn string, nodeNum byte) (*ZbDeviceNodeInfo, error) {
 	o := &ZbDeviceNodeInfo{}
 	if devDb.Where(&ZbDeviceNodeInfo{
 		Sn:     sn,
@@ -96,19 +113,7 @@ func LookupZbDeviceNodeByIN(sn string, nodeNum uint16) (*ZbDeviceNodeInfo, error
 
 // 根据id找到设备节点
 func LookupZbDeviceNodeByID(id string) (*ZbDeviceNodeInfo, error) {
-	idval, err := strconv.ParseUint(id, 10, 0)
-	if err != nil {
-		return nil, err
-	}
-
-	o := &ZbDeviceNodeInfo{}
-	if devDb.First(o, int(idval)).RecordNotFound() {
-		return nil, gorm.ErrRecordNotFound
-	}
-
-	o.parseInternalString()
-
-	return o, nil
+	return lookupZbDeviceNodeByID(devDb, id)
 }
 
 // 根据id找到设备节点
@@ -121,27 +126,16 @@ func lookupZbDeviceNodeByID(db *gorm.DB, id string) (*ZbDeviceNodeInfo, error) {
 	if db.First(o, idval).RecordNotFound() {
 		return nil, gorm.ErrRecordNotFound
 	}
-
 	o.parseInternalString()
 
 	return o, nil
 }
 
-func HasZbDevice(sn string, pid int) bool {
-	if !HasZbProduct(pid) {
-		return false
-	}
-	if db := devDb.Where(&ZbDeviceInfo{Sn: sn}).First(&ZbDeviceInfo{}); db.RecordNotFound() {
-		return false
-	}
-	return true
-}
-
 // 绑定两个设备 要求更新 源设备节点的<目的绑定表>和目标设备节点的<源绑定表>
-func BindZbDeviceNode(SrcSn string, SrcNodeNum uint16,
-	DstBindIeeeAddr string, DstBindNodeNum, BindTrunkID uint16) error {
+func BindZbDeviceNode(SrcSn string, SrcNodeNum byte,
+	DstBindSn string, DstBindNodeNum byte, BindTrunkID uint16) error {
 	var SrcDNI *ZbDeviceNodeInfo
-	var DstDNI *ZbDeviceNodeInfo
+	var DstBindDNI *ZbDeviceNodeInfo
 	var err error
 
 	// 获取源设备节点
@@ -149,31 +143,32 @@ func BindZbDeviceNode(SrcSn string, SrcNodeNum uint16,
 		return err
 	}
 	// 获取目的设备节点
-	if DstDNI, err = LookupZbDeviceNodeByIN(DstBindIeeeAddr, DstBindNodeNum); err != nil {
+	if DstBindDNI, err = LookupZbDeviceNodeByIN(DstBindSn, DstBindNodeNum); err != nil {
 		return err
 	}
 
 	strBindTkid := common.FormatBaseTypes(BindTrunkID)
 	// 只有源设备节点输出集和目的设备输入集互补,即都含有要绑定的集,才进行绑定
 	if !common.IsSliceContainsStrNocase(SrcDNI.outTrunk, strBindTkid) ||
-		!common.IsSliceContainsStrNocase(DstDNI.inTrunk, strBindTkid) {
-		return errors.New("src and dst trunkID Not a complementary")
+		!common.IsSliceContainsStrNocase(DstBindDNI.inTrunk, strBindTkid) {
+		return ErrTrunkNotComplementary
 	}
 
+	srcID := common.FormatBaseTypes(SrcDNI.ID)
+	dstBindID := common.FormatBaseTypes(DstBindDNI.ID)
 	// 源设备节点 目的绑定表 不含目标设备节点 或 目标设备节点 源绑定表 不含源设备节点 将进行绑定添加,
 	// 都有直接返回成功
-	dstID := common.FormatBaseTypes(DstDNI.ID)
-	srcID := common.FormatBaseTypes(SrcDNI.ID)
-	if common.IsSliceContainsStrNocase(SrcDNI.dstBind, dstID) &&
-		common.IsSliceContainsStrNocase(DstDNI.srcBind, srcID) {
+	if common.IsSliceContainsStrNocase(SrcDNI.dstBind, dstBindID) &&
+		common.IsSliceContainsStrNocase(DstBindDNI.srcBind, srcID) {
 		return nil
 	}
-
-	SrcDNI_DstBd := common.AppendStr(SrcDNI.dstBind, dstID)
-	DstDNI_SrcBd := common.AppendStr(DstDNI.srcBind, srcID)
+	// 将目的设备id号添加到 源设备的 目的绑定表
+	SrcDNI_DstBd := common.AppendStr(SrcDNI.dstBind, dstBindID)
+	// 将源设备id号添加到 目的设备的 源绑定表
+	DstBindDNI_SrcBd := common.AppendStr(DstBindDNI.srcBind, srcID)
 
 	SrcDNI.DstBindList = joinInternalString(SrcDNI_DstBd)
-	DstDNI.SrcBindList = joinInternalString(DstDNI_SrcBd)
+	DstBindDNI.SrcBindList = joinInternalString(DstBindDNI_SrcBd)
 
 	// 开始更新表
 	tx := devDb.Begin()
@@ -186,7 +181,7 @@ func BindZbDeviceNode(SrcSn string, SrcNodeNum uint16,
 		tx.Rollback()
 		return err
 	}
-	tx.Model(&DstDNI).Updates(&ZbDeviceNodeInfo{SrcBindList: DstDNI.SrcBindList})
+	tx.Model(&DstBindDNI).Updates(&ZbDeviceNodeInfo{SrcBindList: DstBindDNI.SrcBindList})
 	if err = tx.Error; err != nil {
 		tx.Rollback()
 		return err
@@ -200,17 +195,17 @@ func BindZbDeviceNode(SrcSn string, SrcNodeNum uint16,
 
 	// 成功更新本地绑定
 	SrcDNI.dstBind = SrcDNI_DstBd
-	DstDNI.srcBind = DstDNI_SrcBd
+	DstBindDNI.srcBind = DstBindDNI_SrcBd
 
 	return nil
 }
 
 // 解绑两个设备节点
 // 如果两个设备节点有两个互补集绑定的,那么将进行同时解绑
-func UnZbBindDeviceNode(SrcSn string, SrcNodeNum uint16,
-	DstBindIeeeAddr string, DstBindNodeNum, BindTrunkID uint16) error {
+func UnZbBindDeviceNode(SrcSn string, SrcNodeNum byte,
+	DstBindSn string, DstBindNodeNum byte, BindTrunkID uint16) error {
 	var SrcDNI *ZbDeviceNodeInfo
-	var DstDNI *ZbDeviceNodeInfo
+	var DstBindDNI *ZbDeviceNodeInfo
 	var err error
 
 	// 获取源设备节点
@@ -218,31 +213,32 @@ func UnZbBindDeviceNode(SrcSn string, SrcNodeNum uint16,
 		return nil
 	}
 	// 获取目的设备节点
-	if DstDNI, err = LookupZbDeviceNodeByIN(DstBindIeeeAddr, DstBindNodeNum); err != nil {
+	if DstBindDNI, err = LookupZbDeviceNodeByIN(DstBindSn, DstBindNodeNum); err != nil {
 		return nil
 	}
 
 	strBindtkid := common.FormatBaseTypes(BindTrunkID)
 	// 只有源设备节点输出集和目的设备输入集互补,即都含有要绑定的集,才进行解绑定,否则认为是成功的
 	if !common.IsSliceContainsStrNocase(SrcDNI.outTrunk, strBindtkid) ||
-		!common.IsSliceContainsStrNocase(DstDNI.inTrunk, strBindtkid) {
+		!common.IsSliceContainsStrNocase(DstBindDNI.inTrunk, strBindtkid) {
 		return nil
 	}
 
-	dstid := common.FormatBaseTypes(DstDNI.ID)
+	dstid := common.FormatBaseTypes(DstBindDNI.ID)
 	srcid := common.FormatBaseTypes(SrcDNI.ID)
 
 	// 源设备节点的<目的绑定表>不含目标设备节点
 	//或 目标设备节点<源绑定表>不含源设备节点 将进行绑定解绑直接返回成功
-	if !common.IsSliceContainsStrNocase(SrcDNI.dstBind, dstid) || !common.IsSliceContainsStrNocase(DstDNI.srcBind, srcid) {
+	if !common.IsSliceContainsStrNocase(SrcDNI.dstBind, dstid) ||
+		!common.IsSliceContainsStrNocase(DstBindDNI.srcBind, srcid) {
 		return nil
 	}
 	// 删除源的目标绑定 和 目标的源绑定
 	SrcDNI_DstBd := common.DeleteFromSliceStr(SrcDNI.dstBind, dstid)
-	DstDNI_SrcBd := common.DeleteFromSliceStr(DstDNI.srcBind, srcid)
+	DstBindDNI_SrcBd := common.DeleteFromSliceStr(DstBindDNI.srcBind, srcid)
 
 	SrcDNI.DstBindList = joinInternalString(SrcDNI_DstBd)
-	DstDNI.SrcBindList = joinInternalString(DstDNI_SrcBd)
+	DstBindDNI.SrcBindList = joinInternalString(DstBindDNI_SrcBd)
 
 	// 开始更新表
 	tx := devDb.Begin()
@@ -255,7 +251,7 @@ func UnZbBindDeviceNode(SrcSn string, SrcNodeNum uint16,
 		tx.Rollback()
 		return err
 	}
-	tx.Model(&DstDNI).Updates(&ZbDeviceNodeInfo{SrcBindList: DstDNI.SrcBindList})
+	tx.Model(&DstBindDNI).Updates(&ZbDeviceNodeInfo{SrcBindList: DstBindDNI.SrcBindList})
 	if err = tx.Error; err != nil {
 		tx.Rollback()
 		return err
@@ -268,25 +264,25 @@ func UnZbBindDeviceNode(SrcSn string, SrcNodeNum uint16,
 	}
 	// 成功更新本地
 	SrcDNI.dstBind = SrcDNI_DstBd
-	DstDNI.srcBind = DstDNI_SrcBd
+	DstBindDNI.srcBind = DstBindDNI_SrcBd
 
 	return nil
 }
 
 // 找到绑定表的所有目标设备节点
-func BindFindZbDeviceNodeByNN(NwkAddr, NodeNum, trunkID uint16) ([]*ZbDeviceNodeInfo, error) {
-	src, err := LookupZbDeviceNodeByNN(NwkAddr, NodeNum)
+func BindFindZbDeviceNodeByNN(NwkAddr uint16, NodeNum byte, trunkID uint16) ([]*ZbDeviceNodeInfo, error) {
+	srcDNI, err := LookupZbDeviceNodeByNN(NwkAddr, NodeNum)
 	if err != nil {
 		return nil, err
 	}
 	strTkid := common.FormatBaseTypes(trunkID)
 	// 源设备 是否包含输出集
-	if common.IsSliceContainsStrNocase(src.outTrunk, strTkid) != true {
+	if common.IsSliceContainsStrNocase(srcDNI.outTrunk, strTkid) != true {
 		return nil, ErrNotContainTrunk
 	}
 
-	dni := make([]*ZbDeviceNodeInfo, 0, len(src.dstBind))
-	for _, id := range src.dstBind {
+	dni := make([]*ZbDeviceNodeInfo, 0, len(srcDNI.dstBind))
+	for _, id := range srcDNI.dstBind {
 		tmpdni, err := LookupZbDeviceNodeByID(id)
 		if err != nil {
 			continue
@@ -302,7 +298,7 @@ func BindFindZbDeviceNodeByNN(NwkAddr, NodeNum, trunkID uint16) ([]*ZbDeviceNode
 }
 
 // 找到绑定表的所有目标设备节点
-func BindFindZbDeviceNodeByIN(sn string, NodeNum, trunkID uint16) ([]*ZbDeviceNodeInfo, error) {
+func BindFindZbDeviceNodeByIN(sn string, NodeNum byte, trunkID uint16) ([]*ZbDeviceNodeInfo, error) {
 	src, err := LookupZbDeviceNodeByIN(sn, NodeNum)
 	if err != nil {
 		return nil, err
@@ -348,7 +344,7 @@ func (this *ZbDeviceNodeInfo) GetNwkAddr() uint16 {
 }
 
 // 获取设备节点节点号
-func (this *ZbDeviceNodeInfo) GetNodeNum() uint16 {
+func (this *ZbDeviceNodeInfo) GetNodeNum() byte {
 	return this.NodeNo
 }
 
@@ -471,7 +467,7 @@ func (this *ZbDeviceInfo) createZbDeveiceAndNode() error {
 	for i, v := range devNode {
 		dnode := &ZbDeviceNodeInfo{
 			Sn:        this.Sn,
-			NodeNo:    uint16(i + 1),
+			NodeNo:    byte(i + 1),
 			NwkAddr:   this.NwkAddr,
 			ProductId: this.ProductId,
 		}

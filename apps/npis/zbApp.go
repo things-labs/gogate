@@ -75,7 +75,8 @@ func ZbAppInit() error {
 // 建立zigbee的网络
 func (this *ZbnpiApp) NetworkFormation() error {
 	for trycnt := 0; ; trycnt++ {
-		if ok, err := this.Appcfg_BdbStartCommissioningReq(0x04); err != nil || !ok {
+		if ok, err := this.Appcfg_BdbStartCommissioningReq(
+			npi.Cms_mode_NetworkFormation); err != nil || !ok {
 			if trycnt == 10 {
 				return errors.New("npis: Formation network failed")
 			}
