@@ -69,7 +69,7 @@ func Zdo_EnddeviceAnnceInd(pdu *npi.Npdu) {
 func Zdo_LeaveInd(pdu *npi.Npdu) {
 	o, err := npi.Zdo_LeaveIndParse(pdu)
 	if err != nil {
-		logs.Error("levae indicate: %s", err)
+		logs.Error("leave indicate: %s", err)
 		return
 	}
 

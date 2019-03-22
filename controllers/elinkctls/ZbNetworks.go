@@ -1,7 +1,7 @@
 package elinkctls
 
 import (
-	"github.com/slzm40/gogate/npis"
+	"github.com/slzm40/gogate/apps/npis"
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/elink/channel/ctrl"
 

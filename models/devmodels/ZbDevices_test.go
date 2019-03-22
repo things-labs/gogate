@@ -16,7 +16,7 @@ var (
 		ID:           6655,
 		NwkAddr:      1234,
 		NodeNo:       5,
-		IeeeAddr:     33445566,
+		Sn:     33445566,
 		InTrunkList:  "",
 		OutTrunkList: "",
 		SrcBindList:  "",
@@ -90,7 +90,7 @@ func TestGetDeviceNodeInfo(t *testing.T) {
 			So(tsDevNode.GetNwkAddr(), ShouldEqual, 1234)
 		})
 		Convey("获取ieee地址", func() {
-			So(tsDevNode.GetIeeeAddr(), ShouldEqual, 33445566)
+			So(tsDevNode.GetSn(), ShouldEqual, 33445566)
 		})
 		Convey("获取节点号", func() {
 			So(tsDevNode.GetNodeNum(), ShouldEqual, 5)
@@ -113,7 +113,7 @@ func TestGetDeviceInfo(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		IeeeAddr:  11223344,
+		Sn:  11223344,
 		NwkAddr:   5566,
 		Capacity:  2,
 		ProductId: 80000,
@@ -121,7 +121,7 @@ func TestGetDeviceInfo(t *testing.T) {
 
 	Convey("获取设备信息", t, func() {
 		Convey("获取设备ieee地址", func() {
-			So(dev.GetIeeeAddr(), ShouldEqual, 11223344)
+			So(dev.GetSn(), ShouldEqual, 11223344)
 		})
 		Convey("获取设备网络地址", func() {
 			So(dev.GetNwkAddr(), ShouldEqual, 5566)
@@ -140,14 +140,14 @@ func TestGetDeviceInfo(t *testing.T) {
 }
 
 var tsDev = &ZbDeviceInfo{
-	IeeeAddr:  11223344,
+	Sn:  11223344,
 	NwkAddr:   5566,
 	Capacity:  2,
 	ProductId: 80000,
 }
 
 var tsDev0 = &ZbDeviceInfo{
-	IeeeAddr:  55667788,
+	Sn:  55667788,
 	NwkAddr:   1122,
 	Capacity:  1,
 	ProductId: 80000,
@@ -172,7 +172,7 @@ func TestDevice(t *testing.T) {
 		Convey("通过网络地址查询设备", func() {
 			oDev, err := LookupZbDeviceByNwkAddr(5566)
 			So(err, ShouldBeNil)
-			So(oDev.IeeeAddr, ShouldEqual, tsDev.IeeeAddr)
+			So(oDev.Sn, ShouldEqual, tsDev.Sn)
 			So(oDev.Capacity, ShouldEqual, tsDev.Capacity)
 			So(oDev.ProductId, ShouldEqual, tsDev.ProductId)
 		})

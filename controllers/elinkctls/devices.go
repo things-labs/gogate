@@ -16,6 +16,16 @@ type DevicesCtrlController struct {
 	ctrl.Controller
 }
 
+type DevsInfo struct {
+	ProductID int      `json:"productID"`
+	Sn        []string `json:"sn"`
+}
+
+type DevInfo struct {
+	ProductID int    `json:"productID"`
+	Sn        string `json:"sn"`
+}
+
 // 获取产品Id下的设备列表
 func (this *DevicesCtrlController) Get() {
 	code := elink.CodeSuccess
@@ -70,10 +80,7 @@ func getGernalDevices(pid int, dc *DevicesCtrlController) {
 		sns = append(sns, v.Sn)
 	}
 
-	py, err := jsoniter.Marshal(struct {
-		ProductID int      `json:"productID"`
-		Sn        []string `json:"sn"`
-	}{pid, sns})
+	py, err := jsoniter.Marshal(DevsInfo{pid, sns})
 	if err != nil {
 		dc.ErrorResponse(elink.CodeErrSysInternal)
 		return
@@ -172,10 +179,7 @@ func addDelGernalDevices(isDel bool, pid int, dc *DevicesCtrlController) {
 			code = 301
 			return
 		}
-		if py, err = jsoniter.Marshal(struct {
-			ProductID int      `json:"productID"`
-			Sn        []string `json:"sn"`
-		}{pid, snSuc}); err != nil {
+		if py, err = jsoniter.Marshal(DevsInfo{pid, snSuc}); err != nil {
 			code = elink.CodeErrSysInternal
 			return
 		}
@@ -189,14 +193,27 @@ func addDelGernalDevices(isDel bool, pid int, dc *DevicesCtrlController) {
 			code = 301
 			return
 		}
-		if py, err = jsoniter.Marshal(struct {
-			ProductID int    `json:"productID"`
-			Sn        string `json:"sn"`
-		}{pid, osn}); err != nil {
+		if py, err = jsoniter.Marshal(DevInfo{pid, osn}); err != nil {
 			code = elink.CodeErrSysInternal
 			return
 		}
 	}
 
 	ctrl.WriteCtrlResponse(dc.Input, req.PacketID, code, py)
+}
+
+func ZbDeviceLeave(sn uint64) {
+	dinfo, err := devmodels.LookupZbDeviceByIeeeAddr(devmodels.ToHexString(sn))
+	if err != nil {
+		return
+	}
+
+	dinfo.DeleteZbDeveiceAndNode()
+
+	v, err := jsoniter.Marshal(DevInfo{dinfo.ProductId, dinfo.Sn})
+	if err != nil {
+		return
+	}
+	res := elink.FormatResouce("devices", dinfo.ProductId)
+	WritePublishChData(res, elink.MethodPost, elink.MessageTypeAnnce, v)
 }

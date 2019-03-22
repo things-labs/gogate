@@ -1,4 +1,4 @@
-package main
+package apps
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ const (
 )
 
 const (
-	gatewayProductKey = "zbgw01"
+	gatewayProductKey = "lc_gzs100"
 )
 
 var MqClinet mqtt.Client
