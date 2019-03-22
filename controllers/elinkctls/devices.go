@@ -3,6 +3,7 @@ package elinkctls
 import (
 	"strconv"
 
+	"github.com/slzm40/gogate/apps/mq"
 	"github.com/slzm40/gogate/models/devmodels"
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/elink/channel/ctrl"
@@ -12,11 +13,11 @@ import (
 	"github.com/slzm40/easyjms"
 )
 
-type DevicesCtrlController struct {
+type DevCtrlController struct {
 	ctrl.Controller
 }
 
-type DevsInfo struct {
+type DevicesInfo struct {
 	ProductID int      `json:"productID"`
 	Sn        []string `json:"sn"`
 }
@@ -27,7 +28,7 @@ type DevInfo struct {
 }
 
 // 获取产品Id下的设备列表
-func (this *DevicesCtrlController) Get() {
+func (this *DevCtrlController) Get() {
 	code := elink.CodeSuccess
 	defer func() {
 		if code != elink.CodeSuccess {
@@ -55,7 +56,7 @@ func (this *DevicesCtrlController) Get() {
 
 	// 根据不同的设备类型分发
 	switch pInfo.Types {
-	case devmodels.ProductTypes_General: // 获取通用设备
+	case devmodels.PTypes_General: // 获取通用设备
 		getGernalDevices(int(pid), this)
 	default:
 		code = 202
@@ -63,24 +64,24 @@ func (this *DevicesCtrlController) Get() {
 }
 
 // 添加设备
-func (this *DevicesCtrlController) Post() {
+func (this *DevCtrlController) Post() {
 	dealAddDelGernalDevices(false, this)
 }
 
 // 删除设备
-func (this *DevicesCtrlController) Delete() {
+func (this *DevCtrlController) Delete() {
 	dealAddDelGernalDevices(true, this)
 }
 
 // 获取通用设备列表
-func getGernalDevices(pid int, dc *DevicesCtrlController) {
+func getGernalDevices(pid int, dc *DevCtrlController) {
 	devs := devmodels.FindGeneralDevice(pid)
 	sns := make([]string, 0, len(devs))
 	for _, v := range devs {
 		sns = append(sns, v.Sn)
 	}
 
-	py, err := jsoniter.Marshal(DevsInfo{pid, sns})
+	py, err := jsoniter.Marshal(DevicesInfo{pid, sns})
 	if err != nil {
 		dc.ErrorResponse(elink.CodeErrSysInternal)
 		return
@@ -90,7 +91,7 @@ func getGernalDevices(pid int, dc *DevicesCtrlController) {
 	ctrl.WriteCtrlResponse(dc.Input, packid, elink.CodeSuccess, py)
 }
 
-func dealAddDelGernalDevices(isDel bool, dc *DevicesCtrlController) {
+func dealAddDelGernalDevices(isDel bool, dc *DevCtrlController) {
 	spid := dc.Input.Param.Get("productID")
 	if spid == "" { // never happen but deal,may be other used
 		dc.ErrorResponse(elink.CodeErrSysInternal)
@@ -111,7 +112,7 @@ func dealAddDelGernalDevices(isDel bool, dc *DevicesCtrlController) {
 
 	// 根据不同的设备类型分发
 	switch pInfo.Types {
-	case devmodels.ProductTypes_General: // 通用设备处理s
+	case devmodels.PTypes_General: // 通用设备处理s
 		addDelGernalDevices(isDel, int(pid), dc)
 	default:
 		dc.ErrorResponse(202)
@@ -119,7 +120,7 @@ func dealAddDelGernalDevices(isDel bool, dc *DevicesCtrlController) {
 }
 
 // 添加或删除通用设备
-func addDelGernalDevices(isDel bool, pid int, dc *DevicesCtrlController) {
+func addDelGernalDevices(isDel bool, pid int, dc *DevCtrlController) {
 	code := elink.CodeSuccess
 	defer func() {
 		if code != elink.CodeSuccess {
@@ -179,7 +180,7 @@ func addDelGernalDevices(isDel bool, pid int, dc *DevicesCtrlController) {
 			code = 301
 			return
 		}
-		if py, err = jsoniter.Marshal(DevsInfo{pid, snSuc}); err != nil {
+		if py, err = jsoniter.Marshal(DevicesInfo{pid, snSuc}); err != nil {
 			code = elink.CodeErrSysInternal
 			return
 		}
@@ -215,5 +216,5 @@ func ZbDeviceLeave(sn uint64) {
 		return
 	}
 	res := elink.FormatResouce("devices", dinfo.ProductId)
-	WritePublishChData(res, elink.MethodPost, elink.MessageTypeAnnce, v)
+	mq.WritePublishChData(res, elink.MethodPost, elink.MessageTypeAnnce, v)
 }

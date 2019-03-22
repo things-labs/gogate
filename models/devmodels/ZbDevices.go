@@ -9,7 +9,6 @@ import (
 	"github.com/slzm40/common"
 
 	"github.com/jinzhu/gorm"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 // 设备表

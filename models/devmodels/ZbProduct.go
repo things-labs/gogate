@@ -18,8 +18,22 @@ type ZbProduct struct {
 
 var zbProduct map[int]*ZbProduct = map[int]*ZbProduct{
 	// ProductID: 节点列表,节点描述
-	ProductID_Switch: &ZbProduct{[]NodeDsc{
-		{[]uint16{ltl.TrunkID_GeneralBasic, ltl.TrunkID_GeneralOnoff}, []uint16{}}}, "swtich"}, // 开关
+	PID_DZMS01: &ZbProduct{[]NodeDsc{
+		{[]uint16{ltl.TrunkID_MsTemperatureMeasurement}, []uint16{}},
+		{[]uint16{ltl.TrunkID_MsRelativeHumidity}, []uint16{}}},
+		"温湿度传感器"},
+	PID_DZSW01: &ZbProduct{[]NodeDsc{
+		{[]uint16{ltl.TrunkID_GeneralOnoff}, []uint16{}}}, //
+		"一位智能开关"},
+	PID_DZSW02: &ZbProduct{[]NodeDsc{
+		{[]uint16{ltl.TrunkID_GeneralOnoff}, []uint16{}},
+		{[]uint16{ltl.TrunkID_GeneralOnoff}, []uint16{}}},
+		"二位智能开关"},
+	PID_DZSW03: &ZbProduct{[]NodeDsc{
+		{[]uint16{ltl.TrunkID_GeneralOnoff}, []uint16{}},
+		{[]uint16{ltl.TrunkID_GeneralOnoff}, []uint16{}},
+		{[]uint16{ltl.TrunkID_GeneralOnoff}, []uint16{}}},
+		"三位智能开关"},
 
 	// 例子
 	80000: &ZbProduct{[]NodeDsc{

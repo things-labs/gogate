@@ -53,7 +53,7 @@ func (this *DevCommandCtrlController) Post() {
 	}
 
 	switch pInfo.Types {
-	case devmodels.ProductTypes_Zigbee:
+	case devmodels.PTypes_Zigbee:
 		ZbDeviceCommandDeal(int(pid), this)
 	default:
 		this.ErrorResponse(303)
@@ -72,7 +72,7 @@ func ZbDeviceCommandDeal(pid int, dc *DevCommandCtrlController) {
 
 	//pdtModels.LookupZbDeviceNodeByIN(bpl.Sn, bpl.NodeNo)
 	switch pid {
-	case devmodels.ProductID_Switch:
+	case devmodels.PID_DZSW01:
 		cmd := bpl.Params.Command
 		if cmd == "off" {
 			cmdID = 0

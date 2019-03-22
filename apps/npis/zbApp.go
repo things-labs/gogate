@@ -55,7 +55,7 @@ func ZbAppInit() error {
 		npi.MT_AF_INCOMING_MSG:                        Af_IncomingMsg,
 		npi.MT_ZDO_MGMT_PERMIT_JOIN_RSP:               Zdo_MgmtPermitJoinRsp,
 		npi.MT_ZDO_STATE_CHANGE_IND:                   Zdo_StateChangeInd,
-		npi.MT_ZDO_END_DEV_ANNCE:                      Zdo_EnddeviceAnnceInd,
+		npi.MT_ZDO_END_DEVICE_ANNCE_IND:               Zdo_EnddeviceAnnceInd,
 		npi.MT_ZDO_LEAVE_IND:                          Zdo_LeaveInd,
 		npi.MT_SYS_RESET_IND:                          Sys_ResetInd,
 		npi.MT_APP_CNF_BDB_COMMISSIONING_NOTIFICATION: Appcfg_BdbCommissioningNotice,

@@ -6,11 +6,12 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/jinzhu/gorm"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
-	_DB_NAME  = "data/devmodels.db"
-	_DB_DRIVE = "sqlite3"
+	_DB_NAME   = "data/devmodels.db"
+	_DB_DRIVER = "sqlite3"
 )
 
 type GeneralDeviceInfo struct {
@@ -38,8 +39,8 @@ func init() {
 		os.Create(_DB_NAME)
 	}
 
-	if devDb, err = gorm.Open(_DB_DRIVE, _DB_NAME); err != nil {
-		panic("pdtModels: gorm open failed," + err.Error())
+	if devDb, err = gorm.Open(_DB_DRIVER, _DB_NAME); err != nil {
+		panic("devmodels: gorm open failed," + err.Error())
 	}
 	//default disable
 	//devDb.LogMode(misc.APPCfg.MustBool(goconfig.DEFAULT_SECTION, "ormDbLog", false))
@@ -47,7 +48,7 @@ func init() {
 
 	devDb.AutoMigrate(&ZbDeviceInfo{})
 	if devDb.Error != nil {
-		panic("pdtModels: gorm AutoMigrate failed," + err.Error())
+		panic("devmodels: gorm AutoMigrate failed," + err.Error())
 	}
 
 	if !devDb.HasTable("general_device_infos") {

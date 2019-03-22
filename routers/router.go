@@ -17,7 +17,7 @@ func init() {
 
 // elink router setting
 func init() {
-	elink.Router(ctrl.ChannelCtrl, "devices.@", &elinkctls.DevicesCtrlController{})
-	elink.Router(ctrl.ChannelCtrl, "devices.command.@", &elinkctls.DevCommandCtrlController{})
+	elink.Router(ctrl.ChannelCtrl, "devices.@", &elinkctls.DevCtrlController{})
+	elink.Router(ctrl.ChannelCtrl, "device.commands.@", &elinkctls.DevCommandCtrlController{})
 	elink.Router(ctrl.ChannelCtrl, "zigbee.network", &elinkctls.ZbNetworkCtrlController{})
 }

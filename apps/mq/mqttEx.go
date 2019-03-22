@@ -1,17 +1,17 @@
-package apps
+package mq
 
 import (
 	"fmt"
 	"time"
 
-	_ "github.com/slzm40/gomo/elink/channel/ctrl"
+	"github.com/slzm40/gomo/elink"
+	"github.com/slzm40/gomo/elink/channel/ctrl"
+	"github.com/slzm40/gomo/misc"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/eclipse/paho.mqtt.golang"
 	"github.com/json-iterator/go"
 	"github.com/slzm40/common"
-	"github.com/slzm40/gomo/elink"
-	"github.com/slzm40/gomo/misc"
 )
 
 const (
@@ -23,7 +23,7 @@ const (
 	gatewayProductKey = "lc_gzs100"
 )
 
-var MqClinet mqtt.Client
+var Client mqtt.Client
 
 func init() {
 	elink.RegisterTopicInfo(misc.Mac(), gatewayProductKey) // 注册网关产品Key
@@ -50,13 +50,13 @@ func init() {
 	opts.SetConnectionLostHandler(func(cli mqtt.Client, err error) {
 		logs.Warn("mqtt clinet connection lost ", err)
 	})
-	MqClinet = mqtt.NewClient(opts)
+	Client = mqtt.NewClient(opts)
 	started()
 }
 
 func started() {
 	logs.Info("mqtt client connecting...")
-	if token := MqClinet.Connect(); token.Wait() && token.Error() != nil {
+	if token := Client.Connect(); token.Wait() && token.Error() != nil {
 		logs.Error("mqtt client connect failed, ", token.Error())
 		time.AfterFunc(time.Second*30, started)
 	}
@@ -88,7 +88,7 @@ type GatewayStatus struct {
 
 func HeartBeatStatus() {
 	defer time.AfterFunc(time.Second*10, HeartBeatStatus)
-	if !MqClinet.IsConnected() {
+	if !Client.IsConnected() {
 		return
 	}
 
@@ -119,6 +119,10 @@ func HeartBeatStatus() {
 		logs.Error("HeartBeatStatus:", err)
 	} else {
 		s := fmt.Sprintf("data/0/%s/gateway.heartbeat/patch/time", mac)
-		MqClinet.Publish(s, 0, false, out)
+		Client.Publish(s, 0, false, out)
 	}
+}
+
+func WritePublishChData(resourse, method, messageType string, data interface{}) error {
+	return elink.WritePublish(Client, ctrl.ChannelData, resourse, method, messageType, data)
 }

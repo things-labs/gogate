@@ -1,8 +1,13 @@
 package npis
 
 import (
-	"github.com/astaxie/beego/logs"
+	"github.com/slzm40/gogate/apps/lint"
+	"github.com/slzm40/gogate/apps/mq"
+	"github.com/slzm40/gogate/controllers/elinkres"
+	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/ltl"
+
+	"github.com/json-iterator/go"
 )
 
 func (this *ZbnpiApp) ProcessInSpecificCmd(srcAddr uint16, hdr *ltl.FrameHdr, cmdFormart []byte) byte {
@@ -36,8 +41,23 @@ func (this *ZbnpiApp) ProcessInReadConfigReportRspCmd(srcAddr uint16, hdr *ltl.F
 	return nil
 }
 func (this *ZbnpiApp) ProcessInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []ltl.RcvReportRec) error {
-	logs.Debug("srcaddress: 0x%04x, receive message: %#v", srcAddr, rRec)
-	return nil
+	//var err error
+	var out []byte
+
+	switch hdr.TrunkID {
+	case ltl.TrunkID_MsTemperatureMeasurement, ltl.TrunkID_MsRelativeHumidity:
+		mstemp, err := lint.MsMeasureAttribute(rRec)
+		if err != nil {
+			return err
+		}
+		out, err = jsoniter.Marshal(mstemp)
+		if err != nil {
+			return err
+		}
+	}
+
+	res := elink.FormatResouce(elinkres.DevicePropertys, 20000)
+	return mq.WritePublishChData(res, elink.MethodPatch, elink.MessageTypeAnnce, out)
 }
 func (this *ZbnpiApp) ProcessInDefaultRsp(srcAddr uint16, hdr *ltl.FrameHdr, dfStatus *ltl.DefaultRsp) error {
 	return nil
