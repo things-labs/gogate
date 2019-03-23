@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/slzm40/gomo/elink"
-	"github.com/slzm40/gomo/elink/channel/ctrl"
 	"github.com/slzm40/gomo/misc"
+	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/eclipse/paho.mqtt.golang"

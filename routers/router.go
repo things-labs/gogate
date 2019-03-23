@@ -4,7 +4,7 @@ import (
 	"github.com/slzm40/gogate/controllers/elinkctls"
 	"github.com/slzm40/gogate/controllers/webctls"
 	"github.com/slzm40/gomo/elink"
-	"github.com/slzm40/gomo/elink/channel/ctrl"
+	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
 
 	"github.com/astaxie/beego"
 )

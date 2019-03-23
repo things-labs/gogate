@@ -1,11 +1,12 @@
 package npis
 
 import (
-	"github.com/slzm40/gogate/apps/lint"
 	"github.com/slzm40/gogate/apps/mq"
-	"github.com/slzm40/gogate/controllers/elinkres"
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/ltl"
+	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
+	"github.com/slzm40/gomo/protocol/elinkres"
+	"github.com/slzm40/gomo/protocol/limp"
 
 	"github.com/json-iterator/go"
 )
@@ -40,17 +41,61 @@ func (this *ZbnpiApp) ProcessInReadConfigReportCmd(srcAddr uint16, hdr *ltl.Fram
 func (this *ZbnpiApp) ProcessInReadConfigReportRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rcStatus []ltl.RcvReportCfgRspStatus) error {
 	return nil
 }
+
+type DevAttr struct {
+	ctrl.BasePushData
+	Payload struct {
+		ctrl.BaseNodePayload
+		Data interface{}
+	} `json:"payload"`
+}
+
 func (this *ZbnpiApp) ProcessInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []ltl.RcvReportRec) error {
 	//var err error
 	var out []byte
 
 	switch hdr.TrunkID {
-	case ltl.TrunkID_MsTemperatureMeasurement, ltl.TrunkID_MsRelativeHumidity:
-		mstemp, err := lint.MsMeasureAttribute(rRec)
+	case ltl.TrunkID_MsTemperatureMeasurement:
+		mstemp, err := limp.MsMeasureAttribute(ltl.TrunkID_MsTemperatureMeasurement, rRec)
 		if err != nil {
 			return err
 		}
-		out, err = jsoniter.Marshal(mstemp)
+		in := DevAttr{
+			Payload: struct {
+				ctrl.BaseNodePayload
+				Data interface{}
+			}{
+				BaseNodePayload: ctrl.BaseNodePayload{
+					ProductID: 20000,
+					Sn:        "建一个模拟的",
+					NodeNo:    1,
+				},
+				Data: mstemp,
+			},
+		}
+		out, err = jsoniter.Marshal(in)
+		if err != nil {
+			return err
+		}
+	case ltl.TrunkID_MsRelativeHumidity:
+		mstemp, err := limp.MsMeasureAttribute(ltl.TrunkID_MsRelativeHumidity, rRec)
+		if err != nil {
+			return err
+		}
+		in := DevAttr{
+			Payload: struct {
+				ctrl.BaseNodePayload
+				Data interface{}
+			}{
+				BaseNodePayload: ctrl.BaseNodePayload{
+					ProductID: 20000,
+					Sn:        "建一个模拟的",
+					NodeNo:    2,
+				},
+				Data: mstemp,
+			},
+		}
+		out, err = jsoniter.Marshal(in)
 		if err != nil {
 			return err
 		}

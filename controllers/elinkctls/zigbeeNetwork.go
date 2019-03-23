@@ -3,8 +3,8 @@ package elinkctls
 import (
 	"github.com/slzm40/gogate/apps/npis"
 	"github.com/slzm40/gomo/elink"
-	"github.com/slzm40/gomo/elink/channel/ctrl"
 	"github.com/slzm40/gomo/npi"
+	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/json-iterator/go"

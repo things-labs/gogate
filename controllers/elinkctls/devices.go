@@ -6,7 +6,7 @@ import (
 	"github.com/slzm40/gogate/apps/mq"
 	"github.com/slzm40/gogate/models/devmodels"
 	"github.com/slzm40/gomo/elink"
-	"github.com/slzm40/gomo/elink/channel/ctrl"
+	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/json-iterator/go"
@@ -129,7 +129,7 @@ func addDelGernalDevices(isDel bool, pid int, dc *DevCtrlController) {
 	}()
 
 	req := &ctrl.BaseRequest{}
-	bpl := &ctrl.BasePayload{}
+	bpl := &ctrl.BaseRawPayload{}
 	if err := jsoniter.Unmarshal(dc.Input.Payload, &ctrl.Request{req, bpl}); err != nil {
 		code = elink.CodeErrSysInvalidParameter
 		return
