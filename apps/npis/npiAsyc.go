@@ -2,6 +2,8 @@ package npis
 
 import (
 	"github.com/astaxie/beego/logs"
+	"github.com/slzm40/gogate/apps/cacheq"
+	"github.com/slzm40/gogate/models/devmodels"
 	"github.com/slzm40/gomo/ltl"
 	"github.com/slzm40/gomo/npi"
 )
@@ -64,6 +66,25 @@ func Zdo_EnddeviceAnnceInd(pdu *npi.Npdu) {
 	}
 
 	logs.Debug("enddevice annce: %#v", o)
+	id, err := cacheq.AllocID()
+	if err != nil {
+		return
+	}
+
+	if ZbApps.SendReadReq(o.NwkAddr, ltl.TrunkID_GeneralBasic, ltl.NodeNumRetained,
+		id, []uint16{0, 1, 2, 3, 4, 5, 6, 7}) != nil {
+		cacheq.FreeID(id)
+		return
+	}
+	cacheq.Hang(id, &cacheq.CacheqItem{
+		IsLocal: true,
+		Cb:      cb,
+		Val:     o.IeeeAddr})
+
+}
+
+func cb(ci *cacheq.CacheqItem) error {
+	return nil
 }
 
 func Zdo_LeaveInd(pdu *npi.Npdu) {
@@ -72,7 +93,7 @@ func Zdo_LeaveInd(pdu *npi.Npdu) {
 		logs.Error("leave indicate: %s", err)
 		return
 	}
-
+	devmodels.DeleteZbDeveiceAndNode(devmodels.ToHexString(o.ExtAddr))
 	logs.Debug("levae indicate: %#v", o)
 }
 

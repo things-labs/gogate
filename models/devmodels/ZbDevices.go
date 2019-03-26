@@ -620,5 +620,5 @@ func DeleteZbDeveiceAndNode(sn string) error {
 }
 
 func ToHexString(v uint64) string {
-	return hex.EncodeToString(common.Little_Endian.Putuint64(v))
+	return strings.ToUpper(hex.EncodeToString(common.Big_Endian.Putuint64(v)))
 }

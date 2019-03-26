@@ -1,7 +1,10 @@
 package npis
 
 import (
+	"github.com/astaxie/beego/logs"
+	"github.com/slzm40/gogate/apps/cacheq"
 	"github.com/slzm40/gogate/apps/mq"
+	"github.com/slzm40/gogate/models/devmodels"
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/ltl"
 	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
@@ -18,6 +21,21 @@ func (this *ZbnpiApp) ProcessInReadCmd(srcAddr uint16, hdr *ltl.FrameHdr, attrId
 	return nil
 }
 func (this *ZbnpiApp) ProcessInReadRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rdRspStatus []ltl.RcvReadRspStatus) error {
+	logs.Debug("rsp: %#v", rdRspStatus)
+	gba := limp.BasicAttribute(rdRspStatus)
+
+	itm, err := cacheq.Excute(hdr.TransSeqNum)
+	if err != nil {
+		return err
+	}
+
+	if itm.IsLocal {
+		return devmodels.UpdateZbDeviceAndNode(
+			devmodels.ToHexString(itm.Val.(uint64)), srcAddr, 1, gba.ProductIdentifier)
+	} else {
+
+	}
+
 	return nil
 }
 func (this *ZbnpiApp) ProcessInWriteCmd(srcAddr uint16, hdr *ltl.FrameHdr, wrwrRec []ltl.RcvWriteRec) error {
@@ -45,8 +63,8 @@ func (this *ZbnpiApp) ProcessInReadConfigReportRspCmd(srcAddr uint16, hdr *ltl.F
 type DevAttr struct {
 	ctrl.BasePushData
 	Payload struct {
-		ctrl.BaseNodePayload
-		Data interface{}
+		ctrl.BaseSnPayload
+		Data interface{} `json:"data"`
 	} `json:"payload"`
 }
 
@@ -54,43 +72,26 @@ func (this *ZbnpiApp) ProcessInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec
 	//var err error
 	var out []byte
 
+	zbdnode, err := devmodels.LookupZbDeviceNodeByNN(srcAddr, hdr.NodeNo)
+	if err != nil {
+		logs.Debug("not fined in db")
+		return err
+	}
+
 	switch hdr.TrunkID {
-	case ltl.TrunkID_MsTemperatureMeasurement:
-		mstemp, err := limp.MsMeasureAttribute(ltl.TrunkID_MsTemperatureMeasurement, rRec)
+	case ltl.TrunkID_MsTemperatureMeasurement, ltl.TrunkID_MsRelativeHumidity:
+		mstemp, err := limp.MsMeasureAttribute(int(hdr.NodeNo), hdr.TrunkID, rRec)
 		if err != nil {
 			return err
 		}
 		in := DevAttr{
 			Payload: struct {
-				ctrl.BaseNodePayload
-				Data interface{}
+				ctrl.BaseSnPayload
+				Data interface{} `json:"data"`
 			}{
-				BaseNodePayload: ctrl.BaseNodePayload{
-					ProductID: 20000,
-					Sn:        "建一个模拟的",
-					NodeNo:    1,
-				},
-				Data: mstemp,
-			},
-		}
-		out, err = jsoniter.Marshal(in)
-		if err != nil {
-			return err
-		}
-	case ltl.TrunkID_MsRelativeHumidity:
-		mstemp, err := limp.MsMeasureAttribute(ltl.TrunkID_MsRelativeHumidity, rRec)
-		if err != nil {
-			return err
-		}
-		in := DevAttr{
-			Payload: struct {
-				ctrl.BaseNodePayload
-				Data interface{}
-			}{
-				BaseNodePayload: ctrl.BaseNodePayload{
-					ProductID: 20000,
-					Sn:        "建一个模拟的",
-					NodeNo:    2,
+				BaseSnPayload: ctrl.BaseSnPayload{
+					ProductID: zbdnode.ProductId,
+					Sn:        zbdnode.Sn,
 				},
 				Data: mstemp,
 			},

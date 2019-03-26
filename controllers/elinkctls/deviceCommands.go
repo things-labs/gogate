@@ -15,6 +15,8 @@ type DevCommandCtrlController struct {
 	ctrl.Controller
 }
 
+const pid = "productID"
+
 // 设备命令负载
 type DevCmdPayload struct {
 	ProductID int    `json:"productID"`
