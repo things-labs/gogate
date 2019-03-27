@@ -3,12 +3,10 @@ package elinkctls
 import (
 	"strconv"
 
-	"github.com/slzm40/gogate/apps/mq"
 	"github.com/slzm40/gogate/models/devmodels"
+	"github.com/slzm40/gogate/protocol/elmodels"
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
-	"github.com/slzm40/gomo/protocol/elinkres"
-	"github.com/slzm40/gomo/protocol/elmodels"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/json-iterator/go"
@@ -80,7 +78,7 @@ func getGernalDevices(pid int, dc *DevCtrlController) {
 	}
 
 	packid := jsoniter.Get(dc.Input.Payload, "packetID").ToInt()
-	ctrl.WriteCtrlResponse(dc.Input, packid, elink.CodeSuccess, py)
+	ctrl.WriteResponse(dc.Input, packid, elink.CodeSuccess, py)
 }
 
 func dealAddDelGernalDevices(isDel bool, dc *DevCtrlController) {
@@ -186,27 +184,11 @@ func addDelGernalDevices(isDel bool, pid int, dc *DevCtrlController) {
 			code = 301
 			return
 		}
-		if py, err = jsoniter.Marshal(elmodels.DevInfo{pid, osn}); err != nil {
+		if py, err = jsoniter.Marshal(elmodels.BaseSnPayload{pid, osn}); err != nil {
 			code = elink.CodeErrSysInternal
 			return
 		}
 	}
 
-	ctrl.WriteCtrlResponse(dc.Input, req.PacketID, code, py)
-}
-
-func ZbDeviceLeave(sn uint64) {
-	dinfo, err := devmodels.LookupZbDeviceByIeeeAddr(devmodels.ToHexString(sn))
-	if err != nil {
-		return
-	}
-
-	dinfo.DeleteZbDeveiceAndNode()
-
-	v, err := jsoniter.Marshal(elmodels.DevInfo{dinfo.ProductId, dinfo.Sn})
-	if err != nil {
-		return
-	}
-	res := elink.FormatResouce(elinkres.Devices, dinfo.ProductId)
-	mq.WritePublishChData(res, elink.MethodPost, elink.MessageTypeAnnce, v)
+	ctrl.WriteResponse(dc.Input, req.PacketID, code, py)
 }

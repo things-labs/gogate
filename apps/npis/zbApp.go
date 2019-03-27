@@ -16,6 +16,7 @@ const Incomming_msg_size_max = 256
 
 type ZbnpiApp struct {
 	isNetworkFormation bool
+	isNetworkSteering  bool
 	*ltl.Ltl_t
 	*MiddleMonitor
 }
@@ -92,4 +93,12 @@ func (this *ZbnpiApp) NetworkFormation() error {
 
 func IsNetworkFormation() bool {
 	return ZbApps.isNetworkFormation
+}
+
+func SetNetworkSteering(on bool) {
+	ZbApps.isNetworkSteering = on
+}
+
+func IsNetworkSteering() bool {
+	return ZbApps.isNetworkSteering
 }

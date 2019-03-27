@@ -30,9 +30,9 @@ func (this *ZbNetworkCtrlController) Post() {
 		this.ErrorResponse(elink.CodeErrSysInternal)
 		return
 	}
-
-	packetID := jsoniter.Get(this.Input.Payload, "packetID").ToInt()
-	ctrl.WriteCtrlResponse(this.Input, packetID, elink.CodeSuccess, nil)
+	ctrl.WriteResponse(this.Input, jsoniter.Get(this.Input.Payload, "packetID").ToInt(),
+		elink.CodeSuccess, nil)
+	npis.SetNetworkSteering(true)
 	logs.Debug("elinkctls: zigbee network steering open")
 }
 
@@ -42,8 +42,8 @@ func (this *ZbNetworkCtrlController) Delete() {
 		this.ErrorResponse(elink.CodeErrSysInternal)
 		return
 	}
-
-	packetID := jsoniter.Get(this.Input.Payload, "packetID").ToInt()
-	ctrl.WriteCtrlResponse(this.Input, packetID, elink.CodeSuccess, nil)
+	ctrl.WriteResponse(this.Input, jsoniter.Get(this.Input.Payload, "packetID").ToInt(),
+		elink.CodeSuccess, nil)
+	npis.SetNetworkSteering(false)
 	logs.Debug("elinkctls: zigbee network steering close")
 }

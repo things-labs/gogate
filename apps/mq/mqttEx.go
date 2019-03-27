@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/slzm40/gogate/protocol/elmodels"
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/misc"
 	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
-	"github.com/slzm40/gomo/protocol/elmodels"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/eclipse/paho.mqtt.golang"
@@ -30,11 +30,9 @@ func init() {
 	elink.RegisterTopicInfo(misc.Mac(), gatewayProductKey) // 注册网关产品Key
 
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(mqtt_broker_address).SetPassword(mqtt_broker_password) // broker
-	opts.SetUsername("1").SetClientID(misc.Mac())
-
-	opts.SetCleanSession(false)
-	opts.SetAutoReconnect(true)
+	opts.AddBroker(mqtt_broker_address).SetClientID(misc.Mac()) // broker and clientID
+	opts.SetUsername("1").SetPassword(mqtt_broker_password)     // user name and password
+	opts.SetCleanSession(false).SetAutoReconnect(true)
 
 	opts.SetOnConnectHandler(func(cli mqtt.Client) {
 		logs.Info("mqtt client connect success")
@@ -48,7 +46,7 @@ func init() {
 	})
 
 	opts.SetConnectionLostHandler(func(cli mqtt.Client, err error) {
-		logs.Warn("mqtt client connection lost ", err)
+		logs.Warn("mqtt client connection lost, ", err)
 	})
 
 	if out, err := jsoniter.Marshal(elmodels.GatewayHeatbeats(false)); err != nil {
@@ -60,6 +58,7 @@ func init() {
 	started()
 }
 
+// 启动连接mqtt
 func started() {
 	logs.Info("mqtt client connecting...")
 	if token := Client.Connect(); token.Wait() && token.Error() != nil {
@@ -68,6 +67,7 @@ func started() {
 	}
 }
 
+// 网关心跳包
 func HeartBeatStatus() {
 	defer time.AfterFunc(time.Second*30, HeartBeatStatus)
 	if !Client.IsConnected() {
@@ -83,6 +83,7 @@ func HeartBeatStatus() {
 
 }
 
-func WritePublishChData(resourse, method, messageType string, data interface{}) error {
-	return elink.WritePublish(Client, ctrl.ChannelData, resourse, method, messageType, data)
+// ctrl data通道推送数据
+func WriteCtrlData(resourse, method, messageType string, payload []byte) error {
+	return ctrl.WriteData(Client, resourse, method, messageType, payload)
 }

@@ -5,11 +5,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/astaxie/beego/logs"
-
 	"github.com/slzm40/common"
 	"github.com/slzm40/go-cache"
 	"github.com/slzm40/tsmanage"
+
+	"github.com/astaxie/beego/logs"
 )
 
 type Cacheq struct {
