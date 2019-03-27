@@ -61,8 +61,8 @@ func init() {
 
 // 是否有通用对应的设备
 func HasGeneralDevice(pid int, sn string) bool {
-	_, ok := LookupProduct(pid)
-	if !ok {
+	_, err := LookupProduct(pid)
+	if err != nil {
 		return false
 	}
 
@@ -75,8 +75,8 @@ func HasGeneralDevice(pid int, sn string) bool {
 
 // 创建通用设备
 func CreateGeneralDevice(pid int, sn string) error {
-	_, ok := LookupProduct(pid)
-	if !ok {
+	_, err := LookupProduct(pid)
+	if err != nil {
 		return ErrProductNotExist
 	}
 	return (&GeneralDeviceInfo{ProductId: pid, Sn: sn}).CreateGeneralDevice()
@@ -89,8 +89,8 @@ func (this *GeneralDeviceInfo) CreateGeneralDevice() error {
 
 // 删除通用设备
 func DeleteGeneralDevice(pid int, sn string) error {
-	_, ok := LookupProduct(pid)
-	if !ok {
+	_, err := LookupProduct(pid)
+	if err != nil {
 		return ErrProductNotExist
 	}
 	return (&GeneralDeviceInfo{ProductId: pid, Sn: sn}).DeleteGeneralDevice()
@@ -103,8 +103,8 @@ func (this *GeneralDeviceInfo) DeleteGeneralDevice() error {
 
 // 查找通用设备
 func FindGeneralDevice(pid int) []GeneralDeviceInfo {
-	_, ok := LookupProduct(pid)
-	if !ok {
+	_, err := LookupProduct(pid)
+	if err != nil {
 		return []GeneralDeviceInfo{}
 	}
 	devs := []GeneralDeviceInfo{}

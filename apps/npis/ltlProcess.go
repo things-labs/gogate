@@ -21,9 +21,7 @@ func (this *ZbnpiApp) ProcessInReadCmd(srcAddr uint16, hdr *ltl.FrameHdr, attrId
 	return nil
 }
 func (this *ZbnpiApp) ProcessInReadRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rdRspStatus []ltl.RcvReadRspStatus) error {
-	logs.Debug("rsp: %#v", rdRspStatus)
 	gba := limp.BasicAttribute(rdRspStatus)
-
 	itm, err := cacheq.Excute(hdr.TransSeqNum)
 	if err != nil {
 		return err

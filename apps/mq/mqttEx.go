@@ -7,11 +7,11 @@ import (
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/misc"
 	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
+	"github.com/slzm40/gomo/protocol/elmodels"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/eclipse/paho.mqtt.golang"
 	"github.com/json-iterator/go"
-	"github.com/slzm40/common"
 )
 
 const (
@@ -23,19 +23,19 @@ const (
 	gatewayProductKey = "lc_gzs100"
 )
 
+var gatewayHeartBeatTopic = fmt.Sprintf("data/0/%s/gateway.heartbeat/patch/time", misc.Mac())
 var Client mqtt.Client
 
 func init() {
 	elink.RegisterTopicInfo(misc.Mac(), gatewayProductKey) // 注册网关产品Key
 
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(mqtt_broker_address) // broker
-	opts.SetPassword(mqtt_broker_password)
-	opts.SetUsername("1")
+	opts.AddBroker(mqtt_broker_address).SetPassword(mqtt_broker_password) // broker
+	opts.SetUsername("1").SetClientID(misc.Mac())
+
+	opts.SetCleanSession(false)
 	opts.SetAutoReconnect(true)
 
-	opts.SetClientID(misc.Mac())
-	opts.SetCleanSession(false)
 	opts.SetOnConnectHandler(func(cli mqtt.Client) {
 		logs.Info("mqtt client connect success")
 		chList := elink.ChannelSelectorList()
@@ -44,12 +44,18 @@ func init() {
 			cli.Subscribe(s, 2, elink.Server)
 		}
 
-		time.AfterFunc(time.Second*10, HeartBeatStatus)
+		time.AfterFunc(time.Second, HeartBeatStatus)
 	})
 
 	opts.SetConnectionLostHandler(func(cli mqtt.Client, err error) {
-		logs.Warn("mqtt clinet connection lost ", err)
+		logs.Warn("mqtt client connection lost ", err)
 	})
+
+	if out, err := jsoniter.Marshal(elmodels.GatewayHeatbeats(false)); err != nil {
+		logs.Error("mqtt %s", err.Error())
+	} else {
+		opts.SetBinaryWill(gatewayHeartBeatTopic, out, 2, false)
+	}
 	Client = mqtt.NewClient(opts)
 	started()
 }
@@ -62,65 +68,19 @@ func started() {
 	}
 }
 
-type DeviceInfo struct {
-	Sn string `json:"sn"`
-}
-type DeviceStatus struct {
-	CurrentTime   string `json:"currentTime"`
-	StartDateTime string `json:"startDateTime"`
-	RunningTime   string `json:"runningTime"`
-	Status        string `json:"status"`
-}
-type NetInfo struct {
-	MAC string `json:"MAC"`
-	Mac string `json:"mac"`
-}
-
-type Info struct {
-	DeviceInfo   DeviceInfo   `json:"device_info"`
-	DeviceStatus DeviceStatus `json:"device_status"`
-	NetInfo      NetInfo      `json:"net_info"`
-}
-
-type GatewayStatus struct {
-	Info Info `json:"info"`
-}
-
 func HeartBeatStatus() {
-	defer time.AfterFunc(time.Second*10, HeartBeatStatus)
+	defer time.AfterFunc(time.Second*30, HeartBeatStatus)
 	if !Client.IsConnected() {
 		return
 	}
 
-	mac := misc.Mac()
-
-	dInfo := DeviceInfo{Sn: mac}
-	dStatus := DeviceStatus{
-		CurrentTime:   time.Now().Local().Format("2006-01-02 15:04:05"),
-		StartDateTime: common.SetupTime(),
-		RunningTime:   common.RunningTime(),
-		Status:        "online",
-	}
-	nInfo := NetInfo{
-		MAC: misc.MAC(),
-		Mac: mac,
-	}
-
-	gStatus := GatewayStatus{
-		Info: Info{
-			DeviceInfo:   dInfo,
-			DeviceStatus: dStatus,
-			NetInfo:      nInfo,
-		},
-	}
-
-	out, err := jsoniter.Marshal(gStatus)
+	out, err := jsoniter.Marshal(elmodels.GatewayHeatbeats(true))
 	if err != nil {
 		logs.Error("HeartBeatStatus:", err)
-	} else {
-		s := fmt.Sprintf("data/0/%s/gateway.heartbeat/patch/time", mac)
-		Client.Publish(s, 0, false, out)
+		return
 	}
+	Client.Publish(gatewayHeartBeatTopic, 0, false, out)
+
 }
 
 func WritePublishChData(resourse, method, messageType string, data interface{}) error {

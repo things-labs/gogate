@@ -44,24 +44,28 @@ var zbProduct map[int]*ZbProduct = map[int]*ZbProduct{
 }
 
 // 根据产品id查找产品
-func LookupZbProduct(pID int) (*ZbProduct, error) {
-	o, exists := zbProduct[pID]
-	if !exists {
+func LookupZbProduct(pid int) (*ZbProduct, error) {
+	if pid == PID_RESERVE {
 		return nil, ErrProductNotExist
 	}
-
-	return o, nil
+	if o, exists := zbProduct[pid]; exists {
+		return o, nil
+	}
+	return nil, ErrProductNotExist
 }
 
 // 是否有这个产品Id
-func HasZbProduct(pID int) bool {
-	_, exists := zbProduct[pID]
+func HasZbProduct(pid int) bool {
+	if pid == PID_RESERVE {
+		return false
+	}
+	_, exists := zbProduct[pid]
 	return exists
 }
 
 // 根据产品Id获得产品的节点描述,不含保留默认节点0
-func LookupZbProductDeviceNodeDscList(pID int) ([]NodeDsc, error) {
-	pdt, err := LookupZbProduct(pID)
+func LookupZbProductDeviceNodeDscList(pid int) ([]NodeDsc, error) {
+	pdt, err := LookupZbProduct(pid)
 	if err != nil {
 		return nil, err
 	}
@@ -69,6 +73,7 @@ func LookupZbProductDeviceNodeDscList(pID int) ([]NodeDsc, error) {
 	return pdt.GetDeviceNodeDscList(), nil
 }
 
+// 获取产品描述
 func (this *ZbProduct) GetProductDescritption() string {
 	return this.Description
 }

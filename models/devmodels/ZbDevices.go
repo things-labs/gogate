@@ -566,6 +566,9 @@ func (this *ZbDeviceInfo) DeleteZbDeveiceAndNode() error {
 func UpdateZbDeviceAndNode(sn string, nwkAddr uint16, capacity byte, productID int) error {
 	var err error
 
+	if !HasZbProduct(productID) {
+		return ErrProductNotExist
+	}
 	dev, err := LookupZbDeviceByIeeeAddr(sn)
 	if err != nil {
 		return (&ZbDeviceInfo{
@@ -591,14 +594,12 @@ func UpdateZbDeviceAndNode(sn string, nwkAddr uint16, capacity byte, productID i
 			ProductId: productID,
 		}).createZbDeveiceAndNode()
 	}
-
 	// 更新能力属性
 	if dev.Capacity != capacity {
 		if err = dev.updateCapacity(capacity); err != nil {
 			return err
 		}
 	}
-
 	// 更新对应网络址
 	if dev.NwkAddr != nwkAddr {
 		if err := dev.updateZbDeviceAndNodeNwkAddr(nwkAddr); err != nil {
@@ -619,6 +620,7 @@ func DeleteZbDeveiceAndNode(sn string) error {
 	return dev.DeleteZbDeveiceAndNode()
 }
 
+// 地址转换成字符串,全大写
 func ToHexString(v uint64) string {
 	return strings.ToUpper(hex.EncodeToString(common.Big_Endian.Putuint64(v)))
 }

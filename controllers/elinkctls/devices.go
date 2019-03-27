@@ -7,6 +7,8 @@ import (
 	"github.com/slzm40/gogate/models/devmodels"
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
+	"github.com/slzm40/gomo/protocol/elinkres"
+	"github.com/slzm40/gomo/protocol/elmodels"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/json-iterator/go"
@@ -15,16 +17,6 @@ import (
 
 type DevCtrlController struct {
 	ctrl.Controller
-}
-
-type DevicesInfo struct {
-	ProductID int      `json:"productID"`
-	Sn        []string `json:"sn"`
-}
-
-type DevInfo struct {
-	ProductID int    `json:"productID"`
-	Sn        string `json:"sn"`
 }
 
 // 获取产品Id下的设备列表
@@ -48,8 +40,8 @@ func (this *DevCtrlController) Get() {
 		return
 	}
 
-	pInfo, exist := devmodels.LookupProduct(int(pid))
-	if !exist {
+	pInfo, err := devmodels.LookupProduct(int(pid))
+	if err != nil {
 		code = 200
 		return
 	}
@@ -81,7 +73,7 @@ func getGernalDevices(pid int, dc *DevCtrlController) {
 		sns = append(sns, v.Sn)
 	}
 
-	py, err := jsoniter.Marshal(DevicesInfo{pid, sns})
+	py, err := jsoniter.Marshal(elmodels.DevicesInfo{pid, sns})
 	if err != nil {
 		dc.ErrorResponse(elink.CodeErrSysInternal)
 		return
@@ -104,8 +96,8 @@ func dealAddDelGernalDevices(isDel bool, dc *DevCtrlController) {
 		return
 	}
 
-	pInfo, exist := devmodels.LookupProduct(int(pid))
-	if !exist {
+	pInfo, err := devmodels.LookupProduct(int(pid))
+	if err != nil {
 		dc.ErrorResponse(200)
 		return
 	}
@@ -180,7 +172,7 @@ func addDelGernalDevices(isDel bool, pid int, dc *DevCtrlController) {
 			code = 301
 			return
 		}
-		if py, err = jsoniter.Marshal(DevicesInfo{pid, snSuc}); err != nil {
+		if py, err = jsoniter.Marshal(elmodels.DevicesInfo{pid, snSuc}); err != nil {
 			code = elink.CodeErrSysInternal
 			return
 		}
@@ -194,7 +186,7 @@ func addDelGernalDevices(isDel bool, pid int, dc *DevCtrlController) {
 			code = 301
 			return
 		}
-		if py, err = jsoniter.Marshal(DevInfo{pid, osn}); err != nil {
+		if py, err = jsoniter.Marshal(elmodels.DevInfo{pid, osn}); err != nil {
 			code = elink.CodeErrSysInternal
 			return
 		}
@@ -211,10 +203,10 @@ func ZbDeviceLeave(sn uint64) {
 
 	dinfo.DeleteZbDeveiceAndNode()
 
-	v, err := jsoniter.Marshal(DevInfo{dinfo.ProductId, dinfo.Sn})
+	v, err := jsoniter.Marshal(elmodels.DevInfo{dinfo.ProductId, dinfo.Sn})
 	if err != nil {
 		return
 	}
-	res := elink.FormatResouce("devices", dinfo.ProductId)
+	res := elink.FormatResouce(elinkres.Devices, dinfo.ProductId)
 	mq.WritePublishChData(res, elink.MethodPost, elink.MessageTypeAnnce, v)
 }

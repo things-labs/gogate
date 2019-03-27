@@ -48,8 +48,8 @@ func (this *DevCommandCtrlController) Post() {
 		return
 	}
 
-	pInfo, exist := devmodels.LookupProduct(int(pid))
-	if !exist {
+	pInfo, err := devmodels.LookupProduct(int(pid))
+	if err != nil {
 		this.ErrorResponse(200)
 		return
 	}
