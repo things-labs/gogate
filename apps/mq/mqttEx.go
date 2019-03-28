@@ -2,6 +2,7 @@ package mq
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/slzm40/gogate/protocol/elmodels"
@@ -25,6 +26,7 @@ const (
 
 var gatewayHeartBeatTopic = fmt.Sprintf("data/0/%s/gateway.heartbeat/patch/time", misc.Mac())
 var Client mqtt.Client
+var heartOnce sync.Once
 
 func init() {
 	elink.RegisterTopicInfo(misc.Mac(), gatewayProductKey) // 注册网关产品Key
@@ -41,8 +43,10 @@ func init() {
 			s := fmt.Sprintf("%s/%s/%s/+/+/+/#", ch, elink.TpInfos.ProductKey, misc.Mac())
 			cli.Subscribe(s, 2, elink.Server)
 		}
-
-		time.AfterFunc(time.Second, HeartBeatStatus)
+		heartOnce.Do(func() {
+			time.AfterFunc(time.Second, HeartBeatStatus)
+			fmt.Println("once???????????????????????")
+		})
 	})
 
 	opts.SetConnectionLostHandler(func(cli mqtt.Client, err error) {
