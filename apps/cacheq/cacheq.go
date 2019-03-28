@@ -36,12 +36,12 @@ func init() {
 }
 
 func AllocID() (uint8, error) {
-	v, err := chcheq.Alloc()
+	v, err := chcheq.Acquire()
 	return uint8(v), err
 }
 
 func FreeID(id uint8) {
-	chcheq.Free(uint(id))
+	chcheq.Release(uint(id))
 }
 
 func Hang(id uint8, ci *CacheqItem) {
@@ -56,7 +56,7 @@ func Excute(id uint8) (*CacheqItem, error) {
 		logs.Debug("excute not find")
 		return nil, errors.New("no this transfer id")
 	}
-	chcheq.Free(uint(id))
+	chcheq.Release(uint(id))
 	chcheq.c.Delete(ids)
 	cv := v.(*CacheqItem)
 	//	if cv.Cb != nil {
@@ -73,5 +73,5 @@ func expireCb(k string, val interface{}) {
 	if err != nil {
 		return
 	}
-	c.Free(uint(id))
+	c.Release(uint(id))
 }

@@ -1,6 +1,8 @@
 package elinkctls
 
 import (
+	"errors"
+
 	"github.com/slzm40/easyjms"
 	"github.com/slzm40/gogate/apps/cacheq"
 	"github.com/slzm40/gogate/apps/npis"
@@ -51,7 +53,7 @@ func (this *DevPropertysController) Get() {
 	}
 }
 
-func (this *DevPropertysController) zbDevicePropertysDeal(pid int) {
+func (this *DevPropertysController) zbDevicePropertysDeal(pid int) error {
 	breq := &ctrl.BaseRequest{}
 	bpl := &DevProp{}
 	if err := jsoniter.Unmarshal(this.Input.Payload, &DevPropRequest{breq, bpl}); err != nil {
@@ -61,7 +63,7 @@ func (this *DevPropertysController) zbDevicePropertysDeal(pid int) {
 	jp := easyjms.NewFromMap(bpl.Params)
 	types := jp.Get("Types").MustString()
 	if types == "" {
-		return
+		return errors.New("error happen")
 	}
 
 	switch types {
@@ -85,6 +87,7 @@ func (this *DevPropertysController) zbDevicePropertysDeal(pid int) {
 			Pkid: breq.PacketID,
 		})
 	default:
-		return
+		return nil
 	}
+	return nil
 }
