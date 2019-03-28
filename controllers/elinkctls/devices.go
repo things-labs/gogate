@@ -1,8 +1,6 @@
 package elinkctls
 
 import (
-	"strconv"
-
 	"github.com/slzm40/gogate/models/devmodels"
 	"github.com/slzm40/gogate/protocol/elmodels"
 	"github.com/slzm40/gomo/elink"
@@ -13,12 +11,12 @@ import (
 	"github.com/slzm40/easyjms"
 )
 
-type DevCtrlController struct {
+type DevicesController struct {
 	ctrl.Controller
 }
 
 // 获取产品Id下的设备列表
-func (this *DevCtrlController) Get() {
+func (this *DevicesController) Get() {
 	code := elink.CodeSuccess
 	defer func() {
 		if code != elink.CodeSuccess {
@@ -26,19 +24,13 @@ func (this *DevCtrlController) Get() {
 		}
 	}()
 
-	spid := this.Input.Param.Get("productID")
-	if spid == "" { // never happen but deal,may be other used
+	pid, err := this.AcquireParamPid()
+	if err != nil {
 		code = elink.CodeErrSysInternal
 		return
 	}
 
-	pid, err := strconv.ParseInt(spid, 10, 0)
-	if err != nil { //never happen but deal
-		code = elink.CodeErrSysInternal
-		return
-	}
-
-	pInfo, err := devmodels.LookupProduct(int(pid))
+	pInfo, err := devmodels.LookupProduct(pid)
 	if err != nil {
 		code = 200
 		return
@@ -47,24 +39,24 @@ func (this *DevCtrlController) Get() {
 	// 根据不同的设备类型分发
 	switch pInfo.Types {
 	case devmodels.PTypes_General: // 获取通用设备
-		getGernalDevices(int(pid), this)
+		getGernalDevices(pid, this)
 	default:
 		code = 202
 	}
 }
 
 // 添加设备
-func (this *DevCtrlController) Post() {
-	dealAddDelGernalDevices(false, this)
+func (this *DevicesController) Post() {
+	this.dealAddDelGernalDevices(false)
 }
 
 // 删除设备
-func (this *DevCtrlController) Delete() {
-	dealAddDelGernalDevices(true, this)
+func (this *DevicesController) Delete() {
+	this.dealAddDelGernalDevices(true)
 }
 
 // 获取通用设备列表
-func getGernalDevices(pid int, dc *DevCtrlController) {
+func getGernalDevices(pid int, dc *DevicesController) {
 	devs := devmodels.FindGeneralDevice(pid)
 	sns := make([]string, 0, len(devs))
 	for _, v := range devs {
@@ -81,36 +73,30 @@ func getGernalDevices(pid int, dc *DevCtrlController) {
 	ctrl.WriteResponse(dc.Input, packid, elink.CodeSuccess, py)
 }
 
-func dealAddDelGernalDevices(isDel bool, dc *DevCtrlController) {
-	spid := dc.Input.Param.Get("productID")
-	if spid == "" { // never happen but deal,may be other used
-		dc.ErrorResponse(elink.CodeErrSysInternal)
-		return
-	}
-
-	pid, err := strconv.ParseInt(spid, 10, 0)
-	if err != nil { //never happen but deal
-		dc.ErrorResponse(elink.CodeErrSysInternal)
+func (this *DevicesController) dealAddDelGernalDevices(isDel bool) {
+	pid, err := this.AcquireParamPid()
+	if err != nil {
+		this.ErrorResponse(elink.CodeErrSysInternal)
 		return
 	}
 
 	pInfo, err := devmodels.LookupProduct(int(pid))
 	if err != nil {
-		dc.ErrorResponse(200)
+		this.ErrorResponse(200)
 		return
 	}
 
 	// 根据不同的设备类型分发
 	switch pInfo.Types {
 	case devmodels.PTypes_General: // 通用设备处理s
-		addDelGernalDevices(isDel, int(pid), dc)
+		addDelGernalDevices(isDel, int(pid), this)
 	default:
-		dc.ErrorResponse(202)
+		this.ErrorResponse(202)
 	}
 }
 
 // 添加或删除通用设备
-func addDelGernalDevices(isDel bool, pid int, dc *DevCtrlController) {
+func addDelGernalDevices(isDel bool, pid int, dc *DevicesController) {
 	code := elink.CodeSuccess
 	defer func() {
 		if code != elink.CodeSuccess {

@@ -72,7 +72,7 @@ func Zdo_EnddeviceAnnceInd(pdu *npi.Npdu) {
 		return
 	}
 
-	if ZbApps.SendReadReqBasic(o.NwkAddr, ltl.NodeNumRetained, id) != nil {
+	if ZbApps.SendReadReqBasic(o.NwkAddr, id) != nil {
 		cacheq.FreeID(id)
 		return
 	}

@@ -1,8 +1,6 @@
 package elinkctls
 
 import (
-	"strconv"
-
 	"github.com/slzm40/gogate/models/devmodels"
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
@@ -11,7 +9,7 @@ import (
 	"github.com/json-iterator/go"
 )
 
-type DevCommandCtrlController struct {
+type DevCommandController struct {
 	ctrl.Controller
 }
 
@@ -35,20 +33,14 @@ type DevCmdRequest struct {
 }
 
 // 下发控制命令
-func (this *DevCommandCtrlController) Post() {
-	spid := this.Input.Param.Get("productID")
-	if spid == "" { // never happen but deal,may be other used
+func (this *DevCommandController) Post() {
+	pid, err := this.AcquireParamPid()
+	if err != nil {
 		this.ErrorResponse(elink.CodeErrSysInternal)
 		return
 	}
 
-	pid, err := strconv.ParseInt(spid, 10, 0)
-	if err != nil { //never happen but deal
-		this.ErrorResponse(elink.CodeErrSysInternal)
-		return
-	}
-
-	pInfo, err := devmodels.LookupProduct(int(pid))
+	pInfo, err := devmodels.LookupProduct(pid)
 	if err != nil {
 		this.ErrorResponse(200)
 		return
@@ -56,19 +48,19 @@ func (this *DevCommandCtrlController) Post() {
 
 	switch pInfo.Types {
 	case devmodels.PTypes_Zigbee:
-		ZbDeviceCommandDeal(int(pid), this)
+		this.zbDeviceCommandDeal(pid)
 	default:
 		this.ErrorResponse(303)
 	}
 }
 
-func ZbDeviceCommandDeal(pid int, dc *DevCommandCtrlController) {
+func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 	var cmdID int
 
 	breq := &ctrl.BaseRequest{}
 	bpl := &DevCmdPayload{}
-	if err := jsoniter.Unmarshal(dc.Input.Payload, &DevCmdRequest{breq, bpl}); err != nil {
-		dc.ErrorResponse(elink.CodeErrSysInvalidParameter)
+	if err := jsoniter.Unmarshal(this.Input.Payload, &DevCmdRequest{breq, bpl}); err != nil {
+		this.ErrorResponse(elink.CodeErrSysInvalidParameter)
 		return
 	}
 
@@ -83,7 +75,7 @@ func ZbDeviceCommandDeal(pid int, dc *DevCommandCtrlController) {
 		} else if cmd == "toggle" {
 			cmdID = 2
 		} else {
-			dc.ErrorResponse(304)
+			this.ErrorResponse(304)
 			return
 		}
 		logs.Debug(cmdID)
