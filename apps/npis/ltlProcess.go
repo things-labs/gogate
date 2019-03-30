@@ -3,6 +3,7 @@ package npis
 import (
 	"errors"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/slzm40/gogate/apps/mq"
 	"github.com/slzm40/gogate/controllers/elinkpsh"
 	"github.com/slzm40/gogate/models/devmodels"
@@ -10,6 +11,7 @@ import (
 	"github.com/slzm40/gogate/protocol/elmodels"
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/ltl"
+	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
 	"github.com/slzm40/gomo/protocol/limp"
 
 	"github.com/astaxie/beego/logs"
@@ -24,21 +26,27 @@ func (this *ZbnpiApp) ProInReadRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rdRspSt
 	if !ok {
 		return errors.New("val assert elmodels.CacheqItem failed")
 	}
-	logs.Debug("trunk: %d, item: %#v", hdr.TrunkID, itm)
 	switch hdr.TrunkID {
 	case ltl.TrunkID_GeneralBasic:
-		gba := limp.BasicAttribute(rdRspStatus)
+		gba := limp.BasicAttribute(int(hdr.NodeNo), rdRspStatus)
 		if itm.IsLocal {
-			s, ok := itm.Val.(string)
-			if ok {
-				devmodels.UpdateZbDeviceAndNode(s, srcAddr, 1, gba.ProductIdentifier)
-				if IsNetworkSteering() {
-					elinkpsh.DeviceAnnce(gba.ProductIdentifier, s, true)
-				}
+			devmodels.UpdateZbDeviceAndNode(itm.Sn, srcAddr, 1, gba.ProductIdentifier)
+			if IsNetworkSteering() {
+				elinkpsh.DeviceAnnce(gba.ProductIdentifier, itm.Sn, true)
 			}
-		} else {
-
+			return nil
 		}
+		out, err := jsoniter.Marshal(
+			elmodels.DevPropRspPy{
+				Sn:        itm.Sn,
+				ProductID: itm.ProductID,
+				Data:      gba,
+			})
+		if err != nil {
+			logs.Debug(err)
+			return err
+		}
+		ctrl.WriteResponse(itm.Client, itm.Tp, elink.CodeSuccess, itm.Pkid, out)
 	default:
 		return nil
 	}

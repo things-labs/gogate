@@ -69,7 +69,7 @@ func Zdo_EnddeviceAnnceInd(pdu *npi.Npdu) {
 
 	ZbApps.SendReadReqBasic(o.NwkAddr, &elmodels.ItemInfos{
 		IsLocal: true,
-		Val:     devmodels.ToHexString(o.IeeeAddr),
+		Sn:      devmodels.ToHexString(o.IeeeAddr),
 	})
 }
 

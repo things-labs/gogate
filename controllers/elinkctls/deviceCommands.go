@@ -1,8 +1,7 @@
 package elinkctls
 
 import (
-	"errors"
-
+	"github.com/astaxie/beego/logs"
 	"github.com/slzm40/gogate/apps/npis"
 	"github.com/slzm40/gogate/models/devmodels"
 	"github.com/slzm40/gomo/elink"
@@ -17,68 +16,67 @@ type DevCommandController struct {
 	ctrl.Controller
 }
 
-const pid = "productID"
+type DevCmdPara struct {
+	NodeNo  int                    `json:"nodeNo"`
+	Command string                 `json:"command"`
+	CmdPara map[string]interface{} `json:"cmdPara"`
+}
 
 // 设备命令负载
-type DevCmdPayload struct {
-	ProductID int    `json:"productID"`
-	Sn        string `json:"sn"`
-	Params    struct {
-		NodeNo  int                    `json:"nodeNo"`
-		Command string                 `json:"command"`
-		CmdPara map[string]interface{} `json:"cmdPara"`
-	} `json:"params"`
+type DevCmdReqPayload struct {
+	ProductID int        `json:"productID"`
+	Sn        string     `json:"sn"`
+	Params    DevCmdPara `json:"params"`
 }
 
 // 命令json组合
 type DevCmdRequest struct {
-	*ctrl.BaseRequest
-	*DevCmdPayload
+	ctrl.BaseRequest
+	Payload DevCmdReqPayload `json:"payload,omitempty"`
 }
 
 // 下发控制命令
 func (this *DevCommandController) Post() {
 	pid, err := this.AcquireParamPid()
 	if err != nil {
-		this.ErrorResponse(elink.CodeErrSysInternal)
+		this.ErrorResponse(elink.CodeErrCommonResourceNotSupport)
 		return
 	}
 
+	// 确定是否支持此产品
 	pInfo, err := devmodels.LookupProduct(pid)
 	if err != nil {
-		this.ErrorResponse(200)
+		this.ErrorResponse(elink.CodeErrProudctUndefined)
 		return
 	}
 
+	// 根据产品类型分发命令
 	switch pInfo.Types {
 	case devmodels.PTypes_Zigbee:
 		this.zbDeviceCommandDeal(pid)
 	default:
-		this.ErrorResponse(303)
+		this.ErrorResponse(elink.CodeErrProudctFeatureUndefined)
 	}
 }
 
 func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 	code := elink.CodeSuccess
-	defer func() {
-		if code != elink.CodeSuccess {
-			this.ErrorResponse(code)
-		}
-	}()
-	breq := &ctrl.BaseRequest{}
-	bpl := &DevCmdPayload{}
-	if err := jsoniter.Unmarshal(this.Input.Payload, &DevCmdRequest{breq, bpl}); err != nil {
+	defer func() { this.ErrorResponse(code) }()
+
+	req := &DevCmdRequest{}
+	if err := jsoniter.Unmarshal(this.Input.Payload, req); err != nil {
 		code = elink.CodeErrSysInvalidParameter
 		return
 	}
-
-	if bpl.Params.NodeNo == ltl.NodeNumReserved {
-		dev, err := devmodels.LookupZbDeviceByIeeeAddr(bpl.Sn)
+	logs.Debug("base: %#v", req)
+	rpl := req.Payload
+	if rpl.Params.NodeNo == ltl.NodeNumReserved {
+		dev, err := devmodels.LookupZbDeviceByIeeeAddr(rpl.Sn)
 		if err != nil {
-			code = elink.CodeErrSysInvalidParameter
+			code = elink.CodeErrDeviceNotExist
 			return
 		}
-		switch bpl.Params.Command {
+		switch rpl.Params.Command {
 		case "reset":
 			err = npis.ZbApps.SendSpecificCmdBasic(dev.NwkAddr,
 				ltlspec.COMMAND_BASIC_REBOOT_DEVICE)
@@ -89,12 +87,15 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 			err = npis.ZbApps.SendSpecificCmdBasic(dev.NwkAddr,
 				ltlspec.COMMAND_BASIC_IDENTIFY)
 		default:
-			err = errors.New("not support")
-		}
-		if err != nil {
-			code = 305
+			code = elink.CodeErrDeviceCommandNotSupport
 			return
 		}
+		if err != nil {
+			code = elink.CodeErrDeviceCommandOperationFailed
+			return
+		}
+		this.WriteResponse(elink.CodeSuccess, nil)
+		return
 	}
 
 	//	dinfo, err := devmodels.LookupZbDeviceNodeByIN(bpl.Sn, byte(bpl.Params.NodeNo))

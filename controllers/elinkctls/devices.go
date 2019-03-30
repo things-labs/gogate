@@ -18,21 +18,17 @@ type DevicesController struct {
 // 获取产品Id下的设备列表
 func (this *DevicesController) Get() {
 	code := elink.CodeSuccess
-	defer func() {
-		if code != elink.CodeSuccess {
-			this.ErrorResponse(code)
-		}
-	}()
+	defer func() { this.ErrorResponse(code) }()
 
 	pid, err := this.AcquireParamPid()
 	if err != nil {
-		code = elink.CodeErrSysInternal
+		code = elink.CodeErrCommonResourceNotSupport
 		return
 	}
 
 	pInfo, err := devmodels.LookupProduct(pid)
 	if err != nil {
-		code = 200
+		code = elink.CodeErrProudctUndefined
 		return
 	}
 
@@ -41,7 +37,7 @@ func (this *DevicesController) Get() {
 	case devmodels.PTypes_General: // 获取通用设备
 		this.getGernalDevices(pid)
 	default:
-		code = 202
+		code = elink.CodeErrProudctFeatureUndefined
 	}
 }
 
@@ -56,7 +52,7 @@ func (this *DevicesController) Delete() {
 }
 
 // 获取通用设备列表
-func (this *DevicesController) getGernalDevices(pid int) {
+func (this *DevicesController) getGernalDevices(pid int) int {
 	devs := devmodels.FindGeneralDevice(pid)
 	sns := make([]string, 0, len(devs))
 	for _, v := range devs {
@@ -65,54 +61,49 @@ func (this *DevicesController) getGernalDevices(pid int) {
 
 	py, err := jsoniter.Marshal(elmodels.DevicesInfo{pid, sns})
 	if err != nil {
-		this.ErrorResponse(elink.CodeErrSysInternal)
-		return
+		return elink.CodeErrSysException
 	}
 
 	this.WriteResponse(elink.CodeSuccess, py)
+	return elink.CodeSuccess
 }
 
 func (this *DevicesController) dealAddDelGernalDevices(isDel bool) {
+	code := elink.CodeSuccess
+	defer func() { this.ErrorResponse(code) }()
+
 	pid, err := this.AcquireParamPid()
 	if err != nil {
-		this.ErrorResponse(elink.CodeErrSysInternal)
+		code = elink.CodeErrSysException
 		return
 	}
 
 	pInfo, err := devmodels.LookupProduct(int(pid))
 	if err != nil {
-		this.ErrorResponse(200)
+		code = elink.CodeErrProudctUndefined
 		return
 	}
 
 	// 根据不同的设备类型分发
 	switch pInfo.Types {
 	case devmodels.PTypes_General: // 通用设备处理s
-		this.addDelGernalDevices(isDel, int(pid))
+		code = this.addDelGernalDevices(isDel, int(pid))
 	default:
-		this.ErrorResponse(202)
+		code = elink.CodeErrProudctFeatureUndefined
 	}
 }
 
 // 添加或删除通用设备
-func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) {
-	code := elink.CodeSuccess
-	defer func() {
-		if code != elink.CodeSuccess {
-			this.ErrorResponse(code)
-		}
-	}()
-
+func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) int {
 	req := &ctrl.BaseRequest{}
 	bpl := &ctrl.BaseRawPayload{}
 	if err := jsoniter.Unmarshal(this.Input.Payload, &ctrl.Request{req, bpl}); err != nil {
-		code = elink.CodeErrSysInvalidParameter
-		return
+		return elink.CodeErrSysInvalidParameter
+
 	}
 	ejs, err := easyjms.NewFromJson(bpl.Payload)
 	if err != nil {
-		code = elink.CodeErrSysInvalidParameter
-		return
+		return elink.CodeErrSysInvalidParameter
 	}
 
 	snjs := ejs.Get("sn")
@@ -124,8 +115,7 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) {
 		sn = append(sn, str)
 	}
 	if len(sn) == 0 {
-		code = elink.CodeErrSysInvalidParameter
-		return
+		return elink.CodeErrSysInvalidParameter
 	}
 
 	snSuc := []string{}
@@ -152,12 +142,10 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) {
 
 	if isArray {
 		if len(snSuc) == 0 {
-			code = 301
-			return
+			return elink.CodeErrDeviceCommandOperationFailed
 		}
 		if py, err = jsoniter.Marshal(elmodels.DevicesInfo{pid, snSuc}); err != nil {
-			code = elink.CodeErrSysInternal
-			return
+			return elink.CodeErrSysException
 		}
 	} else {
 		var osn string
@@ -166,14 +154,13 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) {
 			osn = snSuc[0]
 		}
 		if osn == "" {
-			code = 301
-			return
+			return elink.CodeErrDeviceCommandOperationFailed
 		}
 		if py, err = jsoniter.Marshal(elmodels.BaseSnPayload{pid, osn}); err != nil {
-			code = elink.CodeErrSysInternal
-			return
+			return elink.CodeErrSysException
 		}
 	}
 
-	this.WriteResponse(code, py)
+	this.WriteResponse(elink.CodeSuccess, py)
+	return elink.CodeSuccess
 }

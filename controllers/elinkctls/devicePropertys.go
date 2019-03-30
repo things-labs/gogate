@@ -1,7 +1,7 @@
 package elinkctls
 
 import (
-	"errors"
+	"github.com/slzm40/gomo/ltl"
 
 	"github.com/slzm40/easyjms"
 	"github.com/slzm40/gogate/apps/npis"
@@ -17,30 +17,16 @@ type DevPropertysController struct {
 	ctrl.Controller
 }
 
-type DevProp struct {
-	elmodels.BaseSnPayload
-	Params map[string]interface{}
-}
-
-type DevPropRequest struct {
-	*ctrl.BaseRequest
-	*DevProp
-}
-
-func (this *DevPropertysController) Post() {
-
-}
-
 func (this *DevPropertysController) Get() {
 	pid, err := this.AcquireParamPid()
 	if err != nil {
-		this.ErrorResponse(elink.CodeErrSysInternal)
+		this.ErrorResponse(elink.CodeErrCommonResourceNotSupport)
 		return
 	}
 
 	pInfo, err := devmodels.LookupProduct(pid)
 	if err != nil {
-		this.ErrorResponse(200)
+		this.ErrorResponse(elink.CodeErrProudctUndefined)
 		return
 	}
 
@@ -48,38 +34,44 @@ func (this *DevPropertysController) Get() {
 	case devmodels.PTypes_Zigbee:
 		this.zbDevicePropertysDeal(pid)
 	default:
-		this.ErrorResponse(303)
+		this.ErrorResponse(elink.CodeErrProudctFeatureUndefined)
 	}
 }
 
-func (this *DevPropertysController) zbDevicePropertysDeal(pid int) error {
-	breq := &ctrl.BaseRequest{}
-	bpl := &DevProp{}
-	if err := jsoniter.Unmarshal(this.Input.Payload, &DevPropRequest{breq, bpl}); err != nil {
-		return err
+func (this *DevPropertysController) zbDevicePropertysDeal(pid int) {
+	req := &elmodels.DevPropRequest{}
+	if err := jsoniter.Unmarshal(this.Input.Payload, req); err != nil {
+		this.ErrorResponse(elink.CodeErrSysInvalidParameter)
+		return
 	}
 
-	jp := easyjms.NewFromMap(bpl.Params)
-	types := jp.Get("Types").MustString()
-	if types == "" {
-		return errors.New("error happen")
-	}
+	rpl := req.Payload
+	jp := easyjms.NewFromMap(rpl.Params)
+	if jp.Get("nodeNo").MustInt() == ltl.NodeNumReserved {
+		switch jp.Get("types").MustString() {
+		case "basic":
+			dinfo, err := devmodels.LookupZbDeviceByIeeeAddr(rpl.Sn)
+			if err != nil {
+				this.ErrorResponse(elink.CodeErrProudctUndefined)
+				return
+			}
 
-	switch types {
-	case "basic":
-		// 忽略节点号
-		dinfo, err := devmodels.LookupZbDeviceByIeeeAddr(bpl.Sn)
-		if err != nil {
-			return err
+			if err = npis.ZbApps.SendReadReqBasic(dinfo.NwkAddr,
+				&elmodels.ItemInfos{
+					Pkid:      req.PacketID,
+					Client:    this.Input.Client,
+					ProductID: rpl.ProductID,
+					Sn:        rpl.Sn,
+					Tp:        this.Input.Topic,
+				}); err != nil {
+				this.ErrorResponse(elink.CodeErrDeviceCommandOperationFailed)
+				return
+			}
+		default:
+			this.ErrorResponse(elink.CodeErrDevicePropertysNotSupport)
+			return
 		}
 
-		err = npis.ZbApps.SendReadReqBasic(dinfo.NwkAddr,
-			&elmodels.ItemInfos{Pkid: breq.PacketID})
-		if err != nil {
-			return err
-		}
-	default:
-		return nil
+		return
 	}
-	return nil
 }

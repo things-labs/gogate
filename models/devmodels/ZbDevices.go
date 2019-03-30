@@ -68,7 +68,7 @@ func joinInternalString(s []string) string {
 
 // 是否用指定的设备
 func HasZbDevice(sn string, pid int) bool {
-	if !HasZbProduct(pid) {
+	if !HasZbProduct(pid) || len(sn) == 0 {
 		return false
 	}
 	if devDb.Where(&ZbDeviceInfo{Sn: sn}).First(&ZbDeviceInfo{}).RecordNotFound() {
@@ -99,6 +99,9 @@ func LookupZbDeviceNodeByNN(nwkAddr uint16, nodeNum byte) (*ZbDeviceNodeInfo, er
 
 // 根据sn,nodeNum找到设备节点
 func LookupZbDeviceNodeByIN(sn string, nodeNum byte) (*ZbDeviceNodeInfo, error) {
+	if len(sn) == 0 {
+		return nil, ErrInvalidSn
+	}
 	o := &ZbDeviceNodeInfo{}
 	if devDb.Where(&ZbDeviceNodeInfo{
 		Sn:     sn,
@@ -374,6 +377,9 @@ func LookupZbDeviceByNwkAddr(nwkAddr uint16) (*ZbDeviceInfo, error) {
 
 // 根据sn找到设备
 func LookupZbDeviceByIeeeAddr(sn string) (*ZbDeviceInfo, error) {
+	if len(sn) == 0 {
+		return nil, ErrInvalidSn
+	}
 	oInfo := &ZbDeviceInfo{}
 	if devDb.Where(&ZbDeviceInfo{Sn: sn}).First(oInfo).RecordNotFound() {
 		return nil, gorm.ErrRecordNotFound
@@ -566,7 +572,7 @@ func (this *ZbDeviceInfo) DeleteZbDeveiceAndNode() error {
 func UpdateZbDeviceAndNode(sn string, nwkAddr uint16, capacity byte, productID int) error {
 	var err error
 
-	if !HasZbProduct(productID) {
+	if !HasZbProduct(productID) || len(sn) == 0 {
 		return ErrProductNotExist
 	}
 	dev, err := LookupZbDeviceByIeeeAddr(sn)

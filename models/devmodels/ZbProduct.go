@@ -36,7 +36,7 @@ var zbProduct map[int]*ZbProduct = map[int]*ZbProduct{
 		"三位智能开关"},
 
 	// 例子
-	80000: &ZbProduct{[]NodeDsc{
+	PID_ZIGBEE_TEST: &ZbProduct{[]NodeDsc{
 		{[]uint16{}, []uint16{}},             // 节点1 集描述
 		{[]uint16{1, 2}, []uint16{3, 4}},     // 节点2 集描述
 		{[]uint16{3}, []uint16{5, 6, 7, 8}}}, //  节点3 集描述
