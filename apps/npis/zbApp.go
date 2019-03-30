@@ -63,7 +63,7 @@ func ZbAppInit() error {
 	})
 
 	ZbApps = &ZbnpiApp{
-		Ltl_t:         &ltl.Ltl_t{mid},
+		Ltl_t:         ltl.NewClient(mid),
 		MiddleMonitor: mid,
 	}
 

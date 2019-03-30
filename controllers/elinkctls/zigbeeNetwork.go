@@ -7,7 +7,6 @@ import (
 	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
 
 	"github.com/astaxie/beego/logs"
-	"github.com/json-iterator/go"
 )
 
 type ZbNetworkController struct {
@@ -30,8 +29,8 @@ func (this *ZbNetworkController) Post() {
 		this.ErrorResponse(elink.CodeErrSysInternal)
 		return
 	}
-	ctrl.WriteResponse(this.Input, jsoniter.Get(this.Input.Payload, "packetID").ToInt(),
-		elink.CodeSuccess, nil)
+
+	this.WriteResponse(elink.CodeSuccess, nil)
 	npis.SetNetworkSteering(true)
 	logs.Debug("elinkctls: zigbee network steering open")
 }
@@ -42,8 +41,7 @@ func (this *ZbNetworkController) Delete() {
 		this.ErrorResponse(elink.CodeErrSysInternal)
 		return
 	}
-	ctrl.WriteResponse(this.Input, jsoniter.Get(this.Input.Payload, "packetID").ToInt(),
-		elink.CodeSuccess, nil)
+	this.WriteResponse(elink.CodeSuccess, nil)
 	npis.SetNetworkSteering(false)
 	logs.Debug("elinkctls: zigbee network steering close")
 }

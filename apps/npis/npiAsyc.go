@@ -2,22 +2,22 @@ package npis
 
 import (
 	"github.com/astaxie/beego/logs"
-	"github.com/slzm40/gogate/apps/cacheq"
 	"github.com/slzm40/gogate/controllers/elinkpsh"
 	"github.com/slzm40/gogate/models/devmodels"
+	"github.com/slzm40/gogate/protocol/elmodels"
 	"github.com/slzm40/gomo/ltl"
 	"github.com/slzm40/gomo/npi"
 )
 
 /** AF **/
 func Af_DataConfirm(pdu *npi.Npdu) {
-	o, err := npi.Af_DataConfirmParse(pdu)
+	_, err := npi.Af_DataConfirmParse(pdu)
 	if err != nil {
-		logs.Error(err)
+		logs.Error("af data confirm: ", err)
 		return
 	}
 
-	logs.Debug("af data confirm: %#v", o)
+	logs.Debug("af data confirm success")
 }
 
 func Af_IncomingMsg(pdu *npi.Npdu) {
@@ -65,25 +65,12 @@ func Zdo_EnddeviceAnnceInd(pdu *npi.Npdu) {
 		logs.Error("enddevice annce: %s", err)
 		return
 	}
-	logs.Debug("enddevice annce: %#v", o)
+	logs.Debug("enddevice annce: [%s - %d]", devmodels.ToHexString(o.IeeeAddr), o.NwkAddr)
 
-	id, err := cacheq.AllocID()
-	if err != nil {
-		return
-	}
-
-	if ZbApps.SendReadReqBasic(o.NwkAddr, id) != nil {
-		cacheq.FreeID(id)
-		return
-	}
-	cacheq.Hang(id, &cacheq.CacheqItem{
+	ZbApps.SendReadReqBasic(o.NwkAddr, &elmodels.ItemInfos{
 		IsLocal: true,
-		Cb:      cb,
-		Val:     devmodels.ToHexString(o.IeeeAddr)})
-}
-
-func cb(ci *cacheq.CacheqItem) error {
-	return nil
+		Val:     devmodels.ToHexString(o.IeeeAddr),
+	})
 }
 
 func Zdo_LeaveInd(pdu *npi.Npdu) {
@@ -95,7 +82,6 @@ func Zdo_LeaveInd(pdu *npi.Npdu) {
 	sn := devmodels.ToHexString(o.ExtAddr)
 	dev, err := devmodels.LookupZbDeviceByIeeeAddr(sn)
 	if err != nil {
-		logs.Error("leave indicate: %s", err)
 		return
 	}
 
@@ -106,7 +92,7 @@ func Zdo_LeaveInd(pdu *npi.Npdu) {
 	}
 
 	elinkpsh.DeviceAnnce(dev.GetProductID(), dev.GetSn(), false)
-	logs.Debug("levae indicate: [%d - %s]", dev.GetProductID(), dev.GetSn())
+	logs.Debug("levae indicate: [%s - %d]", dev.GetSn(), dev.GetNwkAddr())
 }
 
 /** SYS **/

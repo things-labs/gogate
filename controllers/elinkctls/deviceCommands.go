@@ -1,11 +1,15 @@
 package elinkctls
 
 import (
+	"errors"
+
+	"github.com/slzm40/gogate/apps/npis"
 	"github.com/slzm40/gogate/models/devmodels"
 	"github.com/slzm40/gomo/elink"
+	"github.com/slzm40/gomo/ltl"
+	"github.com/slzm40/gomo/ltl/ltlspec"
 	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
 
-	"github.com/astaxie/beego/logs"
 	"github.com/json-iterator/go"
 )
 
@@ -19,8 +23,8 @@ const pid = "productID"
 type DevCmdPayload struct {
 	ProductID int    `json:"productID"`
 	Sn        string `json:"sn"`
-	NodeNo    int    `json:"nodeNo"`
 	Params    struct {
+		NodeNo  int                    `json:"nodeNo"`
 		Command string                 `json:"command"`
 		CmdPara map[string]interface{} `json:"cmdPara"`
 	} `json:"params"`
@@ -55,30 +59,63 @@ func (this *DevCommandController) Post() {
 }
 
 func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
-	var cmdID int
-
+	code := elink.CodeSuccess
+	defer func() {
+		if code != elink.CodeSuccess {
+			this.ErrorResponse(code)
+		}
+	}()
 	breq := &ctrl.BaseRequest{}
 	bpl := &DevCmdPayload{}
 	if err := jsoniter.Unmarshal(this.Input.Payload, &DevCmdRequest{breq, bpl}); err != nil {
-		this.ErrorResponse(elink.CodeErrSysInvalidParameter)
+		code = elink.CodeErrSysInvalidParameter
 		return
 	}
 
-	//pdtModels.LookupZbDeviceNodeByIN(bpl.Sn, bpl.NodeNo)
-	switch pid {
-	case devmodels.PID_DZSW01:
-		cmd := bpl.Params.Command
-		if cmd == "off" {
-			cmdID = 0
-		} else if cmd == "on" {
-			cmdID = 1
-		} else if cmd == "toggle" {
-			cmdID = 2
-		} else {
-			this.ErrorResponse(304)
+	if bpl.Params.NodeNo == ltl.NodeNumReserved {
+		dev, err := devmodels.LookupZbDeviceByIeeeAddr(bpl.Sn)
+		if err != nil {
+			code = elink.CodeErrSysInvalidParameter
 			return
 		}
-		logs.Debug(cmdID)
-		//npis.ZbApps.SendCommand()
+		switch bpl.Params.Command {
+		case "reset":
+			err = npis.ZbApps.SendSpecificCmdBasic(dev.NwkAddr,
+				ltlspec.COMMAND_BASIC_REBOOT_DEVICE)
+		case "factoryReset":
+			err = npis.ZbApps.SendSpecificCmdBasic(dev.NwkAddr,
+				ltlspec.COMMAND_BASIC_RESET_FACT_DEFAULT)
+		case "identify":
+			err = npis.ZbApps.SendSpecificCmdBasic(dev.NwkAddr,
+				ltlspec.COMMAND_BASIC_IDENTIFY)
+		default:
+			err = errors.New("not support")
+		}
+		if err != nil {
+			code = 305
+			return
+		}
 	}
+
+	//	dinfo, err := devmodels.LookupZbDeviceNodeByIN(bpl.Sn, byte(bpl.Params.NodeNo))
+	//	if err != nil {
+	//		this.ErrorResponse()
+	//	}
+
+	//	switch pid {
+	//	case devmodels.PID_DZSW01:
+	//		cmd := bpl.Params.Command
+	//		if cmd == "off" {
+	//			cmdID = 0
+	//		} else if cmd == "on" {
+	//			cmdID = 1
+	//		} else if cmd == "toggle" {
+	//			cmdID = 2
+	//		} else {
+	//			this.ErrorResponse(304)
+	//			return
+	//		}
+	//		logs.Debug(cmdID)
+	//		//npis.ZbApps.SendCommand()
+	//	}
 }

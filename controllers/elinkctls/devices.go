@@ -39,7 +39,7 @@ func (this *DevicesController) Get() {
 	// 根据不同的设备类型分发
 	switch pInfo.Types {
 	case devmodels.PTypes_General: // 获取通用设备
-		getGernalDevices(pid, this)
+		this.getGernalDevices(pid)
 	default:
 		code = 202
 	}
@@ -56,7 +56,7 @@ func (this *DevicesController) Delete() {
 }
 
 // 获取通用设备列表
-func getGernalDevices(pid int, dc *DevicesController) {
+func (this *DevicesController) getGernalDevices(pid int) {
 	devs := devmodels.FindGeneralDevice(pid)
 	sns := make([]string, 0, len(devs))
 	for _, v := range devs {
@@ -65,12 +65,11 @@ func getGernalDevices(pid int, dc *DevicesController) {
 
 	py, err := jsoniter.Marshal(elmodels.DevicesInfo{pid, sns})
 	if err != nil {
-		dc.ErrorResponse(elink.CodeErrSysInternal)
+		this.ErrorResponse(elink.CodeErrSysInternal)
 		return
 	}
 
-	packid := jsoniter.Get(dc.Input.Payload, "packetID").ToInt()
-	ctrl.WriteResponse(dc.Input, packid, elink.CodeSuccess, py)
+	this.WriteResponse(elink.CodeSuccess, py)
 }
 
 func (this *DevicesController) dealAddDelGernalDevices(isDel bool) {
@@ -89,24 +88,24 @@ func (this *DevicesController) dealAddDelGernalDevices(isDel bool) {
 	// 根据不同的设备类型分发
 	switch pInfo.Types {
 	case devmodels.PTypes_General: // 通用设备处理s
-		addDelGernalDevices(isDel, int(pid), this)
+		this.addDelGernalDevices(isDel, int(pid))
 	default:
 		this.ErrorResponse(202)
 	}
 }
 
 // 添加或删除通用设备
-func addDelGernalDevices(isDel bool, pid int, dc *DevicesController) {
+func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) {
 	code := elink.CodeSuccess
 	defer func() {
 		if code != elink.CodeSuccess {
-			dc.ErrorResponse(code)
+			this.ErrorResponse(code)
 		}
 	}()
 
 	req := &ctrl.BaseRequest{}
 	bpl := &ctrl.BaseRawPayload{}
-	if err := jsoniter.Unmarshal(dc.Input.Payload, &ctrl.Request{req, bpl}); err != nil {
+	if err := jsoniter.Unmarshal(this.Input.Payload, &ctrl.Request{req, bpl}); err != nil {
 		code = elink.CodeErrSysInvalidParameter
 		return
 	}
@@ -176,5 +175,5 @@ func addDelGernalDevices(isDel bool, pid int, dc *DevicesController) {
 		}
 	}
 
-	ctrl.WriteResponse(dc.Input, req.PacketID, code, py)
+	this.WriteResponse(code, py)
 }

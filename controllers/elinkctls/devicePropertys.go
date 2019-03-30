@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/slzm40/easyjms"
-	"github.com/slzm40/gogate/apps/cacheq"
 	"github.com/slzm40/gogate/apps/npis"
 	"github.com/slzm40/gogate/models/devmodels"
 	"github.com/slzm40/gogate/protocol/elmodels"
@@ -73,19 +72,12 @@ func (this *DevPropertysController) zbDevicePropertysDeal(pid int) error {
 		if err != nil {
 			return err
 		}
-		id, err := cacheq.AllocID()
-		if err != nil {
-			return err
-		}
-		err = npis.ZbApps.SendReadReqBasic(dinfo.NwkAddr, id)
-		if err != nil {
-			cacheq.FreeID(id)
-			return err
-		}
 
-		cacheq.Hang(id, &cacheq.CacheqItem{
-			Pkid: breq.PacketID,
-		})
+		err = npis.ZbApps.SendReadReqBasic(dinfo.NwkAddr,
+			&elmodels.ItemInfos{Pkid: breq.PacketID})
+		if err != nil {
+			return err
+		}
 	default:
 		return nil
 	}

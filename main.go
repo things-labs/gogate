@@ -5,6 +5,7 @@ import (
 
 	"github.com/astaxie/beego"
 
+	_ "github.com/slzm40/gogate/apps/mq"
 	_ "github.com/slzm40/gogate/models/devmodels"
 	_ "github.com/slzm40/gogate/routers"
 	_ "github.com/slzm40/gomo/misc"

@@ -14,7 +14,11 @@ type MiddleMonitor struct {
 }
 
 func (this *MiddleMonitor) writeIncommingMsg(msg *ltl.IncomingMsgPkt) {
-	this.IncommingMsgPkt <- msg
+	select {
+	case <-this.CloseChan():
+	case this.IncommingMsgPkt <- msg:
+	}
+
 }
 
 func (this *MiddleMonitor) WriteMsg(DstAddr uint16, Data []byte) error {

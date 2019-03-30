@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/slzm40/gogate/protocol/elinkres"
 	"github.com/slzm40/gogate/protocol/elmodels"
 	"github.com/slzm40/gomo/elink"
 	"github.com/slzm40/gomo/misc"
@@ -24,7 +25,6 @@ const (
 	gatewayProductKey = "lc_gzs100"
 )
 
-var gatewayHeartBeatTopic = fmt.Sprintf("data/0/%s/gateway.heartbeat/patch/time", misc.Mac())
 var Client mqtt.Client
 var heartOnce sync.Once
 
@@ -43,10 +43,7 @@ func init() {
 			s := fmt.Sprintf("%s/%s/%s/+/+/+/#", ch, elink.TpInfos.ProductKey, misc.Mac())
 			cli.Subscribe(s, 2, elink.Server)
 		}
-		heartOnce.Do(func() {
-			time.AfterFunc(time.Second, HeartBeatStatus)
-			fmt.Println("once???????????????????????")
-		})
+		heartOnce.Do(func() { time.AfterFunc(time.Second, HeartBeatStatus) })
 	})
 
 	opts.SetConnectionLostHandler(func(cli mqtt.Client, err error) {
@@ -56,7 +53,9 @@ func init() {
 	if out, err := jsoniter.Marshal(elmodels.GatewayHeatbeats(false)); err != nil {
 		logs.Error("mqtt %s", err.Error())
 	} else {
-		opts.SetBinaryWill(gatewayHeartBeatTopic, out, 2, false)
+		opts.SetBinaryWill(
+			fmt.Sprintf("data/0/%s/%s/patch/time", misc.Mac(), elinkres.GatewayHeartbeat),
+			out, 2, false)
 	}
 	Client = mqtt.NewClient(opts)
 	started()
@@ -83,8 +82,8 @@ func HeartBeatStatus() {
 		logs.Error("HeartBeatStatus:", err)
 		return
 	}
-	Client.Publish(gatewayHeartBeatTopic, 0, false, out)
-
+	elink.WriteSpecialData(Client, ctrl.ChannelData,
+		elinkres.GatewayHeartbeat, elink.MethodPatch, elink.MessageTypeTime, out)
 }
 
 // ctrl data通道推送数据
