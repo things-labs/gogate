@@ -79,11 +79,19 @@ func HeartBeatStatus() {
 
 	out, err := jsoniter.Marshal(elmodels.GatewayHeatbeats(true))
 	if err != nil {
-		logs.Error("HeartBeatStatus:", err)
+		logs.Error("GatewayHeatbeats:", err)
 		return
 	}
 	elink.WriteSpecialData(Client, ctrl.ChannelData,
 		elinkres.GatewayHeartbeat, elink.MethodPatch, elink.MessageTypeTime, out)
+
+	out, err = jsoniter.Marshal(elmodels.GatewayMonitors())
+	if err != nil {
+		logs.Error("GatewayMonitors:", err)
+		return
+	}
+	elink.WriteSpecialData(Client, ctrl.ChannelData,
+		elinkres.GatewayMonitor, elink.MethodPatch, elink.MessageTypeTime, out)
 }
 
 // ctrl data通道推送数据
