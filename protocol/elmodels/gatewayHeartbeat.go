@@ -3,8 +3,8 @@ package elmodels
 import (
 	"time"
 
-	"github.com/thinkgos/common"
 	"github.com/thinkgos/gomo/misc"
+	"github.com/thinkgos/utils"
 )
 
 type DeviceInfo struct {
@@ -43,8 +43,8 @@ func GatewayHeatbeats(isonline bool) *GatewayHeatbeat {
 			DeviceInfo: DeviceInfo{Sn: mac},
 			DeviceStatus: DeviceStatus{
 				CurrentTime:   time.Now().Local().Format("2006-01-02 15:04:05"),
-				StartDateTime: common.SetupTime(),
-				RunningTime:   common.RunningTime(),
+				StartDateTime: utils.SetupTime(),
+				RunningTime:   utils.RunningTime(),
 				Status:        status,
 			},
 			NetInfo: NetInfo{

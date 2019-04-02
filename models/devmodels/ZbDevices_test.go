@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/slzm40/common"
+	"github.com/slzm40/utils"
 
 	"github.com/jinzhu/gorm"
 	. "github.com/smartystreets/goconvey/convey"
@@ -200,7 +200,7 @@ func TestDevice(t *testing.T) {
 		Convey("通过ID查询设备节点", func() {
 			o1, _ := LookupZbDeviceNodeByNN(5566, 0)
 
-			o2, err := LookupZbDeviceNodeByID(common.FormatBaseTypes(o1.ID))
+			o2, err := LookupZbDeviceNodeByID(utils.FormatBaseTypes(o1.ID))
 
 			So(err, ShouldBeNil)
 			So(reflect.DeepEqual(o1, o2), ShouldBeTrue)

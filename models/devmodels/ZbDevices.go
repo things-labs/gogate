@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/thinkgos/common"
+	"github.com/thinkgos/utils"
 
 	"github.com/jinzhu/gorm"
 )
@@ -149,25 +149,25 @@ func BindZbDeviceNode(SrcSn string, SrcNodeNum byte,
 		return err
 	}
 
-	strBindTkid := common.FormatBaseTypes(BindTrunkID)
+	strBindTkid := utils.FormatBaseTypes(BindTrunkID)
 	// 只有源设备节点输出集和目的设备输入集互补,即都含有要绑定的集,才进行绑定
-	if !common.IsSliceContainsStrNocase(SrcDNI.outTrunk, strBindTkid) ||
-		!common.IsSliceContainsStrNocase(DstBindDNI.inTrunk, strBindTkid) {
+	if !utils.IsSliceContainsStrNocase(SrcDNI.outTrunk, strBindTkid) ||
+		!utils.IsSliceContainsStrNocase(DstBindDNI.inTrunk, strBindTkid) {
 		return ErrTrunkNotComplementary
 	}
 
-	srcID := common.FormatBaseTypes(SrcDNI.ID)
-	dstBindID := common.FormatBaseTypes(DstBindDNI.ID)
+	srcID := utils.FormatBaseTypes(SrcDNI.ID)
+	dstBindID := utils.FormatBaseTypes(DstBindDNI.ID)
 	// 源设备节点 目的绑定表 不含目标设备节点 或 目标设备节点 源绑定表 不含源设备节点 将进行绑定添加,
 	// 都有直接返回成功
-	if common.IsSliceContainsStrNocase(SrcDNI.dstBind, dstBindID) &&
-		common.IsSliceContainsStrNocase(DstBindDNI.srcBind, srcID) {
+	if utils.IsSliceContainsStrNocase(SrcDNI.dstBind, dstBindID) &&
+		utils.IsSliceContainsStrNocase(DstBindDNI.srcBind, srcID) {
 		return nil
 	}
 	// 将目的设备id号添加到 源设备的 目的绑定表
-	SrcDNI_DstBd := common.AppendStr(SrcDNI.dstBind, dstBindID)
+	SrcDNI_DstBd := utils.AppendStr(SrcDNI.dstBind, dstBindID)
 	// 将源设备id号添加到 目的设备的 源绑定表
-	DstBindDNI_SrcBd := common.AppendStr(DstBindDNI.srcBind, srcID)
+	DstBindDNI_SrcBd := utils.AppendStr(DstBindDNI.srcBind, srcID)
 
 	SrcDNI.DstBindList = joinInternalString(SrcDNI_DstBd)
 	DstBindDNI.SrcBindList = joinInternalString(DstBindDNI_SrcBd)
@@ -219,25 +219,25 @@ func UnZbBindDeviceNode(SrcSn string, SrcNodeNum byte,
 		return nil
 	}
 
-	strBindtkid := common.FormatBaseTypes(BindTrunkID)
+	strBindtkid := utils.FormatBaseTypes(BindTrunkID)
 	// 只有源设备节点输出集和目的设备输入集互补,即都含有要绑定的集,才进行解绑定,否则认为是成功的
-	if !common.IsSliceContainsStrNocase(SrcDNI.outTrunk, strBindtkid) ||
-		!common.IsSliceContainsStrNocase(DstBindDNI.inTrunk, strBindtkid) {
+	if !utils.IsSliceContainsStrNocase(SrcDNI.outTrunk, strBindtkid) ||
+		!utils.IsSliceContainsStrNocase(DstBindDNI.inTrunk, strBindtkid) {
 		return nil
 	}
 
-	dstid := common.FormatBaseTypes(DstBindDNI.ID)
-	srcid := common.FormatBaseTypes(SrcDNI.ID)
+	dstid := utils.FormatBaseTypes(DstBindDNI.ID)
+	srcid := utils.FormatBaseTypes(SrcDNI.ID)
 
 	// 源设备节点的<目的绑定表>不含目标设备节点
 	//或 目标设备节点<源绑定表>不含源设备节点 将进行绑定解绑直接返回成功
-	if !common.IsSliceContainsStrNocase(SrcDNI.dstBind, dstid) ||
-		!common.IsSliceContainsStrNocase(DstBindDNI.srcBind, srcid) {
+	if !utils.IsSliceContainsStrNocase(SrcDNI.dstBind, dstid) ||
+		!utils.IsSliceContainsStrNocase(DstBindDNI.srcBind, srcid) {
 		return nil
 	}
 	// 删除源的目标绑定 和 目标的源绑定
-	SrcDNI_DstBd := common.DeleteFromSliceStr(SrcDNI.dstBind, dstid)
-	DstBindDNI_SrcBd := common.DeleteFromSliceStr(DstBindDNI.srcBind, srcid)
+	SrcDNI_DstBd := utils.DeleteFromSliceStr(SrcDNI.dstBind, dstid)
+	DstBindDNI_SrcBd := utils.DeleteFromSliceStr(DstBindDNI.srcBind, srcid)
 
 	SrcDNI.DstBindList = joinInternalString(SrcDNI_DstBd)
 	DstBindDNI.SrcBindList = joinInternalString(DstBindDNI_SrcBd)
@@ -277,9 +277,9 @@ func BindFindZbDeviceNodeByNN(NwkAddr uint16, NodeNum byte, trunkID uint16) ([]*
 	if err != nil {
 		return nil, err
 	}
-	strTkid := common.FormatBaseTypes(trunkID)
+	strTkid := utils.FormatBaseTypes(trunkID)
 	// 源设备 是否包含输出集
-	if common.IsSliceContainsStrNocase(srcDNI.outTrunk, strTkid) != true {
+	if utils.IsSliceContainsStrNocase(srcDNI.outTrunk, strTkid) != true {
 		return nil, ErrNotContainTrunk
 	}
 
@@ -291,7 +291,7 @@ func BindFindZbDeviceNodeByNN(NwkAddr uint16, NodeNum byte, trunkID uint16) ([]*
 		}
 
 		// 只有目标设备含有输入集才加入
-		if common.IsSliceContainsStrNocase(tmpdni.inTrunk, strTkid) {
+		if utils.IsSliceContainsStrNocase(tmpdni.inTrunk, strTkid) {
 			dni = append(dni, tmpdni)
 		}
 	}
@@ -305,9 +305,9 @@ func BindFindZbDeviceNodeByIN(sn string, NodeNum byte, trunkID uint16) ([]*ZbDev
 	if err != nil {
 		return nil, err
 	}
-	strTkid := common.FormatBaseTypes(trunkID)
+	strTkid := utils.FormatBaseTypes(trunkID)
 	// 源设备 是否包含输出集
-	if !common.IsSliceContainsStrNocase(src.outTrunk, strTkid) {
+	if !utils.IsSliceContainsStrNocase(src.outTrunk, strTkid) {
 		return nil, ErrNotContainTrunk
 	}
 
@@ -319,7 +319,7 @@ func BindFindZbDeviceNodeByIN(sn string, NodeNum byte, trunkID uint16) ([]*ZbDev
 		}
 
 		// 只有目标设备含有输入集才加入
-		if common.IsSliceContainsStrNocase(tmpdni.inTrunk, strTkid) {
+		if utils.IsSliceContainsStrNocase(tmpdni.inTrunk, strTkid) {
 			dni = append(dni, tmpdni)
 		}
 	}
@@ -509,14 +509,14 @@ func (this *ZbDeviceInfo) DeleteZbDeveiceAndNode() error {
 
 	for _, v := range devNodes {
 		v.parseInternalString() // 将集与绑定表解析一下
-		vid := common.FormatBaseTypes(v.ID)
+		vid := utils.FormatBaseTypes(v.ID)
 		// 是否有源绑定,有则删除每一个 源的目标绑定
 		if len(v.srcBind) > 0 {
 			for _, tv := range v.srcBind { // 扫描每一个源 的目标绑定,让它删除对应id
 				tmpdevNode, err := lookupZbDeviceNodeByID(tx, tv)
 				if err == nil && len(tmpdevNode.dstBind) > 0 &&
-					common.IsSliceContainsStrNocase(tmpdevNode.dstBind, vid) {
-					tmpdevNode.dstBind = common.DeleteFromSliceStrAll(tmpdevNode.dstBind, vid)
+					utils.IsSliceContainsStrNocase(tmpdevNode.dstBind, vid) {
+					tmpdevNode.dstBind = utils.DeleteFromSliceStrAll(tmpdevNode.dstBind, vid)
 					tmpdevNode.DstBindList = joinInternalString(tmpdevNode.dstBind)
 
 					tx.Model(tmpdevNode).
@@ -534,8 +534,8 @@ func (this *ZbDeviceInfo) DeleteZbDeveiceAndNode() error {
 			for _, tv := range v.dstBind { // 扫描每一个目标 的源绑定,让它删除对应id
 				tmpdevNode, err := lookupZbDeviceNodeByID(tx, tv)
 				if err == nil && len(tmpdevNode.srcBind) > 0 &&
-					common.IsSliceContainsStrNocase(tmpdevNode.srcBind, vid) {
-					tmpdevNode.srcBind = common.DeleteFromSliceStrAll(tmpdevNode.srcBind, vid)
+					utils.IsSliceContainsStrNocase(tmpdevNode.srcBind, vid) {
+					tmpdevNode.srcBind = utils.DeleteFromSliceStrAll(tmpdevNode.srcBind, vid)
 					tmpdevNode.SrcBindList = joinInternalString(tmpdevNode.srcBind)
 
 					tx.Model(tmpdevNode).
@@ -628,5 +628,5 @@ func DeleteZbDeveiceAndNode(sn string) error {
 
 // 地址转换成字符串,全大写
 func ToHexString(v uint64) string {
-	return strings.ToUpper(hex.EncodeToString(common.Big_Endian.Putuint64(v)))
+	return strings.ToUpper(hex.EncodeToString(utils.Big_Endian.Putuint64(v)))
 }
