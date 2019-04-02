@@ -17,6 +17,7 @@ func init() {
 
 // elink router setting
 func init() {
+	elink.Router(ctrl.ChannelCtrl, "gateway.upgrade", &elinkctls.GatewayUpgrade{})
 	elink.Router(ctrl.ChannelCtrl, "devices.@", &elinkctls.DevicesController{})
 	elink.Router(ctrl.ChannelCtrl, "device.commands.@", &elinkctls.DevCommandController{})
 	elink.Router(ctrl.ChannelCtrl, "device.propertys.@", &elinkctls.DevPropertysController{})
