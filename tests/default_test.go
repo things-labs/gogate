@@ -1,12 +1,13 @@
 package test
 
 import (
-	_ "github.com/slzm40/gogate/routers"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
 	"runtime"
 	"testing"
+
+	_ "github.com/thinkgos/gogate/routers"
 
 	"github.com/astaxie/beego"
 	. "github.com/smartystreets/goconvey/convey"

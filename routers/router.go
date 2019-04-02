@@ -1,10 +1,10 @@
 package routers
 
 import (
-	"github.com/slzm40/gogate/controllers/elinkctls"
-	"github.com/slzm40/gogate/controllers/webctls"
-	"github.com/slzm40/gomo/elink"
-	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
+	"github.com/thinkgos/gogate/controllers/elinkctls"
+	"github.com/thinkgos/gogate/controllers/webctls"
+	"github.com/thinkgos/gomo/elink"
+	"github.com/thinkgos/gomo/protocol/elinkch/ctrl"
 
 	"github.com/astaxie/beego"
 )

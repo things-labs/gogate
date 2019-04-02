@@ -4,9 +4,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/slzm40/gomo/ltl"
-	"github.com/slzm40/gomo/misc"
-	"github.com/slzm40/gomo/npi"
+	"github.com/thinkgos/gomo/ltl"
+	"github.com/thinkgos/gomo/misc"
+	"github.com/thinkgos/gomo/npi"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/tarm/serial"

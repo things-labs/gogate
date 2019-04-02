@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/slzm40/common"
+	"github.com/thinkgos/common"
 
 	"github.com/jinzhu/gorm"
 )

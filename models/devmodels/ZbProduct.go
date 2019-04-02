@@ -1,7 +1,7 @@
 package devmodels
 
 import (
-	"github.com/slzm40/gomo/ltl"
+	"github.com/thinkgos/gomo/ltl"
 )
 
 // 节点输入输出集列表

@@ -3,8 +3,8 @@ package npis
 import (
 	"errors"
 
-	"github.com/slzm40/gomo/ltl"
-	"github.com/slzm40/gomo/npi"
+	"github.com/thinkgos/gomo/ltl"
+	"github.com/thinkgos/gomo/npi"
 )
 
 // npi与ltl的中间层

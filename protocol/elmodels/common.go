@@ -2,7 +2,7 @@ package elmodels
 
 import (
 	"github.com/eclipse/paho.mqtt.golang"
-	"github.com/slzm40/gomo/elink"
+	"github.com/thinkgos/gomo/elink"
 )
 
 type BaseSnPayload struct {

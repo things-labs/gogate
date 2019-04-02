@@ -1,14 +1,14 @@
 package elinkctls
 
 import (
-	"github.com/slzm40/gomo/ltl"
+	"github.com/thinkgos/gomo/ltl"
 
-	"github.com/slzm40/easyjms"
-	"github.com/slzm40/gogate/apps/npis"
-	"github.com/slzm40/gogate/models/devmodels"
-	"github.com/slzm40/gogate/protocol/elmodels"
-	"github.com/slzm40/gomo/elink"
-	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
+	"github.com/thinkgos/easyjms"
+	"github.com/thinkgos/gogate/apps/npis"
+	"github.com/thinkgos/gogate/models/devmodels"
+	"github.com/thinkgos/gogate/protocol/elmodels"
+	"github.com/thinkgos/gomo/elink"
+	"github.com/thinkgos/gomo/protocol/elinkch/ctrl"
 
 	"github.com/json-iterator/go"
 )

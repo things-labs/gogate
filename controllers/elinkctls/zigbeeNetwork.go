@@ -1,10 +1,10 @@
 package elinkctls
 
 import (
-	"github.com/slzm40/gogate/apps/npis"
-	"github.com/slzm40/gomo/elink"
-	"github.com/slzm40/gomo/npi"
-	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
+	"github.com/thinkgos/gogate/apps/npis"
+	"github.com/thinkgos/gomo/elink"
+	"github.com/thinkgos/gomo/npi"
+	"github.com/thinkgos/gomo/protocol/elinkch/ctrl"
 
 	"github.com/astaxie/beego/logs"
 )

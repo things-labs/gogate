@@ -1,10 +1,10 @@
 package elinkpsh
 
 import (
-	"github.com/slzm40/gogate/apps/mq"
-	"github.com/slzm40/gogate/protocol/elinkres"
-	"github.com/slzm40/gogate/protocol/elmodels"
-	"github.com/slzm40/gomo/elink"
+	"github.com/thinkgos/gogate/apps/mq"
+	"github.com/thinkgos/gogate/protocol/elinkres"
+	"github.com/thinkgos/gogate/protocol/elmodels"
+	"github.com/thinkgos/gomo/elink"
 
 	"github.com/json-iterator/go"
 )

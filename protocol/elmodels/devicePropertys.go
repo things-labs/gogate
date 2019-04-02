@@ -1,7 +1,7 @@
 package elmodels
 
 import (
-	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
+	"github.com/thinkgos/gomo/protocol/elinkch/ctrl"
 )
 
 type DevPropReqPy struct {

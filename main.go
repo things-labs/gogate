@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/slzm40/gogate/apps/npis"
+	"github.com/thinkgos/gogate/apps/npis"
 
 	"github.com/astaxie/beego"
 
-	_ "github.com/slzm40/gogate/apps/mq"
-	_ "github.com/slzm40/gogate/models/devmodels"
-	_ "github.com/slzm40/gogate/routers"
-	_ "github.com/slzm40/gomo/misc"
+	_ "github.com/thinkgos/gogate/apps/mq"
+	_ "github.com/thinkgos/gogate/models/devmodels"
+	_ "github.com/thinkgos/gogate/routers"
+	_ "github.com/thinkgos/gomo/misc"
 )
 
 func main() {

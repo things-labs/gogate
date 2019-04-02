@@ -2,12 +2,12 @@ package elinkctls
 
 import (
 	"github.com/astaxie/beego/logs"
-	"github.com/slzm40/gogate/apps/npis"
-	"github.com/slzm40/gogate/models/devmodels"
-	"github.com/slzm40/gomo/elink"
-	"github.com/slzm40/gomo/ltl"
-	"github.com/slzm40/gomo/ltl/ltlspec"
-	"github.com/slzm40/gomo/protocol/elinkch/ctrl"
+	"github.com/thinkgos/gogate/apps/npis"
+	"github.com/thinkgos/gogate/models/devmodels"
+	"github.com/thinkgos/gomo/elink"
+	"github.com/thinkgos/gomo/ltl"
+	"github.com/thinkgos/gomo/ltl/ltlspec"
+	"github.com/thinkgos/gomo/protocol/elinkch/ctrl"
 
 	"github.com/json-iterator/go"
 )

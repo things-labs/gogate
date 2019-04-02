@@ -2,11 +2,11 @@ package npis
 
 import (
 	"github.com/astaxie/beego/logs"
-	"github.com/slzm40/gogate/controllers/elinkpsh"
-	"github.com/slzm40/gogate/models/devmodels"
-	"github.com/slzm40/gogate/protocol/elmodels"
-	"github.com/slzm40/gomo/ltl"
-	"github.com/slzm40/gomo/npi"
+	"github.com/thinkgos/gogate/controllers/elinkpsh"
+	"github.com/thinkgos/gogate/models/devmodels"
+	"github.com/thinkgos/gogate/protocol/elmodels"
+	"github.com/thinkgos/gomo/ltl"
+	"github.com/thinkgos/gomo/npi"
 )
 
 /** AF **/

@@ -3,8 +3,8 @@ package elmodels
 import (
 	"time"
 
-	"github.com/slzm40/common"
-	"github.com/slzm40/gomo/misc"
+	"github.com/thinkgos/common"
+	"github.com/thinkgos/gomo/misc"
 )
 
 type DeviceInfo struct {
