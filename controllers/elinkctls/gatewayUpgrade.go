@@ -1,7 +1,6 @@
 package elinkctls
 
 import (
-	"encoding/hex"
 	"net/http"
 	"os"
 	"syscall"
@@ -46,9 +45,9 @@ func (this *GatewayUpgrade) Post() {
 	rpl := req.Payload
 	valid := validation.Validation{}
 	valid.Required(rpl.Url, "url")
-	valid.Required(rpl.Checksum, "checksum")
-	valid.Required(rpl.Signature, "signature")
-	valid.Required(rpl.PublicKey, "publicKey")
+	//	valid.Required(rpl.Checksum, "checksum")
+	//	valid.Required(rpl.Signature, "signature")
+	//	valid.Required(rpl.PublicKey, "publicKey")
 
 	if valid.HasErrors() {
 		code = elink.CodeErrSysInvalidParameter
@@ -72,26 +71,26 @@ func (this *GatewayUpgrade) Post() {
 }
 
 func doUpdate(iop *GwUpReqPayload) error {
-	ck, err := hex.DecodeString(iop.Checksum)
-	if err != nil {
-		return err
-	}
+	//	ck, err := hex.DecodeString(iop.Checksum)
+	//	if err != nil {
+	//		return err
+	//	}
 
-	sign, err := hex.DecodeString(iop.Signature)
-	if err != nil {
-		return err
-	}
+	//	sign, err := hex.DecodeString(iop.Signature)
+	//	if err != nil {
+	//		return err
+	//	}
 	// default crypto.sha256 and ECDSAVerifier
 	opt := update.Options{
-		Checksum:  ck,
-		Signature: sign,
+		//		Checksum:  ck,
+		//		Signature: sign,
 	}
-	if err = opt.SetPublicKeyPEM([]byte(iop.PublicKey)); err != nil {
-		return err
-	}
-	if iop.IsPatcher {
-		opt.Patcher = update.NewBSDiffPatcher()
-	}
+	//	if err = opt.SetPublicKeyPEM([]byte(iop.PublicKey)); err != nil {
+	//		return err
+	//	}
+	//	if iop.IsPatcher {
+	//		opt.Patcher = update.NewBSDiffPatcher()
+	//	}
 
 	resp, err := http.Get(iop.Url) // get the new file
 	if err != nil {
@@ -107,5 +106,4 @@ func doUpdate(iop *GwUpReqPayload) error {
 	}
 
 	return err
-
 }
