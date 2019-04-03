@@ -5,11 +5,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elinkres"
 	"github.com/thinkgos/gogate/protocol/elmodels"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/misc"
-	"github.com/thinkgos/gomo/protocol/elinkch/ctrl"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/eclipse/paho.mqtt.golang"

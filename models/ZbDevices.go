@@ -1,4 +1,4 @@
-package devmodels
+package models
 
 import (
 	"encoding/hex"
@@ -71,14 +71,14 @@ func HasZbDevice(sn string, pid int) bool {
 	if !HasZbProduct(pid) || len(sn) == 0 {
 		return false
 	}
-	if devDb.Where(&ZbDeviceInfo{Sn: sn}).First(&ZbDeviceInfo{}).RecordNotFound() {
+	if db.Where(&ZbDeviceInfo{Sn: sn}).First(&ZbDeviceInfo{}).RecordNotFound() {
 		return false
 	}
 	return true
 }
 
 func HasZbDeviceNode(nwkAddr uint16, nodeNum byte) bool {
-	if devDb.Where((&ZbDeviceNodeInfo{NwkAddr: nwkAddr, NodeNo: nodeNum})).RecordNotFound() {
+	if db.Where((&ZbDeviceNodeInfo{NwkAddr: nwkAddr, NodeNo: nodeNum})).RecordNotFound() {
 		return false
 	}
 	return true
@@ -87,7 +87,7 @@ func HasZbDeviceNode(nwkAddr uint16, nodeNum byte) bool {
 // 根据nwkAddr,nodeNum找到设备节点
 func LookupZbDeviceNodeByNN(nwkAddr uint16, nodeNum byte) (*ZbDeviceNodeInfo, error) {
 	o := &ZbDeviceNodeInfo{}
-	if devDb.Where(&ZbDeviceNodeInfo{
+	if db.Where(&ZbDeviceNodeInfo{
 		NwkAddr: nwkAddr,
 		NodeNo:  nodeNum}).First(o).RecordNotFound() {
 		return nil, gorm.ErrRecordNotFound
@@ -103,7 +103,7 @@ func LookupZbDeviceNodeByIN(sn string, nodeNum byte) (*ZbDeviceNodeInfo, error) 
 		return nil, ErrInvalidSn
 	}
 	o := &ZbDeviceNodeInfo{}
-	if devDb.Where(&ZbDeviceNodeInfo{
+	if db.Where(&ZbDeviceNodeInfo{
 		Sn:     sn,
 		NodeNo: nodeNum}).First(o).RecordNotFound() {
 		return nil, gorm.ErrRecordNotFound
@@ -115,7 +115,7 @@ func LookupZbDeviceNodeByIN(sn string, nodeNum byte) (*ZbDeviceNodeInfo, error) 
 
 // 根据id找到设备节点
 func LookupZbDeviceNodeByID(id string) (*ZbDeviceNodeInfo, error) {
-	return lookupZbDeviceNodeByID(devDb, id)
+	return lookupZbDeviceNodeByID(db, id)
 }
 
 // 根据id找到设备节点
@@ -173,7 +173,7 @@ func BindZbDeviceNode(SrcSn string, SrcNodeNum byte,
 	DstBindDNI.SrcBindList = joinInternalString(DstBindDNI_SrcBd)
 
 	// 开始更新表
-	tx := devDb.Begin()
+	tx := db.Begin()
 	if err = tx.Error; err != nil {
 		return err
 	}
@@ -243,7 +243,7 @@ func UnZbBindDeviceNode(SrcSn string, SrcNodeNum byte,
 	DstBindDNI.SrcBindList = joinInternalString(DstBindDNI_SrcBd)
 
 	// 开始更新表
-	tx := devDb.Begin()
+	tx := db.Begin()
 	if err = tx.Error; err != nil {
 		return err
 	}
@@ -368,7 +368,7 @@ func (this *ZbDeviceNodeInfo) GetBindList() (srcBind, dstBind []string) {
 // 根据网络地址找到设备
 func LookupZbDeviceByNwkAddr(nwkAddr uint16) (*ZbDeviceInfo, error) {
 	oInfo := &ZbDeviceInfo{}
-	if devDb.Where(&ZbDeviceInfo{NwkAddr: nwkAddr}).First(oInfo).RecordNotFound() {
+	if db.Where(&ZbDeviceInfo{NwkAddr: nwkAddr}).First(oInfo).RecordNotFound() {
 		return nil, gorm.ErrRecordNotFound
 	}
 
@@ -381,7 +381,7 @@ func LookupZbDeviceByIeeeAddr(sn string) (*ZbDeviceInfo, error) {
 		return nil, ErrInvalidSn
 	}
 	oInfo := &ZbDeviceInfo{}
-	if devDb.Where(&ZbDeviceInfo{Sn: sn}).First(oInfo).RecordNotFound() {
+	if db.Where(&ZbDeviceInfo{Sn: sn}).First(oInfo).RecordNotFound() {
 		return nil, gorm.ErrRecordNotFound
 	}
 
@@ -418,15 +418,15 @@ func (this *ZbDeviceInfo) updateCapacity(newVal byte) error {
 		return nil
 	}
 
-	devDb.Model(this).Update("capacity", newVal)
-	return devDb.Error
+	db.Model(this).Update("capacity", newVal)
+	return db.Error
 }
 
 // 更新设备和设备节点所有节点的网络地址
 func (this *ZbDeviceInfo) updateZbDeviceAndNodeNwkAddr(NewnwkAddr uint16) error {
 	var err error
 
-	tx := devDb.Begin()
+	tx := db.Begin()
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -457,7 +457,7 @@ func (this *ZbDeviceInfo) createZbDeveiceAndNode() error {
 
 	devNode := pdt.GetDeviceNodeDscList()
 
-	tx := devDb.Begin()
+	tx := db.Begin()
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -499,7 +499,7 @@ func (this *ZbDeviceInfo) createZbDeveiceAndNode() error {
 
 // 根据ieee地址删除设备,包含所有的设备节点
 func (this *ZbDeviceInfo) DeleteZbDeveiceAndNode() error {
-	tx := devDb.Begin()
+	tx := db.Begin()
 	if tx.Error != nil {
 		return tx.Error
 	}

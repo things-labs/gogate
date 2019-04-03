@@ -3,7 +3,7 @@ package npis
 import (
 	"github.com/astaxie/beego/logs"
 	"github.com/thinkgos/gogate/controllers/elinkpsh"
-	"github.com/thinkgos/gogate/models/devmodels"
+	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gogate/protocol/elmodels"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/npi"
@@ -65,11 +65,11 @@ func Zdo_EnddeviceAnnceInd(pdu *npi.Npdu) {
 		logs.Error("enddevice annce: %s", err)
 		return
 	}
-	logs.Debug("enddevice annce: [%s - %d]", devmodels.ToHexString(o.IeeeAddr), o.NwkAddr)
+	logs.Debug("enddevice annce: [%s - %d]", models.ToHexString(o.IeeeAddr), o.NwkAddr)
 
 	ZbApps.SendReadReqBasic(o.NwkAddr, &elmodels.ItemInfos{
 		IsLocal: true,
-		Sn:      devmodels.ToHexString(o.IeeeAddr),
+		Sn:      models.ToHexString(o.IeeeAddr),
 	})
 }
 
@@ -79,8 +79,8 @@ func Zdo_LeaveInd(pdu *npi.Npdu) {
 		logs.Error("leave indicate: %s", err)
 		return
 	}
-	sn := devmodels.ToHexString(o.ExtAddr)
-	dev, err := devmodels.LookupZbDeviceByIeeeAddr(sn)
+	sn := models.ToHexString(o.ExtAddr)
+	dev, err := models.LookupZbDeviceByIeeeAddr(sn)
 	if err != nil {
 		return
 	}

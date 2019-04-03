@@ -1,6 +1,7 @@
 package elinkres
 
 const (
+	SystemUser          = "system.user"
 	GatewayMonitor      = "gateway.monitor"
 	GatewayHeartbeat    = "gateway.heartbeat"
 	GatewayConfigs      = "gateway.configs"

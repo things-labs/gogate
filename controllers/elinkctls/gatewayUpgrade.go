@@ -7,8 +7,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gomo/elink"
-	"github.com/thinkgos/gomo/protocol/elinkch/ctrl"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/validation"

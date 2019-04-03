@@ -6,12 +6,12 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/thinkgos/gogate/apps/mq"
 	"github.com/thinkgos/gogate/controllers/elinkpsh"
-	"github.com/thinkgos/gogate/models/devmodels"
+	"github.com/thinkgos/gogate/models"
+	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elinkres"
 	"github.com/thinkgos/gogate/protocol/elmodels"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/ltl"
-	"github.com/thinkgos/gomo/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gomo/protocol/limp"
 
 	"github.com/astaxie/beego/logs"
@@ -30,7 +30,7 @@ func (this *ZbnpiApp) ProInReadRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rdRspSt
 	case ltl.TrunkID_GeneralBasic:
 		gba := limp.BasicAttribute(int(hdr.NodeNo), rdRspStatus)
 		if itm.IsLocal {
-			devmodels.UpdateZbDeviceAndNode(itm.Sn, srcAddr, 1, gba.ProductIdentifier)
+			models.UpdateZbDeviceAndNode(itm.Sn, srcAddr, 1, gba.ProductIdentifier)
 			if IsNetworkSteering() {
 				elinkpsh.DeviceAnnce(gba.ProductIdentifier, itm.Sn, true)
 			}
@@ -69,7 +69,7 @@ func (this *ZbnpiApp) ProInReadRpCfgRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rc
 func (this *ZbnpiApp) ProInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []ltl.ReportRec) error {
 	var out []byte
 
-	zbdnode, err := devmodels.LookupZbDeviceNodeByNN(srcAddr, hdr.NodeNo)
+	zbdnode, err := models.LookupZbDeviceNodeByNN(srcAddr, hdr.NodeNo)
 	if err != nil {
 		return err
 	}

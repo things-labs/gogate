@@ -1,4 +1,4 @@
-package devmodels
+package models
 
 import (
 	"reflect"
@@ -16,7 +16,7 @@ var (
 		ID:           6655,
 		NwkAddr:      1234,
 		NodeNo:       5,
-		Sn:     33445566,
+		Sn:           33445566,
 		InTrunkList:  "",
 		OutTrunkList: "",
 		SrcBindList:  "",
@@ -113,7 +113,7 @@ func TestGetDeviceInfo(t *testing.T) {
 		Model: gorm.Model{
 			ID: 1,
 		},
-		Sn:  11223344,
+		Sn:        11223344,
 		NwkAddr:   5566,
 		Capacity:  2,
 		ProductId: 80000,
@@ -140,14 +140,14 @@ func TestGetDeviceInfo(t *testing.T) {
 }
 
 var tsDev = &ZbDeviceInfo{
-	Sn:  11223344,
+	Sn:        11223344,
 	NwkAddr:   5566,
 	Capacity:  2,
 	ProductId: 80000,
 }
 
 var tsDev0 = &ZbDeviceInfo{
-	Sn:  55667788,
+	Sn:        55667788,
 	NwkAddr:   1122,
 	Capacity:  1,
 	ProductId: 80000,

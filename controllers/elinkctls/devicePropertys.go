@@ -5,10 +5,10 @@ import (
 
 	"github.com/thinkgos/easyjms"
 	"github.com/thinkgos/gogate/apps/npis"
-	"github.com/thinkgos/gogate/models/devmodels"
+	"github.com/thinkgos/gogate/models"
+	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elmodels"
 	"github.com/thinkgos/gomo/elink"
-	"github.com/thinkgos/gomo/protocol/elinkch/ctrl"
 
 	"github.com/json-iterator/go"
 )
@@ -24,14 +24,14 @@ func (this *DevPropertysController) Get() {
 		return
 	}
 
-	pInfo, err := devmodels.LookupProduct(pid)
+	pInfo, err := models.LookupProduct(pid)
 	if err != nil {
 		this.ErrorResponse(elink.CodeErrProudctUndefined)
 		return
 	}
 
 	switch pInfo.Types {
-	case devmodels.PTypes_Zigbee:
+	case models.PTypes_Zigbee:
 		this.zbDevicePropertysDeal(pid)
 	default:
 		this.ErrorResponse(elink.CodeErrProudctFeatureUndefined)
@@ -50,7 +50,7 @@ func (this *DevPropertysController) zbDevicePropertysDeal(pid int) {
 	if jp.Get("nodeNo").MustInt() == ltl.NodeNumReserved {
 		switch jp.Get("types").MustString() {
 		case "basic":
-			dinfo, err := devmodels.LookupZbDeviceByIeeeAddr(rpl.Sn)
+			dinfo, err := models.LookupZbDeviceByIeeeAddr(rpl.Sn)
 			if err != nil {
 				this.ErrorResponse(elink.CodeErrProudctUndefined)
 				return

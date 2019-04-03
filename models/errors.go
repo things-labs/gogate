@@ -1,4 +1,4 @@
-package devmodels
+package models
 
 import (
 	"errors"

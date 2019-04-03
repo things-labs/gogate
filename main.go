@@ -6,7 +6,7 @@ import (
 	"github.com/astaxie/beego"
 
 	_ "github.com/thinkgos/gogate/apps/mq"
-	_ "github.com/thinkgos/gogate/models/devmodels"
+	_ "github.com/thinkgos/gogate/models"
 	_ "github.com/thinkgos/gogate/routers"
 	_ "github.com/thinkgos/gomo/misc"
 )

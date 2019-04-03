@@ -1,4 +1,4 @@
-package devmodels
+package models
 
 // 设备产品类型
 const (

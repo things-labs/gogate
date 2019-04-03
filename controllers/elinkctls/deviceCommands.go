@@ -3,11 +3,11 @@ package elinkctls
 import (
 	"github.com/astaxie/beego/logs"
 	"github.com/thinkgos/gogate/apps/npis"
-	"github.com/thinkgos/gogate/models/devmodels"
+	"github.com/thinkgos/gogate/models"
+	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/ltl/ltlspec"
-	"github.com/thinkgos/gomo/protocol/elinkch/ctrl"
 
 	"github.com/json-iterator/go"
 )
@@ -44,7 +44,7 @@ func (this *DevCommandController) Post() {
 	}
 
 	// 确定是否支持此产品
-	pInfo, err := devmodels.LookupProduct(pid)
+	pInfo, err := models.LookupProduct(pid)
 	if err != nil {
 		this.ErrorResponse(elink.CodeErrProudctUndefined)
 		return
@@ -52,7 +52,7 @@ func (this *DevCommandController) Post() {
 
 	// 根据产品类型分发命令
 	switch pInfo.Types {
-	case devmodels.PTypes_Zigbee:
+	case models.PTypes_Zigbee:
 		this.zbDeviceCommandDeal(pid)
 	default:
 		this.ErrorResponse(elink.CodeErrProudctFeatureUndefined)
@@ -71,7 +71,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 	logs.Debug("base: %#v", req)
 	rpl := req.Payload
 	if rpl.Params.NodeNo == ltl.NodeNumReserved {
-		dev, err := devmodels.LookupZbDeviceByIeeeAddr(rpl.Sn)
+		dev, err := models.LookupZbDeviceByIeeeAddr(rpl.Sn)
 		if err != nil {
 			code = elink.CodeErrDeviceNotExist
 			return

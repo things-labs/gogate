@@ -3,6 +3,7 @@ package elmodels
 import (
 	"time"
 
+	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gomo/misc"
 	"github.com/thinkgos/utils"
 )
@@ -22,7 +23,7 @@ type NetInfo struct {
 }
 
 type Info struct {
-	Uid          []int        `json:"uid"`
+	Uid          []int64      `json:"uid"`
 	DeviceInfo   DeviceInfo   `json:"device_info"`
 	DeviceStatus DeviceStatus `json:"device_status"`
 	NetInfo      NetInfo      `json:"net_info"`
@@ -40,6 +41,7 @@ func GatewayHeatbeats(isonline bool) *GatewayHeatbeat {
 	mac := misc.Mac()
 	return &GatewayHeatbeat{
 		Info: Info{
+			Uid:        models.GetUsers(),
 			DeviceInfo: DeviceInfo{Sn: mac},
 			DeviceStatus: DeviceStatus{
 				CurrentTime:   time.Now().Local().Format("2006-01-02 15:04:05"),

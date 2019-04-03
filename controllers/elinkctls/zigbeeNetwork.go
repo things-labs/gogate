@@ -2,9 +2,9 @@ package elinkctls
 
 import (
 	"github.com/thinkgos/gogate/apps/npis"
+	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/npi"
-	"github.com/thinkgos/gomo/protocol/elinkch/ctrl"
 
 	"github.com/astaxie/beego/logs"
 )

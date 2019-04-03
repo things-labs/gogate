@@ -1,4 +1,4 @@
-package devmodels
+package models
 
 import (
 	"github.com/thinkgos/gomo/ltl"
