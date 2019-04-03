@@ -3,7 +3,9 @@ package elinkctls
 import (
 	"net/http"
 	"os"
+	"path/filepath"
 	"syscall"
+	"time"
 
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/protocol/elinkch/ctrl"
@@ -57,13 +59,16 @@ func (this *GatewayUpgrade) Post() {
 		code = elink.CodeErrSysOperationFailed
 		return
 	}
+	this.WriteResponse(elink.CodeSuccess, nil)
+	time.Sleep(3) // give enough time to send the message
 	bin, err := os.Executable()
 	if err != nil {
 		code = elink.CodeErrSysException
 		logs.Error("path: find failed!", err)
 		return
 	}
-	if err = syscall.Exec(bin, []string{}, os.Environ()); err != nil {
+	_, file := filepath.Split(bin)
+	if err = syscall.Exec(bin, []string{file}, os.Environ()); err != nil {
 		code = elink.CodeErrSysException
 		logs.Error("exec failed!%s", err.Error())
 		return
