@@ -42,10 +42,4 @@ func init() {
 	if !db.HasTable("zb_device_node_infos") {
 		db.Raw(zbDeviceNodeInfos_Sql).Scan(&ZbDeviceNodeInfo{})
 	}
-	lUser = new(localUser)
-	users := getUsers()
-	lUser.tab = make([]int64, 0, len(users))
-	for _, v := range users {
-		lUser.tab = append(lUser.tab, v.Uid)
-	}
 }

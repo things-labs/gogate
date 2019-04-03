@@ -7,9 +7,23 @@ import (
 	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego/logs"
-	jsoniter "github.com/json-iterator/go"
-	"github.com/thinkgos/easyjms"
+	"github.com/json-iterator/go"
 )
+
+type DevSnPayload struct {
+	ProductID int    `json:"productID"`
+	Sn        string `json:"sn"`
+}
+
+type DevMultiSnPayload struct {
+	ProductID int      `json:"productID"`
+	Sn        []string `json:"sn"`
+}
+
+type DevMultiSnRequest struct {
+	ctrl.BaseRequest
+	Payload DevMultiSnPayload `json:"payload,omitempty"`
+}
 
 type DevicesController struct {
 	ctrl.Controller
@@ -18,7 +32,9 @@ type DevicesController struct {
 // 获取产品Id下的设备列表
 func (this *DevicesController) Get() {
 	code := elink.CodeSuccess
-	defer func() { this.ErrorResponse(code) }()
+	defer func() {
+		this.ErrorResponse(code)
+	}()
 
 	pid, err := this.AcquireParamPid()
 	if err != nil {
@@ -59,7 +75,7 @@ func (this *DevicesController) getGernalDevices(pid int) int {
 		sns = append(sns, v.Sn)
 	}
 
-	py, err := jsoniter.Marshal(elmodels.DevicesInfo{pid, sns})
+	py, err := jsoniter.Marshal(DevMultiSnPayload{pid, sns})
 	if err != nil {
 		return elink.CodeErrSysException
 	}
@@ -70,7 +86,9 @@ func (this *DevicesController) getGernalDevices(pid int) int {
 
 func (this *DevicesController) dealAddDelGernalDevices(isDel bool) {
 	code := elink.CodeSuccess
-	defer func() { this.ErrorResponse(code) }()
+	defer func() {
+		this.ErrorResponse(code)
+	}()
 
 	pid, err := this.AcquireParamPid()
 	if err != nil {
@@ -95,29 +113,29 @@ func (this *DevicesController) dealAddDelGernalDevices(isDel bool) {
 
 // 添加或删除通用设备
 func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) int {
-	bpl := &ctrl.BaseRawPayload{}
-	if err := jsoniter.Unmarshal(this.Input.Payload, &ctrl.Request{&ctrl.BaseRequest{}, bpl}); err != nil {
-		return elink.CodeErrSysInvalidParameter
-	}
-	ejs, err := easyjms.NewFromJson(bpl.Payload)
-	if err != nil {
-		return elink.CodeErrSysInvalidParameter
-	}
+	var sn []string
+	var isArray bool
+	var err error
 
-	snjs := ejs.Get("sn")
-	sn := []string{}
-	isArray := snjs.IsArray()
-	if isArray {
-		sn = snjs.MustStringArray()
-	} else if str, err := snjs.String(); err == nil {
-		sn = append(sn, str)
+	sns := jsoniter.Get(this.Input.Payload, "payload", "sn")
+	switch sns.ValueType() {
+	case jsoniter.StringValue:
+		sn = append(sn, sns.ToString())
+	case jsoniter.ArrayValue:
+		isArray = true
+		req := &DevMultiSnRequest{}
+		if err := jsoniter.Unmarshal(this.Input.Payload, req); err != nil {
+			return elink.CodeErrSysInvalidParameter
+		}
+		sn = req.Payload.Sn
+	default:
+		return elink.CodeErrSysInvalidParameter
 	}
 	if len(sn) == 0 {
 		return elink.CodeErrSysInvalidParameter
 	}
 
 	snSuc := []string{}
-	py := []byte{}
 	// 处理要添加或删除的设备
 	for _, v := range sn {
 		if models.HasGeneralDevice(pid, v) { // 设备存在
@@ -137,20 +155,20 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) int {
 		}
 		snSuc = append(snSuc, v)
 	}
-
 	if len(snSuc) == 0 {
 		return elink.CodeErrDeviceCommandOperationFailed
 	}
+
+	py := []byte{}
 	if isArray {
 		if py, err = jsoniter.Marshal(elmodels.DevicesInfo{pid, snSuc}); err != nil {
 			return elink.CodeErrSysException
 		}
 	} else {
-		osn := snSuc[0]
-		if osn == "" {
+		if snSuc[0] == "" {
 			return elink.CodeErrDeviceCommandOperationFailed
 		}
-		if py, err = jsoniter.Marshal(elmodels.BaseSnPayload{pid, osn}); err != nil {
+		if py, err = jsoniter.Marshal(elmodels.BaseSnPayload{pid, snSuc[0]}); err != nil {
 			return elink.CodeErrSysException
 		}
 	}

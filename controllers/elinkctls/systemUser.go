@@ -1,10 +1,11 @@
 package elinkctls
 
 import (
-	"github.com/json-iterator/go"
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gomo/elink"
+
+	"github.com/json-iterator/go"
 )
 
 type SysMultiUserPayload struct {
@@ -15,17 +16,13 @@ type SysUserPayload struct {
 	Uid int64 `json:"uid"`
 }
 
-type SysUserRequest struct {
+type SysMultiUserRequest struct {
 	ctrl.BaseRequest
 	Payload SysMultiUserPayload `json:"payload,omitempty"`
 }
 
 type SysUserController struct {
 	ctrl.Controller
-}
-
-func (this *SysUserController) Post() {
-	this.userDeal(false)
 }
 
 func (this *SysUserController) Get() {
@@ -35,6 +32,10 @@ func (this *SysUserController) Get() {
 		return
 	}
 	this.WriteResponse(elink.CodeSuccess, out)
+}
+
+func (this *SysUserController) Post() {
+	this.userDeal(false)
 }
 
 func (this *SysUserController) Delete() {
@@ -56,7 +57,7 @@ func (this *SysUserController) userDeal(isDel bool) {
 		uid = append(uid, juid.ToInt64())
 	case jsoniter.ArrayValue:
 		isArray = true
-		req := &SysUserRequest{}
+		req := &SysMultiUserRequest{}
 		if err := jsoniter.Unmarshal(this.Input.Payload, req); err != nil {
 			code = elink.CodeErrSysInvalidParameter
 			return
