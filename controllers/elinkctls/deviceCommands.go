@@ -1,7 +1,6 @@
 package elinkctls
 
 import (
-	"github.com/astaxie/beego/logs"
 	"github.com/thinkgos/gogate/apps/npis"
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
@@ -68,7 +67,6 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 		code = elink.CodeErrSysInvalidParameter
 		return
 	}
-	logs.Debug("base: %#v", req)
 	rpl := req.Payload
 	if rpl.Params.NodeNo == ltl.NodeNumReserved {
 		dev, err := models.LookupZbDeviceByIeeeAddr(rpl.Sn)
