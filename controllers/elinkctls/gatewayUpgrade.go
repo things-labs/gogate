@@ -33,9 +33,17 @@ type GwUpRequest struct {
 	Payload GwUpReqPayload `json:"payload,omitempty"`
 }
 
+var isUpgradeInProcess bool = false
+
 func (this *GatewayUpgrade) Post() {
+	if isUpgradeInProcess {
+		this.ErrorResponse(elink.CodeErrSysInProcess)
+		return
+	}
+	isUpgradeInProcess = true
 	code := elink.CodeSuccess
 	defer func() {
+		isUpgradeInProcess = false
 		this.ErrorResponse(code)
 	}()
 
