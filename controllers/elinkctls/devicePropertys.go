@@ -7,11 +7,22 @@ import (
 	"github.com/thinkgos/gogate/apps/npis"
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
-	"github.com/thinkgos/gogate/protocol/elmodels"
+	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/elink"
 
 	"github.com/json-iterator/go"
 )
+
+type DevPropReqPy struct {
+	ProductID int                    `json:"productID"`
+	Sn        string                 `json:"sn"`
+	Params    map[string]interface{} `json:"params,omitempty"`
+}
+
+type DevPropRequest struct {
+	ctrl.BaseRequest
+	Payload DevPropReqPy `json:"payload,omitempty"`
+}
 
 type DevPropertysController struct {
 	ctrl.Controller
@@ -39,7 +50,7 @@ func (this *DevPropertysController) Get() {
 }
 
 func (this *DevPropertysController) zbDevicePropertysDeal(pid int) {
-	req := &elmodels.DevPropRequest{}
+	req := &DevPropRequest{}
 	if err := jsoniter.Unmarshal(this.Input.Payload, req); err != nil {
 		this.ErrorResponse(elink.CodeErrSysInvalidParameter)
 		return
@@ -57,7 +68,7 @@ func (this *DevPropertysController) zbDevicePropertysDeal(pid int) {
 			}
 
 			if err = npis.ZbApps.SendReadReqBasic(dinfo.NwkAddr,
-				&elmodels.ItemInfos{
+				&elinkmd.ItemInfos{
 					Pkid:      req.PacketID,
 					Client:    this.Input.Client,
 					ProductID: rpl.ProductID,

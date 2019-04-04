@@ -16,11 +16,7 @@ import (
 	"github.com/json-iterator/go"
 )
 
-type GatewayUpgrade struct {
-	ctrl.Controller
-}
-
-type GwUpReqPayload struct {
+type GwUpReqPy struct {
 	Url       string `json:"url"`
 	Checksum  string `json:"checksum"`
 	PublicKey string `json:"publicKey"`
@@ -30,7 +26,11 @@ type GwUpReqPayload struct {
 
 type GwUpRequest struct {
 	ctrl.BaseRequest
-	Payload GwUpReqPayload `json:"payload,omitempty"`
+	Payload GwUpReqPy `json:"payload,omitempty"`
+}
+
+type GatewayUpgrade struct {
+	ctrl.Controller
 }
 
 var isUpgradeInProcess bool = false
@@ -83,7 +83,7 @@ func (this *GatewayUpgrade) Post() {
 	}
 }
 
-func doUpdate(iop *GwUpReqPayload) error {
+func doUpdate(iop *GwUpReqPy) error {
 	//	ck, err := hex.DecodeString(iop.Checksum)
 	//	if err != nil {
 	//		return err

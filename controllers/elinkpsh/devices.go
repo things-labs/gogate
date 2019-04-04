@@ -3,15 +3,19 @@ package elinkpsh
 import (
 	"github.com/thinkgos/gogate/apps/mq"
 	"github.com/thinkgos/gogate/protocol/elinkres"
-	"github.com/thinkgos/gogate/protocol/elmodels"
 	"github.com/thinkgos/gomo/elink"
 
 	"github.com/json-iterator/go"
 )
 
+type DevSnPy struct {
+	ProductID int    `json:"productID"`
+	Sn        string `json:"sn"`
+}
+
 // 设备加入或离开通知
 func DeviceAnnce(pid int, sn string, isjoin bool) error {
-	v, err := jsoniter.Marshal(elmodels.BaseSnPayload{pid, sn})
+	v, err := jsoniter.Marshal(DevSnPy{pid, sn})
 	if err != nil {
 		return err
 	}

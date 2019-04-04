@@ -3,26 +3,25 @@ package elinkctls
 import (
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
-	"github.com/thinkgos/gogate/protocol/elmodels"
 	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/json-iterator/go"
 )
 
-type DevSnPayload struct {
+type DevSnPy struct {
 	ProductID int    `json:"productID"`
 	Sn        string `json:"sn"`
 }
 
-type DevMultiSnPayload struct {
+type DevMultiSnPy struct {
 	ProductID int      `json:"productID"`
 	Sn        []string `json:"sn"`
 }
 
 type DevMultiSnRequest struct {
 	ctrl.BaseRequest
-	Payload DevMultiSnPayload `json:"payload,omitempty"`
+	Payload DevMultiSnPy `json:"payload,omitempty"`
 }
 
 type DevicesController struct {
@@ -75,7 +74,7 @@ func (this *DevicesController) getGernalDevices(pid int) int {
 		sns = append(sns, v.Sn)
 	}
 
-	py, err := jsoniter.Marshal(DevMultiSnPayload{pid, sns})
+	py, err := jsoniter.Marshal(DevMultiSnPy{pid, sns})
 	if err != nil {
 		return elink.CodeErrSysException
 	}
@@ -161,14 +160,14 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) int {
 
 	py := []byte{}
 	if isArray {
-		if py, err = jsoniter.Marshal(elmodels.DevicesInfo{pid, snSuc}); err != nil {
+		if py, err = jsoniter.Marshal(DevMultiSnPy{pid, snSuc}); err != nil {
 			return elink.CodeErrSysException
 		}
 	} else {
 		if snSuc[0] == "" {
 			return elink.CodeErrDeviceCommandOperationFailed
 		}
-		if py, err = jsoniter.Marshal(elmodels.BaseSnPayload{pid, snSuc[0]}); err != nil {
+		if py, err = jsoniter.Marshal(DevSnPy{pid, snSuc[0]}); err != nil {
 			return elink.CodeErrSysException
 		}
 	}

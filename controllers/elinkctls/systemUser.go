@@ -8,17 +8,17 @@ import (
 	"github.com/json-iterator/go"
 )
 
-type SysMultiUserPayload struct {
+type SysMultiUserPy struct {
 	Uid []int64 `json:"uid"`
 }
 
-type SysUserPayload struct {
+type SysUserPy struct {
 	Uid int64 `json:"uid"`
 }
 
 type SysMultiUserRequest struct {
 	ctrl.BaseRequest
-	Payload SysMultiUserPayload `json:"payload,omitempty"`
+	Payload SysMultiUserPy `json:"payload,omitempty"`
 }
 
 type SysUserController struct {
@@ -26,7 +26,7 @@ type SysUserController struct {
 }
 
 func (this *SysUserController) Get() {
-	out, err := jsoniter.Marshal(SysMultiUserPayload{Uid: models.GetUsers()})
+	out, err := jsoniter.Marshal(SysMultiUserPy{Uid: models.GetUsers()})
 	if err != nil {
 		this.ErrorResponse(elink.CodeErrSysOperationFailed)
 		return
@@ -88,13 +88,13 @@ func (this *SysUserController) userDeal(isDel bool) {
 	var out []byte
 	var err error
 	if isArray {
-		out, err = jsoniter.Marshal(SysMultiUserPayload{Uid: uidSuc})
+		out, err = jsoniter.Marshal(SysMultiUserPy{Uid: uidSuc})
 		if err != nil {
 			code = elink.CodeErrSysOperationFailed
 			return
 		}
 	} else {
-		out, err = jsoniter.Marshal(SysUserPayload{Uid: uidSuc[0]})
+		out, err = jsoniter.Marshal(SysUserPy{Uid: uidSuc[0]})
 		if err != nil {
 			code = elink.CodeErrSysOperationFailed
 			return

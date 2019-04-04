@@ -12,10 +12,6 @@ import (
 	"github.com/json-iterator/go"
 )
 
-type DevCommandController struct {
-	ctrl.Controller
-}
-
 type DevCmdPara struct {
 	NodeNo  int                    `json:"nodeNo"`
 	Command string                 `json:"command"`
@@ -23,7 +19,7 @@ type DevCmdPara struct {
 }
 
 // 设备命令负载
-type DevCmdReqPayload struct {
+type DevCmdReqPy struct {
 	ProductID int        `json:"productID"`
 	Sn        string     `json:"sn"`
 	Params    DevCmdPara `json:"params"`
@@ -32,7 +28,11 @@ type DevCmdReqPayload struct {
 // 命令json组合
 type DevCmdRequest struct {
 	ctrl.BaseRequest
-	Payload DevCmdReqPayload `json:"payload,omitempty"`
+	Payload DevCmdReqPy `json:"payload,omitempty"`
+}
+
+type DevCommandController struct {
+	ctrl.Controller
 }
 
 // 下发控制命令

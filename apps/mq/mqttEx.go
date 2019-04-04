@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
+	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gogate/protocol/elinkres"
-	"github.com/thinkgos/gogate/protocol/elmodels"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/misc"
 
@@ -50,7 +50,7 @@ func init() {
 		logs.Warn("mqtt client connection lost, ", err)
 	})
 
-	if out, err := jsoniter.Marshal(elmodels.GatewayHeatbeats(false)); err != nil {
+	if out, err := jsoniter.Marshal(elinkmd.GatewayHeatbeats(false)); err != nil {
 		logs.Error("mqtt %s", err.Error())
 	} else {
 		opts.SetBinaryWill(
@@ -77,21 +77,26 @@ func HeartBeatStatus() {
 		return
 	}
 
-	out, err := jsoniter.Marshal(elmodels.GatewayHeatbeats(true))
-	if err != nil {
-		logs.Error("GatewayHeatbeats:", err)
-		return
-	}
-	elink.WriteSpecialData(Client, ctrl.ChannelData,
-		elinkres.GatewayHeartbeat, elink.MethodPatch, elink.MessageTypeTime, out)
+	func() {
+		out, err := jsoniter.Marshal(elinkmd.GatewayHeatbeats(true))
+		if err != nil {
+			logs.Error("GatewayHeatbeats:", err)
+			return
+		}
+		elink.WriteSpecialData(Client, ctrl.ChannelData,
+			elinkres.GatewayHeartbeat, elink.MethodPatch, elink.MessageTypeTime, out)
+	}()
 
-	out, err = jsoniter.Marshal(elmodels.GatewayMonitors())
-	if err != nil {
-		logs.Error("GatewayMonitors:", err)
-		return
-	}
-	elink.WriteSpecialData(Client, ctrl.ChannelData,
-		elinkres.GatewayMonitor, elink.MethodPatch, elink.MessageTypeTime, out)
+	func() {
+		out, err := jsoniter.Marshal(elinkmd.GatewayMonitors())
+		if err != nil {
+			logs.Error("GatewayMonitors:", err)
+			return
+		}
+		elink.WriteSpecialData(Client, ctrl.ChannelData,
+			elinkres.GatewayMonitor, elink.MethodPatch, elink.MessageTypeTime, out)
+	}()
+
 }
 
 // ctrl data通道推送数据

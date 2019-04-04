@@ -8,8 +8,8 @@ import (
 	"github.com/thinkgos/gogate/controllers/elinkpsh"
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
+	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gogate/protocol/elinkres"
-	"github.com/thinkgos/gogate/protocol/elmodels"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/protocol/limp"
@@ -22,9 +22,9 @@ func (this *ZbnpiApp) ProInSpecificCmd(srcAddr uint16, hdr *ltl.FrameHdr, cmdFor
 }
 
 func (this *ZbnpiApp) ProInReadRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rdRspStatus []ltl.ReadRspStatus, val interface{}) error {
-	itm, ok := val.(*elmodels.ItemInfos)
+	itm, ok := val.(*elinkmd.ItemInfos)
 	if !ok {
-		return errors.New("val assert elmodels.CacheqItem failed")
+		return errors.New("val assert elinkmd.CacheqItem failed")
 	}
 	switch hdr.TrunkID {
 	case ltl.TrunkID_GeneralBasic:
@@ -37,7 +37,7 @@ func (this *ZbnpiApp) ProInReadRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rdRspSt
 			return nil
 		}
 		out, err := jsoniter.Marshal(
-			elmodels.DevPropRspPy{
+			elinkmd.DevPropRspPy{
 				Sn:        itm.Sn,
 				ProductID: itm.ProductID,
 				Data:      gba,

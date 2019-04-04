@@ -1,4 +1,4 @@
-package elmodels
+package elinkmd
 
 import (
 	"time"

@@ -1,4 +1,4 @@
-package elmodels
+package elinkmd
 
 import (
 	"runtime"
@@ -6,7 +6,6 @@ import (
 
 func GatewayMonitors() *runtime.MemStats {
 	memStats := new(runtime.MemStats)
-
 	runtime.ReadMemStats(memStats)
 	return memStats
 }

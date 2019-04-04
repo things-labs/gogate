@@ -1,19 +1,9 @@
-package elmodels
+package elinkmd
 
 import (
 	"github.com/eclipse/paho.mqtt.golang"
 	"github.com/thinkgos/gomo/elink"
 )
-
-type BaseSnPayload struct {
-	ProductID int    `json:"productID"`
-	Sn        string `json:"sn"`
-}
-
-type DevicesInfo struct {
-	ProductID int      `json:"productID"`
-	Sn        []string `json:"sn"`
-}
 
 type ItemInfos struct {
 	Client    mqtt.Client
