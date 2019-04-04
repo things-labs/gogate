@@ -3,11 +3,10 @@ package npis
 import (
 	"errors"
 
-	jsoniter "github.com/json-iterator/go"
 	"github.com/thinkgos/gogate/apps/mq"
 	"github.com/thinkgos/gogate/controllers/elinkpsh"
+	"github.com/thinkgos/gogate/middle/ewait"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/ltl"
@@ -16,36 +15,36 @@ import (
 	"github.com/astaxie/beego/logs"
 )
 
+type deviceAnnce struct {
+	sn      string
+	nwkaddr uint16
+}
+
 func (this *ZbnpiApp) ProInSpecificCmd(srcAddr uint16, hdr *ltl.FrameHdr, cmdFormart []byte, val interface{}) byte {
 	return 0
 }
 
 func (this *ZbnpiApp) ProInReadRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rdRspStatus []ltl.ReadRspStatus, val interface{}) error {
-	itm, ok := val.(*elinkmd.ItemInfos)
+	var islocal bool
+	id, ok := val.(string)
 	if !ok {
-		return errors.New("val assert elinkmd.CacheqItem failed")
+		islocal = true
 	}
 	switch hdr.TrunkID {
 	case ltl.TrunkID_GeneralBasic:
 		gba := limp.BasicAttribute(int(hdr.NodeNo), rdRspStatus)
-		if itm.IsLocal {
-			models.UpdateZbDeviceAndNode(itm.Sn, srcAddr, 1, gba.ProductIdentifier)
+		if islocal {
+			itm, ok := val.(deviceAnnce)
+			if !ok || srcAddr != itm.nwkaddr {
+				return errors.New("no this address")
+			}
+			models.UpdateZbDeviceAndNode(itm.sn, srcAddr, 1, gba.ProductIdentifier)
 			if IsNetworkSteering() {
-				elinkpsh.DeviceAnnce(gba.ProductIdentifier, itm.Sn, true)
+				elinkpsh.DeviceAnnce(gba.ProductIdentifier, itm.sn, true)
 			}
 			return nil
 		}
-		out, err := jsoniter.Marshal(
-			elinkmd.DevPropRspPy{
-				Sn:        itm.Sn,
-				ProductID: itm.ProductID,
-				Data:      gba,
-			})
-		if err != nil {
-			logs.Debug(err)
-			return err
-		}
-		ctrl.WriteResponse(itm.Client, itm.Tp, elink.CodeSuccess, itm.Pkid, out)
+		ewait.Done(id, gba)
 	default:
 		return nil
 	}

@@ -4,7 +4,6 @@ import (
 	"github.com/astaxie/beego/logs"
 	"github.com/thinkgos/gogate/controllers/elinkpsh"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/npi"
 )
@@ -67,10 +66,7 @@ func Zdo_EnddeviceAnnceInd(pdu *npi.Npdu) {
 	}
 	logs.Debug("enddevice annce: [%s - %d]", models.ToHexString(o.IeeeAddr), o.NwkAddr)
 
-	ZbApps.SendReadReqBasic(o.NwkAddr, &elinkmd.ItemInfos{
-		IsLocal: true,
-		Sn:      models.ToHexString(o.IeeeAddr),
-	})
+	ZbApps.SendReadReqBasic(o.NwkAddr, deviceAnnce{models.ToHexString(o.IeeeAddr), o.NwkAddr})
 }
 
 func Zdo_LeaveInd(pdu *npi.Npdu) {
