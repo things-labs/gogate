@@ -1,8 +1,8 @@
-package elinkres
+package elinkmd
 
 const (
 	SystemUser          = "system.user"
-	GatewayMonitor      = "gateway.monitor"
+	SystemMonitor       = "system.monitor"
 	GatewayHeartbeat    = "gateway.heartbeat"
 	GatewayConfigs      = "gateway.configs"
 	GatewayUpgrade      = "gateway.upgrade"

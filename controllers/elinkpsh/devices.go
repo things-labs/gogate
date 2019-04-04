@@ -2,7 +2,7 @@ package elinkpsh
 
 import (
 	"github.com/thinkgos/gogate/apps/mq"
-	"github.com/thinkgos/gogate/protocol/elinkres"
+	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/elink"
 
 	"github.com/json-iterator/go"
@@ -24,6 +24,6 @@ func DeviceAnnce(pid int, sn string, isjoin bool) error {
 		method = elink.MethodPost
 	}
 
-	return mq.WriteCtrlData(elink.FormatResouce(elinkres.Devices, pid),
+	return mq.WriteCtrlData(elink.FormatResouce(elinkmd.Devices, pid),
 		method, elink.MessageTypeAnnce, v)
 }

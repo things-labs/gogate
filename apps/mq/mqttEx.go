@@ -7,7 +7,6 @@ import (
 
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
-	"github.com/thinkgos/gogate/protocol/elinkres"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/misc"
 
@@ -54,7 +53,7 @@ func init() {
 		logs.Error("mqtt %s", err.Error())
 	} else {
 		opts.SetBinaryWill(
-			fmt.Sprintf("data/0/%s/%s/patch/time", misc.Mac(), elinkres.GatewayHeartbeat),
+			fmt.Sprintf("data/0/%s/%s/patch/time", misc.Mac(), elinkmd.GatewayHeartbeat),
 			out, 2, false)
 	}
 	Client = mqtt.NewClient(opts)
@@ -77,6 +76,7 @@ func HeartBeatStatus() {
 		return
 	}
 
+	// 心跳包推送
 	func() {
 		out, err := jsoniter.Marshal(elinkmd.GatewayHeatbeats(true))
 		if err != nil {
@@ -84,9 +84,10 @@ func HeartBeatStatus() {
 			return
 		}
 		elink.WriteSpecialData(Client, ctrl.ChannelData,
-			elinkres.GatewayHeartbeat, elink.MethodPatch, elink.MessageTypeTime, out)
+			elinkmd.GatewayHeartbeat, elink.MethodPatch, elink.MessageTypeTime, out)
 	}()
 
+	// 系统监控信息推送
 	func() {
 		out, err := jsoniter.Marshal(elinkmd.GatewayMonitors())
 		if err != nil {
@@ -94,9 +95,8 @@ func HeartBeatStatus() {
 			return
 		}
 		elink.WriteSpecialData(Client, ctrl.ChannelData,
-			elinkres.GatewayMonitor, elink.MethodPatch, elink.MessageTypeTime, out)
+			elinkmd.SystemMonitor, elink.MethodPatch, elink.MessageTypeTime, out)
 	}()
-
 }
 
 // ctrl data通道推送数据

@@ -9,7 +9,6 @@ import (
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
-	"github.com/thinkgos/gogate/protocol/elinkres"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/protocol/limp"
@@ -87,7 +86,7 @@ func (this *ZbnpiApp) ProInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []l
 	}
 
 	return mq.WriteCtrlData(
-		elink.FormatResouce(elinkres.DevicePropertys, zbdnode.ProductId),
+		elink.FormatResouce(elinkmd.DevicePropertys, zbdnode.ProductId),
 		elink.MethodPatch, elink.MessageTypeAnnce, out)
 }
 
