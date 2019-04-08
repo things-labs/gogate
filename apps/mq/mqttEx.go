@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	//mqtt_broker_address  = "tcp://mqtt.lchtime.cn:1883" // 无ssl
-	mqtt_broker_address  = "ssl://115.lchtime.com:8883" // 支持ssl
+	mqtt_broker_address = "tcp://mqtt.lchtime.cn:1883" // 无ssl
+	//mqtt_broker_address  = "ssl://115.lchtime.com:8883" // 支持ssl
 	mqtt_broker_username = "1"
 	mqtt_broker_password = "52399399"
 )
@@ -38,11 +38,11 @@ func init() {
 	opts.AddBroker(mqtt_broker_address).SetClientID(misc.Mac())              // broker and clientID
 	opts.SetUsername(mqtt_broker_username).SetPassword(mqtt_broker_password) // user name and password
 	opts.SetCleanSession(false).SetAutoReconnect(true)
-	tlscfg, err := NewTLSConfig()
-	if err != nil {
-		panic(err)
-	}
-	opts.SetTLSConfig(tlscfg)
+	//	tlscfg, err := NewTLSConfig()
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//	opts.SetTLSConfig(tlscfg)
 
 	opts.SetOnConnectHandler(func(cli mqtt.Client) {
 		logs.Info("mqtt client connect success")

@@ -9,13 +9,13 @@ const (
 
 // 所有的产品id列表, 必需注册到DeviceProductInfos, zigbee的产品需要另外注册到zigbee的设备产品里
 const (
+	PID_DZMS01       = 20000 + iota // LC_DZMS01型号温湿度传感器
+	PID_DZSW01                      // = PID_DZMS01 + iota // LC_DZSW01型号一位智能开关
+	PID_DZSW02                      // = PID_DZMS01 + iota // LC_DZSW02型号二位智能开关
+	PID_DZSW03                      // = PID_DZMS01 + iota // LC_DZSW03型号三位智能开关
+	PID_RESERVE      = 0
 	PID_ZIGBEE_TEST  = 80000
 	PID_GENERAL_TEST = 80001
-	PID_RESERVE      = 0
-	PID_DZMS01       = 20000             // LC_DZMS01型号温湿度传感器
-	PID_DZSW01       = PID_DZMS01 + iota // LC_DZSW01型号一位智能开关
-	PID_DZSW02       = PID_DZMS01 + iota // LC_DZSW02型号二位智能开关
-	PID_DZSW03       = PID_DZMS01 + iota // LC_DZSW03型号三位智能开关
 )
 
 type ProductInfo struct {

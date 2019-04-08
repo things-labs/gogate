@@ -2,6 +2,7 @@ package npis
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/thinkgos/gogate/apps/mq"
 	"github.com/thinkgos/gogate/controllers/elinkpsh"
@@ -38,7 +39,12 @@ func (this *ZbnpiApp) ProInReadRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rdRspSt
 			if !ok || srcAddr != itm.nwkaddr {
 				return errors.New("no this address")
 			}
-			models.UpdateZbDeviceAndNode(itm.sn, srcAddr, 1, gba.ProductIdentifier)
+			logs.Debug("New device-productID: %d,sn: %s, srcAddress: %d",
+				gba.ProductIdentifier, itm.sn, srcAddr)
+			err := models.UpdateZbDeviceAndNode(itm.sn, srcAddr, 1, gba.ProductIdentifier)
+			if err != nil {
+				return err
+			}
 			if IsNetworkSteering() {
 				elinkpsh.DeviceAnnce(gba.ProductIdentifier, itm.sn, true)
 			}
@@ -46,7 +52,7 @@ func (this *ZbnpiApp) ProInReadRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rdRspSt
 		}
 		ewait.Done(id, gba)
 	default:
-		return nil
+		return errors.New(fmt.Sprintf("trunk not implementation: %d", hdr.TrunkID))
 	}
 
 	return nil
