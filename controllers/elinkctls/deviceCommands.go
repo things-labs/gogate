@@ -12,7 +12,6 @@ import (
 )
 
 type DevCmdPara struct {
-	NodeNo  int                    `json:"nodeNo"`
 	Command string                 `json:"command"`
 	CmdPara map[string]interface{} `json:"cmdPara"`
 }
@@ -21,6 +20,7 @@ type DevCmdPara struct {
 type DevCmdReqPy struct {
 	ProductID int        `json:"productID"`
 	Sn        string     `json:"sn"`
+	NodeNo    int        `json:"nodeNo"`
 	Params    DevCmdPara `json:"params"`
 }
 
@@ -59,8 +59,12 @@ func (this *DevCommandController) Post() {
 }
 
 func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
+	var cmdID byte
+
 	code := elink.CodeSuccess
-	defer func() { this.ErrorResponse(code) }()
+	defer func() {
+		this.ErrorResponse(code)
+	}()
 
 	req := &DevCmdRequest{}
 	if err := jsoniter.Unmarshal(this.Input.Payload, req); err != nil {
@@ -68,7 +72,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 		return
 	}
 	rpl := req.Payload
-	if rpl.Params.NodeNo == ltl.NodeNumReserved {
+	if rpl.NodeNo == ltl.NodeNumReserved {
 		dev, err := models.LookupZbDeviceByIeeeAddr(rpl.Sn)
 		if err != nil {
 			code = elink.CodeErrDeviceNotExist
@@ -96,25 +100,34 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 		return
 	}
 
-	//	dinfo, err := devmodels.LookupZbDeviceNodeByIN(bpl.Sn, byte(bpl.Params.NodeNo))
-	//	if err != nil {
-	//		this.ErrorResponse()
-	//	}
+	dinfo, err := models.LookupZbDeviceNodeByIN(rpl.Sn, byte(rpl.NodeNo))
+	if err != nil {
+		code = elink.CodeErrDeviceNotExist
+		return
+	}
 
-	//	switch pid {
-	//	case devmodels.PID_DZSW01:
-	//		cmd := bpl.Params.Command
-	//		if cmd == "off" {
-	//			cmdID = 0
-	//		} else if cmd == "on" {
-	//			cmdID = 1
-	//		} else if cmd == "toggle" {
-	//			cmdID = 2
-	//		} else {
-	//			this.ErrorResponse(304)
-	//			return
-	//		}
-	//		logs.Debug(cmdID)
-	//		//npis.ZbApps.SendCommand()
-	//	}
+	switch pid {
+	case models.PID_DZSW01, models.PID_DZSW02, models.PID_DZSW03:
+		cmd := rpl.Params.Command
+		if cmd == "off" {
+			cmdID = 0
+		} else if cmd == "on" {
+			cmdID = 1
+		} else if cmd == "toggle" {
+			cmdID = 2
+		} else {
+			code = elink.CodeErrDeviceCommandNotSupport
+			return
+		}
+		err := npis.ZbApps.SendSpecificCmd(dinfo.GetNwkAddr(), ltl.TrunkID_GeneralOnoff,
+			byte(rpl.NodeNo), ltl.RESPONSETYPE_NO, cmdID, nil, nil)
+		if err != nil {
+			code = elink.CodeErrDeviceCommandOperationFailed
+			return
+		}
+		this.WriteResponse(elink.CodeSuccess, nil)
+	default:
+		code = elink.CodeErrProudctFeatureUndefined
+		return
+	}
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/thinkgos/gomo/protocol/limp"
 
 	"github.com/astaxie/beego/logs"
+	"github.com/json-iterator/go"
 )
 
 type deviceAnnce struct {
@@ -33,7 +34,7 @@ func (this *ZbnpiApp) ProInReadRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rdRspSt
 	}
 	switch hdr.TrunkID {
 	case ltl.TrunkID_GeneralBasic:
-		gba := limp.BasicAttribute(int(hdr.NodeNo), rdRspStatus)
+		gba := limp.BasicAttribute(rdRspStatus)
 		if islocal {
 			itm, ok := val.(deviceAnnce)
 			if !ok || srcAddr != itm.nwkaddr {
@@ -70,8 +71,15 @@ func (this *ZbnpiApp) ProInReadRpCfgRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rc
 	return nil
 }
 
+type ProReportPayload struct {
+	ProductID int         `json:"productID"`
+	Sn        string      `json:"sn"`
+	NodeNo    int         `json:"nodeNo,omitempty"`
+	Data      interface{} `json:"data"`
+}
+
 func (this *ZbnpiApp) ProInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []ltl.ReportRec) error {
-	var out []byte
+	var v ProReportPayload
 
 	zbdnode, err := models.LookupZbDeviceNodeByNN(srcAddr, hdr.NodeNo)
 	if err != nil {
@@ -79,17 +87,34 @@ func (this *ZbnpiApp) ProInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []l
 	}
 
 	switch hdr.TrunkID {
+	case ltl.TrunkID_GeneralOnoff:
+		v = ProReportPayload{
+			ProductID: zbdnode.ProductId,
+			Sn:        zbdnode.Sn,
+			NodeNo:    int(hdr.NodeNo),
+			Data:      limp.OnoffAttribute(rRec),
+		}
 	case ltl.TrunkID_MsTemperatureMeasurement, ltl.TrunkID_MsRelativeHumidity:
-		out, err = limp.MsMeasureAttrReport(zbdnode.Sn, zbdnode.ProductId, int(hdr.NodeNo),
-			hdr.TrunkID, rRec)
+		ms, err := limp.MsMeasureAttrReport(hdr.TrunkID, rRec)
 		if err != nil {
 			return err
 		}
+
+		v = ProReportPayload{
+			ProductID: zbdnode.ProductId,
+			Sn:        zbdnode.Sn,
+			NodeNo:    int(hdr.NodeNo),
+			Data:      ms,
+		}
 	default:
 		logs.Error("no fix trunkid")
-		return nil
+		return errors.New("no fix trunkid")
 	}
 
+	out, err := jsoniter.Marshal(v)
+	if err != nil {
+		return err
+	}
 	return mq.WriteCtrlData(
 		elink.FormatResouce(elinkmd.DevicePropertys, zbdnode.ProductId),
 		elink.MethodPatch, elink.MessageTypeAnnce, out)

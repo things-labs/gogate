@@ -16,6 +16,7 @@ import (
 type DevPropReqPy struct {
 	ProductID int                    `json:"productID"`
 	Sn        string                 `json:"sn"`
+	NodeNo    int                    `json:"nodeNo,omitempty"`
 	Params    map[string]interface{} `json:"params,omitempty"`
 }
 
@@ -27,6 +28,7 @@ type DevPropRequest struct {
 type DevPropRspPy struct {
 	ProductID int         `json:"productID"`
 	Sn        string      `json:"sn"`
+	NodeNo    int         `json:"nodeNo,omitempty"`
 	Data      interface{} `json:"data"`
 }
 
@@ -45,7 +47,7 @@ func (this *DevPropertysController) Get() {
 		code = elink.CodeErrCommonResourceNotSupport
 		return
 	}
-
+	// 确定产品Id是否注册过
 	pInfo, err := models.LookupProduct(pid)
 	if err != nil {
 		code = elink.CodeErrProudctUndefined
@@ -68,7 +70,7 @@ func (this *DevPropertysController) zbDevicePropertysGet(pid int) int {
 
 	rpl := req.Payload
 	jp := easyjms.NewFromMap(rpl.Params)
-	if jp.Get("nodeNo").MustInt() == ltl.NodeNumReserved {
+	if rpl.NodeNo == ltl.NodeNumReserved {
 		switch jp.Get("types").MustString() {
 		case "basic":
 			dinfo, err := models.LookupZbDeviceByIeeeAddr(rpl.Sn)
@@ -87,7 +89,7 @@ func (this *DevPropertysController) zbDevicePropertysGet(pid int) int {
 			if !ok {
 				return elink.CodeErrDeviceCommandOperationFailed
 			}
-			out, err := jsoniter.Marshal(DevPropRspPy{rpl.ProductID, rpl.Sn, item})
+			out, err := jsoniter.Marshal(DevPropRspPy{rpl.ProductID, rpl.Sn, rpl.NodeNo, item})
 			if err != nil {
 				return elink.CodeErrSysException
 			}
