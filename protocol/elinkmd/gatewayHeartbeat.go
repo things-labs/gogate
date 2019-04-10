@@ -3,8 +3,8 @@ package elinkmd
 import (
 	"time"
 
+	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gomo/misc"
 	"github.com/thinkgos/utils"
 )
 

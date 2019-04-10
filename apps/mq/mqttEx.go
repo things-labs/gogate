@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/elink"
-	"github.com/thinkgos/gomo/misc"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/eclipse/paho.mqtt.golang"
@@ -24,16 +24,13 @@ const (
 	mqtt_broker_password = "52399399"
 )
 
-const (
-	gatewayProductKey = "lc_gzs100"
-)
-
 var Client mqtt.Client
 var heartOnce sync.Once
 
 func init() {
-	elink.RegisterTopicInfo(misc.Mac(), gatewayProductKey) // 注册网关产品Key
-
+	elink.RegisterTopicInfo(misc.Mac(), elinkmd.ProductKey) // 注册网关产品Key
+}
+func MqttInit() {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(mqtt_broker_address).SetClientID(misc.Mac())              // broker and clientID
 	opts.SetUsername(mqtt_broker_username).SetPassword(mqtt_broker_password) // user name and password

@@ -1,6 +1,10 @@
 package elinkmd
 
 const (
+	ProductKey = "lc_gzs100"
+)
+
+const (
 	SystemUser          = "system.user"
 	SystemMonitor       = "system.monitor"
 	GatewayHeartbeat    = "gateway.heartbeat"

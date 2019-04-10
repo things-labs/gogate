@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gomo/ltl"
-	"github.com/thinkgos/gomo/misc"
 	"github.com/thinkgos/gomo/npi"
 
 	"github.com/astaxie/beego/logs"
@@ -24,20 +24,21 @@ type ZbnpiApp struct {
 var ZbApps *ZbnpiApp
 
 func ZbAppInit() error {
-	var err error
 	var m *npi.Monitor
 
-	bcfg := misc.APPCfg
+	bcfg := misc.UartCfg
 	usartcfg := &serial.Config{}
 
-	if usartcfg.Name, err = bcfg.GetValue("COM0", "Name"); err != nil {
+	secCom0, err := bcfg.GetSection("COM0")
+	if err != nil {
 		return err
 	}
 
-	usartcfg.Baud = bcfg.MustInt("COM0", "Name", 115200)
-	usartcfg.Size = byte(bcfg.MustInt("COM0", "DataBit", 8))
-	usartcfg.Parity = serial.Parity(bcfg.MustInt("COM0", "Parity", 'N'))
-	usartcfg.StopBits = serial.StopBits(bcfg.MustInt("COM0", "StopBit", 1))
+	usartcfg.Name = secCom0.Key("Name").MustString("COM0")
+	usartcfg.Baud = secCom0.Key("BaudRate").MustInt(115200)
+	usartcfg.Size = byte(secCom0.Key("DataBit").MustUint(8))
+	usartcfg.Parity = serial.Parity(secCom0.Key("Parity").MustInt('N'))
+	usartcfg.StopBits = serial.StopBits(secCom0.Key("StopBit").MustInt(1))
 
 	logs.Debug("usarcfg: %#v", usartcfg)
 
