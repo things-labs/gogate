@@ -19,7 +19,7 @@ func main() {
 		panic("main: npi app init failed")
 	}
 
-	go discover.Run("192.168.199.240")
+	go discover.Run()
 
 	beego.Run()
 }

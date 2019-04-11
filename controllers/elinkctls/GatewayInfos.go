@@ -1,6 +1,8 @@
 package elinkctls
 
 import (
+	"net"
+
 	jsoniter "github.com/json-iterator/go"
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
@@ -24,7 +26,7 @@ func (this *GatewayInfos) Get() {
 		misc.BuildDate(),
 		misc.Version(),
 		utils.RunningTime(),
-		"",
+		GetOutboundIP(),
 	}
 
 	out, err := jsoniter.Marshal(rsp)
@@ -34,4 +36,13 @@ func (this *GatewayInfos) Get() {
 	}
 
 	this.WriteResponse(elink.CodeSuccess, out)
+}
+
+// Get preferred outbound ip of this machine
+func GetOutboundIP() string {
+	conn, _ := net.Dial("udp", "8.8.8.8:80")
+	defer conn.Close()
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP.String()
 }
