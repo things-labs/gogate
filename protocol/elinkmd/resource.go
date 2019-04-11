@@ -9,6 +9,7 @@ const (
 	SystemMonitor       = "system.monitor"
 	GatewayHeartbeat    = "gateway.heartbeat"
 	GatewayConfigs      = "gateway.configs"
+	GatewayInfos        = "gateway.infos"
 	GatewayUpgrade      = "gateway.upgrade"
 	Devices             = "devices"
 	DeviceConfigs       = "device.configs"

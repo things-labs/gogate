@@ -26,7 +26,7 @@ type GwUpReqPy struct {
 
 type GwUpRequest struct {
 	ctrl.BaseRequest
-	Payload GwUpReqPy `json:"payload,omitempty"`
+	Payload GwUpReqPy `json:"payload"`
 }
 
 type GatewayUpgrade struct {
@@ -35,40 +35,42 @@ type GatewayUpgrade struct {
 
 var isUpgradeInProcess bool = false
 
+// 更新程序
 func (this *GatewayUpgrade) Post() {
-	if isUpgradeInProcess {
-		this.ErrorResponse(elink.CodeErrSysInProcess)
-		return
-	}
-	isUpgradeInProcess = true
 	code := elink.CodeSuccess
 	defer func() {
 		isUpgradeInProcess = false
 		this.ErrorResponse(code)
 	}()
 
+	if isUpgradeInProcess {
+		code = elink.CodeErrSysInProcess
+		return
+	}
+	isUpgradeInProcess = true
 	req := &GwUpRequest{}
 	if err := jsoniter.Unmarshal(this.Input.Payload, req); err != nil {
 		code = elink.CodeErrSysInvalidParameter
 		return
 	}
 	rpl := req.Payload
+	// check request parameter valid
 	valid := validation.Validation{}
 	valid.Required(rpl.Url, "url")
 	//	valid.Required(rpl.Checksum, "checksum")
 	//	valid.Required(rpl.Signature, "signature")
 	//	valid.Required(rpl.PublicKey, "publicKey")
-
 	if valid.HasErrors() {
 		code = elink.CodeErrSysInvalidParameter
 		return
 	}
+
 	if err := doUpdate(&rpl); err != nil {
 		code = elink.CodeErrSysOperationFailed
 		return
 	}
 	this.WriteResponse(elink.CodeSuccess, nil)
-	time.Sleep(3) // give enough time to send the message
+	time.Sleep(3) // give enough time to send the message to cliet
 	bin, err := os.Executable()
 	if err != nil {
 		code = elink.CodeErrSysException
@@ -76,7 +78,8 @@ func (this *GatewayUpgrade) Post() {
 		return
 	}
 	_, file := filepath.Split(bin)
-	if err = syscall.Exec(bin, []string{file}, os.Environ()); err != nil {
+	err = syscall.Exec(bin, []string{file}, os.Environ())
+	if err != nil {
 		code = elink.CodeErrSysException
 		logs.Error("exec failed!%s", err.Error())
 		return

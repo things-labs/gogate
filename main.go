@@ -18,7 +18,6 @@ func main() {
 	if npis.ZbAppInit() != nil {
 		panic("main: npi app init failed")
 	}
-	//logs.Debug("here")
 
 	go discover.Run("192.168.199.240")
 

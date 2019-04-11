@@ -32,9 +32,12 @@ func init() {
 }
 func MqttInit() {
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(mqtt_broker_address).SetClientID(misc.Mac())              // broker and clientID
-	opts.SetUsername(mqtt_broker_username).SetPassword(mqtt_broker_password) // user name and password
-	opts.SetCleanSession(false).SetAutoReconnect(true)
+	opts.AddBroker(mqtt_broker_address)
+	opts.SetClientID(misc.Mac())
+	opts.SetUsername(mqtt_broker_username)
+	opts.SetPassword(mqtt_broker_password)
+	opts.SetCleanSession(false)
+	opts.SetAutoReconnect(true)
 	//	tlscfg, err := NewTLSConfig()
 	//	if err != nil {
 	//		panic(err)
@@ -42,7 +45,7 @@ func MqttInit() {
 	//	opts.SetTLSConfig(tlscfg)
 
 	opts.SetOnConnectHandler(func(cli mqtt.Client) {
-		logs.Info("mqtt client connect success")
+		logs.Info("mqtt client connection success")
 		chList := elink.ChannelSelectorList()
 		for _, ch := range chList {
 			s := fmt.Sprintf("%s/%s/%s/+/+/+/#", ch, elink.TpInfos.ProductKey, misc.Mac())
@@ -63,7 +66,7 @@ func MqttInit() {
 			out, 2, false)
 	}
 	Client = mqtt.NewClient(opts)
-	started()
+	Connect()
 }
 func NewTLSConfig() (*tls.Config, error) {
 	// Import trusted certificates from CAfile.pem.
@@ -105,11 +108,11 @@ func NewTLSConfig() (*tls.Config, error) {
 }
 
 // 启动连接mqtt
-func started() {
+func Connect() {
 	logs.Info("mqtt client connecting...")
 	if token := Client.Connect(); token.Wait() && token.Error() != nil {
-		logs.Error("mqtt client connect failed, ", token.Error())
-		time.AfterFunc(time.Second*30, started)
+		logs.Warn("mqtt client connect failed, ", token.Error())
+		time.AfterFunc(time.Second*30, Connect)
 	}
 }
 

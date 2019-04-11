@@ -35,7 +35,7 @@ func init() {
 }
 
 func LogsInit() {
-	logs.Reset() // 复位日志
+	logs.Reset() // 复位日志输出流
 	sec, err := APPCfg.GetSection("logs")
 	if err != nil {
 		level := 7
@@ -63,8 +63,9 @@ func LogsInit() {
 	}
 	// Enable output filename and line
 	logs.EnableFuncCallDepth(sec.Key("isEFCD").MustBool(false))
+	// Enalbe async output log
 	if sec.Key("isAsync").MustBool(false) {
-		logs.Async() // Enalbe async output log
+		logs.Async()
 	}
 	logs.Debug("use adapter: %s,level: %d", adapter, tmpll)
 	return
@@ -89,6 +90,7 @@ func watch() {
 			if !ok {
 				return
 			}
+			logs.Debug("op:", event)
 			if (event.Op & fsnotify.Write) == fsnotify.Write {
 				err = APPCfg.Reload()
 				if err != nil {

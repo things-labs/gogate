@@ -8,10 +8,9 @@ import (
 
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
-	"github.com/thinkgos/utils"
 
 	"github.com/astaxie/beego/logs"
-	"github.com/json-iterator/go"
+	jsoniter "github.com/json-iterator/go"
 )
 
 const (
@@ -28,7 +27,6 @@ func Run(params ...string) {
 
 	listenAddr := "localhost"
 	listenPort := int(0)
-
 	if len(params) > 0 && params[0] != "" {
 		strs := strings.Split(params[0], ":")
 		if len(strs) > 0 && strs[0] != "" {
@@ -98,7 +96,7 @@ func handleClient(conn *net.UDPConn) {
 		Topic:      req.Topic,
 		ProductKey: req.ProductKey,
 		Mac:        misc.Mac(),
-		BuildDate:  utils.BuildDateTime(),
+		BuildDate:  misc.BuildDate(),
 		Version:    misc.Version(),
 	}
 

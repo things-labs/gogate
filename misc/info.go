@@ -18,9 +18,10 @@ const (
 )
 
 type gatewayInfo struct {
-	mac     string // "0C5415B171AA"
-	MAC     string // "0C:54:15:B1:71:AA"
-	version string // v1.2.3 Beta
+	mac       string // "0C5415B171AA"
+	MAC       string // "0C:54:15:B1:71:AA"
+	version   string // v1.2.3 Beta
+	buildDate string // 2018-12-09 15:26:26
 }
 
 var gatewayInfos *gatewayInfo
@@ -32,22 +33,33 @@ func init() {
 	}
 
 	gatewayInfos = &gatewayInfo{
-		mac:     strings.ToUpper(hex.EncodeToString(inf.HardwareAddr)),
-		MAC:     strings.ToUpper(inf.HardwareAddr.String()),
-		version: utils.Version(major, minor, fixed, isBeta),
+		mac:       strings.ToUpper(hex.EncodeToString(inf.HardwareAddr)),
+		MAC:       strings.ToUpper(inf.HardwareAddr.String()),
+		version:   utils.Version(major, minor, fixed, isBeta),
+		buildDate: utils.BuildDateTime(),
 	}
 }
 
+// "0C5415B171AA"
 func Mac() string {
 	return gatewayInfos.mac
 }
 
+// "0C:54:15:B1:71:AA"
 func MAC() string {
 	return gatewayInfos.MAC
 }
+
+// v1.2.3 Beta
 func Version() string {
 	return gatewayInfos.version
 }
+
+// format 2018-12-09 15:26:26
+func BuildDate() string {
+	return gatewayInfos.buildDate
+}
+
 func NetInterface() (*net.Interface, error) {
 	var intf *net.Interface
 	var err error
