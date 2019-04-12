@@ -9,8 +9,8 @@ import (
 )
 
 type GwMonitor struct {
-	AppMemInfos    *runtime.MemStats
 	SystemMemInfos *syscall.Sysinfo_t
+	AppMemInfos    *runtime.MemStats
 }
 
 func GatewayMonitors() *GwMonitor {
@@ -22,5 +22,5 @@ func GatewayMonitors() *GwMonitor {
 	if err != nil {
 		fmt.Println("syscall sysinfo failed")
 	}
-	return &GwMonitor{memStats, sysInfo}
+	return &GwMonitor{sysInfo, memStats}
 }
