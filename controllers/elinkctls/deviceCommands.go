@@ -79,7 +79,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 			return
 		}
 		switch rpl.Params.Command {
-		case "reset":
+		case "reboot":
 			err = npis.ZbApps.SendSpecificCmdBasic(dev.NwkAddr,
 				ltlspec.COMMAND_BASIC_REBOOT_DEVICE)
 		case "factoryReset":
@@ -120,7 +120,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 			return
 		}
 		err := npis.ZbApps.SendSpecificCmd(dinfo.GetNwkAddr(), ltl.TrunkID_GeneralOnoff,
-			byte(rpl.NodeNo), ltl.RESPONSETYPE_NO, cmdID, nil, nil)
+			byte(rpl.NodeNo), ltl.LTL_FRAMECTL_CLIENT_SERVER_DIR, ltl.RESPONSETYPE_NO, cmdID, nil, nil)
 		if err != nil {
 			code = elink.CodeErrDeviceCommandOperationFailed
 			return
