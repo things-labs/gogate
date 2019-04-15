@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	DefaultDiscoverAddr = "0.0.0.0"
 	DefaultDiscoverPort = 8091
 )
 
@@ -25,7 +26,7 @@ const (
 func Run(params ...string) {
 	var addrstr string
 
-	listenAddr := "localhost"
+	listenAddr := DefaultDiscoverAddr
 	listenPort := int(0)
 	if len(params) > 0 && params[0] != "" {
 		strs := strings.Split(params[0], ":")
@@ -46,7 +47,6 @@ func Run(params ...string) {
 	if err != nil {
 		panic(err)
 	}
-
 	conn, err := net.ListenUDP("udp", addr)
 	if err != nil {
 		panic(err)
@@ -92,7 +92,7 @@ func handleClient(conn *net.UDPConn) {
 		return
 	}
 
-	rsp := GatewayDiscoverRsp{
+	rsp := &GatewayDiscoverRsp{
 		Topic:      req.Topic,
 		ProductKey: req.ProductKey,
 		Mac:        misc.Mac(),
