@@ -48,6 +48,7 @@ func (this *GatewayUpgrade) Post() {
 		return
 	}
 	isUpgradeInProcess = true
+
 	req := &GwUpRequest{}
 	if err := jsoniter.Unmarshal(this.Input.Payload, req); err != nil {
 		code = elink.CodeErrSysInvalidParameter

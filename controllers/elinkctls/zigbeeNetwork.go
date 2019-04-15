@@ -30,17 +30,28 @@ func (this *ZbNetworkController) Post() {
 		return
 	}
 	npis.SetNetworkSteering(true)
-	this.WriteResponse(elink.CodeSuccess, nil)
 	logs.Debug("elinkctls: zigbee network steering open")
+
+	err = this.WriteResponse(elink.CodeSuccess, nil)
+	if err != nil {
+		logs.Error(err)
+	}
+
 }
 
 // 关闭zigbee组网
 func (this *ZbNetworkController) Delete() {
-	if ok, err := npis.ZbApps.Zb_PermitJoingReq(0xfffc, 0); err != nil && !ok {
+	ok, err := npis.ZbApps.Zb_PermitJoingReq(0xfffc, 0)
+	if err != nil && !ok {
 		this.ErrorResponse(elink.CodeErrSysException)
 		return
 	}
 	npis.SetNetworkSteering(false)
-	this.WriteResponse(elink.CodeSuccess, nil)
 	logs.Debug("elinkctls: zigbee network steering close")
+
+	err = this.WriteResponse(elink.CodeSuccess, nil)
+	if err != nil {
+		logs.Error(err)
+	}
+
 }

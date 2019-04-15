@@ -11,8 +11,8 @@ import (
 const defaultTime = 5 * time.Second
 
 type EvWait struct {
-	value chan interface{}
-	once  int32
+	value chan interface{} // 传值通道
+	once  int32            // 通道只关一次
 	tm    time.Duration
 }
 type evManage struct {
@@ -23,7 +23,6 @@ type evManage struct {
 var em *evManage
 
 func init() {
-
 	sf, _ := snowflake.NewNode(2)
 	c := cache.New(5*time.Second, 30*time.Second)
 	c.OnEvicted(cleanUp)

@@ -5,6 +5,7 @@ import (
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gomo/elink"
 
+	"github.com/astaxie/beego/logs"
 	"github.com/json-iterator/go"
 )
 
@@ -26,12 +27,15 @@ type SysUserController struct {
 }
 
 func (this *SysUserController) Get() {
-	out, err := jsoniter.Marshal(SysMultiUserPy{Uid: models.GetUsers()})
+	out, err := jsoniter.Marshal(&SysMultiUserPy{Uid: models.GetUsers()})
 	if err != nil {
 		this.ErrorResponse(elink.CodeErrSysOperationFailed)
 		return
 	}
-	this.WriteResponse(elink.CodeSuccess, out)
+	err = this.WriteResponse(elink.CodeSuccess, out)
+	if err != nil {
+		logs.Error(err)
+	}
 }
 
 func (this *SysUserController) Post() {
@@ -45,6 +49,7 @@ func (this *SysUserController) Delete() {
 func (this *SysUserController) userDeal(isDel bool) {
 	var uid []int64
 	var isArray bool
+	var err error
 
 	code := elink.CodeSuccess
 	defer func() {
@@ -58,7 +63,8 @@ func (this *SysUserController) userDeal(isDel bool) {
 	case jsoniter.ArrayValue:
 		isArray = true
 		req := &SysMultiUserRequest{}
-		if err := jsoniter.Unmarshal(this.Input.Payload, req); err != nil {
+		err = jsoniter.Unmarshal(this.Input.Payload, req)
+		if err != nil {
 			code = elink.CodeErrSysInvalidParameter
 			return
 		}
@@ -68,38 +74,38 @@ func (this *SysUserController) userDeal(isDel bool) {
 		return
 	}
 
-	uidSuc := []int64{}
+	sucUid := make([]int64, 0, len(uid))
 	for _, v := range uid {
 		if isDel {
-			if err := models.DeleteUser(v); err != nil {
-				continue
-			}
+			err = models.DeleteUser(v)
 		} else {
-			if err := models.AddUser(v); err != nil {
-				continue
-			}
+			err = models.AddUser(v)
 		}
-		uidSuc = append(uidSuc, v)
+		if err != nil {
+			continue
+		}
+		sucUid = append(sucUid, v)
 	}
-	if len(uidSuc) == 0 {
+	if len(sucUid) == 0 {
 		code = elink.CodeErrSysOperationFailed
 		return
 	}
-	var out []byte
-	var err error
+
+	var rspPy interface{}
+
 	if isArray {
-		out, err = jsoniter.Marshal(SysMultiUserPy{Uid: uidSuc})
-		if err != nil {
-			code = elink.CodeErrSysOperationFailed
-			return
-		}
+		rspPy = &SysMultiUserPy{Uid: sucUid}
 	} else {
-		out, err = jsoniter.Marshal(SysUserPy{Uid: uidSuc[0]})
-		if err != nil {
-			code = elink.CodeErrSysOperationFailed
-			return
-		}
+		rspPy = &SysUserPy{Uid: sucUid[0]}
+	}
+	out, err := jsoniter.Marshal(rspPy)
+	if err != nil {
+		code = elink.CodeErrSysOperationFailed
+		return
 	}
 
-	this.WriteResponse(elink.CodeSuccess, out)
+	err = this.WriteResponse(elink.CodeSuccess, out)
+	if err != nil {
+		logs.Error(err)
+	}
 }
