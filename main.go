@@ -15,11 +15,9 @@ import (
 func main() {
 	misc.LogsInit()
 	mq.MqttInit()
-	if npis.ZbAppInit() != nil {
+	if npis.OpenZbApp() != nil {
 		panic("main: npi app init failed")
 	}
-
 	go discover.Run()
-
 	beego.Run()
 }

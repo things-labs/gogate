@@ -43,10 +43,10 @@ func NewSerialConfig() (*serial.Config, error) {
 	return usartcfg, nil
 }
 
-func ZbAppInit() error {
+func OpenZbApp() error {
 	container := dig.New()
 	container.Provide(NewSerialConfig)
-	container.Provide(npi.NewNpiMonitor)
+	container.Provide(npi.Open)
 	container.Provide(NewMiddleMonitor)
 	container.Provide(func(mid *MiddleMonitor) *ZbnpiApp {
 		return &ZbnpiApp{
@@ -55,14 +55,15 @@ func ZbAppInit() error {
 		}
 	})
 
-	err := container.Invoke(func(app *ZbnpiApp) {
-		go app.ServerInApdu(app)
-		app.MiddleMonitor.Start()
+	return container.Invoke(func(app *ZbnpiApp) {
+		go app.ServerInApdu(app.Context(), app)
 		app.NetworkFormation()
 		ZbApps = app
 	})
+}
 
-	return err
+func CloseZbApp() {
+	ZbApps.Close()
 }
 
 // 建立zigbee的网络

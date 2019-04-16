@@ -35,10 +35,9 @@ func NewMiddleMonitor(m *npi.Monitor) *MiddleMonitor {
 
 func (this *MiddleMonitor) writeIncommingMsg(msg *ltl.IncomingMsgPkt) {
 	select {
-	case <-this.CloseChan():
+	case <-this.Context().Done():
 	case this.IncommingMsgPkt <- msg:
 	}
-
 }
 
 func (this *MiddleMonitor) WriteMsg(DstAddr uint16, Data []byte) error {
