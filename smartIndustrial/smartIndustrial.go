@@ -9,7 +9,7 @@ import (
 	"github.com/astaxie/beego"
 
 	_ "github.com/thinkgos/gogate/models"
-	_ "github.com/thinkgos/gogate/routers"
+	_ "github.com/thinkgos/gogate/smartIndustrial/routers"
 )
 
 func main() {

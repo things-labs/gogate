@@ -1,3 +1,4 @@
-/views
-/data
-/static
+*/views
+*/data
+*/static
+*.exe*
