@@ -4,7 +4,7 @@ import (
 	"github.com/thinkgos/gogate/apps/mq"
 	"github.com/thinkgos/gogate/apps/npis"
 	"github.com/thinkgos/gogate/misc"
-	"github.com/thinkgos/gogate/misc/discover"
+	"github.com/thinkgos/gogate/plugin/discover"
 
 	"github.com/astaxie/beego"
 
@@ -14,7 +14,7 @@ import (
 
 func main() {
 	misc.LogsInit()
-	mq.MqttInit()
+	mq.MqInit()
 	if npis.OpenZbApp() != nil {
 		panic("main: npi app init failed")
 	}

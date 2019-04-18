@@ -158,7 +158,7 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) int {
 		return elink.CodeErrDeviceCommandOperationFailed
 	}
 
-	py := []byte{}
+	var py []byte
 	if isArray {
 		if py, err = jsoniter.Marshal(DevMultiSnPy{pid, snSuc}); err != nil {
 			return elink.CodeErrSysException

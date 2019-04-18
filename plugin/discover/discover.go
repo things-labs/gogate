@@ -1,3 +1,5 @@
+// UDP 本地发现插件,默认端口8091
+
 package discover
 
 import (
@@ -7,52 +9,58 @@ import (
 	"strings"
 
 	"github.com/thinkgos/gogate/misc"
-	"github.com/thinkgos/gogate/protocol/elinkmd"
+	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego/logs"
 	jsoniter "github.com/json-iterator/go"
 )
 
 const (
-	DefaultDiscoverAddr = "0.0.0.0"
 	DefaultDiscoverPort = 8091
 )
 
 // Run discover application.
 // discover.Run() default run on HttpPort
-// discover.Run("localhost")
+// discover.Run("localhost:8091")
 // discover.Run(":8091")
 // discover.Run("127.0.0.1:8091")
 func Run(params ...string) {
-	var addrstr string
+	var listenAddr string
+	var listenPort int
+	var err error
 
-	listenAddr := DefaultDiscoverAddr
-	listenPort := int(0)
 	if len(params) > 0 && params[0] != "" {
 		strs := strings.Split(params[0], ":")
 		if len(strs) > 0 && strs[0] != "" {
 			listenAddr = strs[0]
 		}
 		if len(strs) > 1 && strs[1] != "" {
-			listenPort, _ = strconv.Atoi(strs[1])
+			if listenPort, err = strconv.Atoi(strs[1]); err != nil {
+				logs.Critical("discover: ", err)
+				return
+			}
 		}
 	}
+
 	if listenPort != 0 {
-		addrstr = fmt.Sprintf("%s:%d", listenAddr, listenPort)
+		listenAddr = fmt.Sprintf("%s:%d", listenAddr, listenPort)
 	} else {
-		addrstr = fmt.Sprintf("%s:%d", listenAddr, DefaultDiscoverPort)
+		listenAddr = fmt.Sprintf("%s:%d", listenAddr, DefaultDiscoverPort)
 	}
 
-	addr, err := net.ResolveUDPAddr("udp", addrstr)
+	addr, err := net.ResolveUDPAddr("udp", listenAddr)
 	if err != nil {
-		panic(err)
+		logs.Critical("discover: ", err)
+		return
 	}
 	conn, err := net.ListenUDP("udp", addr)
 	if err != nil {
-		panic(err)
+		logs.Critical("discover: ", err)
+		return
 	}
 	defer conn.Close()
-	logs.Info("discover server Running on %s", addrstr)
+
+	logs.Debug("discover: server Running on %s", listenAddr)
 	for {
 		handleClient(conn)
 	}
@@ -87,7 +95,7 @@ func handleClient(conn *net.UDPConn) {
 		return
 	}
 
-	if req.ProductKey != elinkmd.ProductKey {
+	if req.ProductKey != elink.TpInfos.ProductKey {
 		logs.Error("productkey not match")
 		return
 	}

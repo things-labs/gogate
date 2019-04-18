@@ -27,10 +27,7 @@ const (
 var Client mqtt.Client
 var heartOnce sync.Once
 
-func init() {
-	elink.RegisterTopicInfo(misc.Mac(), elinkmd.ProductKey) // 注册网关产品Key
-}
-func MqttInit() {
+func MqInit(productKey, mac string) {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(mqtt_broker_address)
 	opts.SetClientID(misc.Mac())
@@ -48,7 +45,7 @@ func MqttInit() {
 		logs.Info("mqtt client connection success")
 		chList := elink.ChannelSelectorList()
 		for _, ch := range chList {
-			s := fmt.Sprintf("%s/%s/%s/+/+/+/#", ch, elink.TpInfos.ProductKey, misc.Mac())
+			s := fmt.Sprintf("%s/%s/%s/+/+/+/#", ch, productKey, mac)
 			cli.Subscribe(s, 2, elink.Server)
 		}
 		heartOnce.Do(func() { time.AfterFunc(time.Second, HeartBeatStatus) })
@@ -130,8 +127,11 @@ func HeartBeatStatus() {
 			logs.Error("GatewayHeatbeats:", err)
 			return
 		}
-		elink.WriteSpecialData(Client, ctrl.ChannelData,
+		err = elink.WriteSpecialData(Client, ctrl.ChannelData,
 			elinkmd.GatewayHeartbeat, elink.MethodPatch, elink.MessageTypeTime, out)
+		if err != nil {
+			logs.Error("GatewayHeatbeats:", err)
+		}
 	}()
 
 	// 系统监控信息推送
@@ -141,8 +141,11 @@ func HeartBeatStatus() {
 			logs.Error("GatewayMonitors:", err)
 			return
 		}
-		elink.WriteSpecialData(Client, ctrl.ChannelData,
+		err = elink.WriteSpecialData(Client, ctrl.ChannelData,
 			elinkmd.SystemMonitor, elink.MethodPatch, elink.MessageTypeTime, out)
+		if err != nil {
+			logs.Error("GatewayHeatbeats:", err)
+		}
 	}()
 }
 
