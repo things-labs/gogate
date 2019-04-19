@@ -8,8 +8,6 @@ import (
 	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/elink"
 
-	"github.com/astaxie/beego"
-
 	_ "github.com/thinkgos/gogate/models"
 	_ "github.com/thinkgos/gogate/smartHome/routers"
 )
@@ -21,6 +19,6 @@ func main() {
 	if npis.OpenZbApp() != nil {
 		panic("main: npi app init failed")
 	}
-	go discover.Run()
-	beego.Run()
+
+	discover.Run()
 }

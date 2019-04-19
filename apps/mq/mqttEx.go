@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	mqtt_broker_address = "tcp://mqtt.lchtime.cn:1883" // 无ssl
+	mqtt_broker_address = "tcp://155.lchtime.com:1883" // 无ssl
 	//mqtt_broker_address  = "ssl://115.lchtime.com:8883" // 支持ssl
 	mqtt_broker_username = "1"
 	mqtt_broker_password = "52399399"
