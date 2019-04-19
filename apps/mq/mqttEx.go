@@ -63,7 +63,7 @@ func MqInit(productKey, mac string) {
 			out, 2, false)
 	}
 	Client = mqtt.NewClient(opts)
-	Connect()
+	go Connect()
 }
 func NewTLSConfig() (*tls.Config, error) {
 	// Import trusted certificates from CAfile.pem.
@@ -107,7 +107,7 @@ func NewTLSConfig() (*tls.Config, error) {
 // 启动连接mqtt
 func Connect() {
 	logs.Info("mqtt client connecting...")
-	if token := Client.Connect(); token.Wait() && token.Error() != nil {
+	if token := Client.Connect(); !token.WaitTimeout(time.Second*10) || (token.Error() != nil) {
 		logs.Warn("mqtt client connect failed, ", token.Error())
 		time.AfterFunc(time.Second*30, Connect)
 	}
