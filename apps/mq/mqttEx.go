@@ -33,7 +33,7 @@ func MqInit(productKey, mac string) {
 	opts.SetClientID(misc.Mac())
 	opts.SetUsername(mqtt_broker_username)
 	opts.SetPassword(mqtt_broker_password)
-	opts.SetCleanSession(false)
+	opts.SetCleanSession(true)
 	opts.SetAutoReconnect(true)
 	//	tlscfg, err := NewTLSConfig()
 	//	if err != nil {

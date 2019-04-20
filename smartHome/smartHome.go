@@ -14,6 +14,7 @@ import (
 
 func main() {
 	elink.RegisterTopicInfo(misc.Mac(), elinkmd.ProductKey) // 注册网关产品Key
+	misc.CfgInit()
 	misc.LogsInit()
 	mq.MqInit(elinkmd.ProductKey, misc.Mac())
 	if npis.OpenZbApp() != nil {

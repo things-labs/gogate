@@ -1,4 +1,7 @@
-﻿#enable orm DB log 
+package misc
+
+const (
+	SMARTAPP_DEFAULT_CFG = `#enable orm DB log 
 ormDbLog=true
 
 [logs]
@@ -15,3 +18,13 @@ logFCD = 0
 #使用conn时配置
 net = udp
 addr = 192.168.1.199:9000
+`
+	USART_DEFAULT_CFG = `[COM0]
+Name=COM5
+BaudRate=115200
+DataBit=8
+Parity=N
+StopBit=1
+FlowType=0
+`
+)

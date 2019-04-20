@@ -2,7 +2,10 @@ package misc
 
 import (
 	"fmt"
+	"os"
+	"path"
 
+	"github.com/Unknwon/com"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/fsnotify/fsnotify"
@@ -10,8 +13,8 @@ import (
 )
 
 const (
-	APP_CFG_PATH   = "./conf/moapp.conf" // 应用配置路径
-	USART_CFG_PATH = "./conf/usart.conf" // 串口配置
+	SMARTAPP_CFG_PATH = "conf/smartapp.conf" // 应用配置路径
+	USART_CFG_PATH    = "conf/usart.conf"    // 串口配置
 )
 
 var (
@@ -20,18 +23,57 @@ var (
 	watcher *fsnotify.Watcher
 )
 
-func init() {
+func CfgInit() error {
 	var err error
 
-	if APPCfg, err = ini.Load(APP_CFG_PATH); err != nil {
-		panic(err)
+	if dir := path.Dir(SMARTAPP_CFG_PATH); !com.IsExist(dir) {
+		os.MkdirAll(dir, os.ModePerm)
+		FactorySmartAppCfg()
+		FactoryUsartCfg()
 	}
 
-	if UartCfg, err = ini.Load(USART_CFG_PATH); err != nil {
-		panic(err)
+	if !com.IsExist(SMARTAPP_CFG_PATH) {
+		FactorySmartAppCfg()
+	}
+
+	if APPCfg, err = ini.LooseLoad(SMARTAPP_CFG_PATH); err != nil {
+		if APPCfg, err = ini.Load([]byte(SMARTAPP_DEFAULT_CFG)); err != nil {
+			logs.Critical("config load failed,", err)
+		}
+	}
+
+	if !com.IsExist(USART_CFG_PATH) {
+		FactoryUsartCfg()
+	}
+
+	if UartCfg, err = ini.LooseLoad(USART_CFG_PATH); err != nil {
+		if UartCfg, err = ini.Load([]byte(USART_DEFAULT_CFG)); err != nil {
+			logs.Critical("config load failed,", err)
+		}
 	}
 
 	go watch()
+	return err
+}
+
+func FactorySmartAppCfg() error {
+	f, err := os.Create(SMARTAPP_CFG_PATH)
+	if err != nil {
+		return err
+	}
+	f.WriteString(SMARTAPP_DEFAULT_CFG)
+	f.Close()
+	return nil
+}
+
+func FactoryUsartCfg() error {
+	f, err := os.Create(USART_CFG_PATH)
+	if err != nil {
+		return err
+	}
+	f.WriteString(USART_DEFAULT_CFG)
+	f.Close()
+	return nil
 }
 
 func LogsInit() {
@@ -78,7 +120,7 @@ func watch() {
 	}
 	defer watcher.Close()
 
-	watcher.Add(APP_CFG_PATH)
+	watcher.Add(SMARTAPP_CFG_PATH)
 	for {
 		select {
 		case err, ok := <-watcher.Errors:
