@@ -106,10 +106,11 @@ func (this *Controller) Delete() {
 }
 
 // 不带Payload错误回复,code为CodeSuccess将不进行回复
-func (this *Controller) ErrorResponse(code int) {
+func (this *Controller) ErrorResponse(code int) error {
 	if code != elink.CodeSuccess {
-		this.WriteResponse(code, nil)
+		return this.WriteResponse(code, nil)
 	}
+	return nil
 }
 
 // 回复,只关注payload即可

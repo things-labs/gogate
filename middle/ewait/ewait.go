@@ -45,7 +45,7 @@ func Add(id string, t ...time.Duration) *EvWait {
 	if len(t) > 0 {
 		ew.tm = t[0]
 	}
-	em.Add(id, ew)
+	em.Set(id, ew)
 	return ew
 }
 
