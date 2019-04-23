@@ -9,6 +9,7 @@ import (
 	"github.com/thinkgos/utils"
 
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 )
 
 // 设备表
@@ -20,7 +21,7 @@ type ZbDeviceInfo struct {
 	ProductId int
 }
 
-//NOTE: 表内数组以逗号","分隔
+// NOTE: 表内数组全部以逗号","分隔
 // 节点表
 type ZbDeviceNodeInfo struct {
 	ID           uint   //`gorm:"primary_key"`
@@ -53,12 +54,27 @@ const zbDeviceNodeInfos_Sql = `CREATE TABLE "zb_device_node_infos" (
 	"status" integer default(0),
 	UNIQUE(sn,node_no) ON CONFLICT FAIL)`
 
+func init() {
+	RegisterDbTableInitFunction(func() error {
+		if err := db.AutoMigrate(&ZbDeviceInfo{}).Error; err != nil {
+			return errors.Wrap(err, "db AutoMigrate failed")
+		}
+
+		if !db.HasTable("zb_device_node_infos") {
+			return db.Raw(zbDeviceNodeInfos_Sql).Scan(&ZbDeviceNodeInfo{}).Error
+		}
+
+		return nil
+	})
+}
+
 // 采用","分隔字符串
 func splitInternalString(s string) []string {
 	if s == "" {
 		return []string{}
 	}
-	return strings.Split(s, ",") // NOTE: 如果切割空字符串会返回一个空字符的数组,长度为1,这是个坑
+	// NOTE: 如果切割空字符串会返回一个空字符的数组,长度为1,这是个坑
+	return strings.Split(s, ",")
 }
 
 // 采用","拼接字符串
@@ -66,51 +82,45 @@ func joinInternalString(s []string) string {
 	return strings.Join(s, ",")
 }
 
-// 是否用指定的设备
+// 是否有指定的设备
 func HasZbDevice(sn string, pid int) bool {
 	if !HasZbProduct(pid) || len(sn) == 0 {
 		return false
 	}
-	if db.Where(&ZbDeviceInfo{Sn: sn}).First(&ZbDeviceInfo{}).RecordNotFound() {
-		return false
-	}
-	return true
+	return db.Where(&ZbDeviceInfo{Sn: sn}).First(&ZbDeviceInfo{}).Error == nil
 }
 
+// 有指定节点(nwkAddress nodeNum)
 func HasZbDeviceNode(nwkAddr uint16, nodeNum byte) bool {
-	if db.Where((&ZbDeviceNodeInfo{NwkAddr: nwkAddr, NodeNo: nodeNum})).RecordNotFound() {
-		return false
-	}
-	return true
+	return db.Where(&ZbDeviceNodeInfo{
+		NwkAddr: nwkAddr,
+		NodeNo:  nodeNum,
+	}).Error == nil
 }
 
 // 根据nwkAddr,nodeNum找到设备节点
 func LookupZbDeviceNodeByNN(nwkAddr uint16, nodeNum byte) (*ZbDeviceNodeInfo, error) {
 	o := &ZbDeviceNodeInfo{}
-	if db.Where(&ZbDeviceNodeInfo{
+	if err := db.Where(&ZbDeviceNodeInfo{
 		NwkAddr: nwkAddr,
-		NodeNo:  nodeNum}).First(o).RecordNotFound() {
-		return nil, gorm.ErrRecordNotFound
+		NodeNo:  nodeNum}).First(o).Error; err != nil {
+		return nil, err
 	}
-	o.parseInternalString()
-
-	return o, nil
+	return o.parseInternalString(), nil
 }
 
 // 根据sn,nodeNum找到设备节点
 func LookupZbDeviceNodeByIN(sn string, nodeNum byte) (*ZbDeviceNodeInfo, error) {
 	if len(sn) == 0 {
-		return nil, ErrInvalidSn
+		return nil, ErrInvalidParameter
 	}
 	o := &ZbDeviceNodeInfo{}
-	if db.Where(&ZbDeviceNodeInfo{
+	if err := db.Where(&ZbDeviceNodeInfo{
 		Sn:     sn,
-		NodeNo: nodeNum}).First(o).RecordNotFound() {
-		return nil, gorm.ErrRecordNotFound
+		NodeNo: nodeNum}).First(o).Error; err != nil {
+		return nil, err
 	}
-	o.parseInternalString()
-
-	return o, nil
+	return o.parseInternalString(), nil
 }
 
 // 根据id找到设备节点
@@ -125,17 +135,17 @@ func lookupZbDeviceNodeByID(db *gorm.DB, id string) (*ZbDeviceNodeInfo, error) {
 		return nil, err
 	}
 	o := &ZbDeviceNodeInfo{}
-	if db.First(o, idval).RecordNotFound() {
-		return nil, gorm.ErrRecordNotFound
+	if err := db.First(o, idval).Error; err != nil {
+		return nil, err
 	}
-	o.parseInternalString()
 
-	return o, nil
+	return o.parseInternalString(), nil
 }
 
 // 绑定两个设备 要求更新 源设备节点的<目的绑定表>和目标设备节点的<源绑定表>
 func BindZbDeviceNode(SrcSn string, SrcNodeNum byte,
-	DstBindSn string, DstBindNodeNum byte, BindTrunkID uint16) error {
+	DstBindSn string, DstBindNodeNum byte,
+	BindTrunkID uint16) error {
 	var SrcDNI *ZbDeviceNodeInfo
 	var DstBindDNI *ZbDeviceNodeInfo
 	var err error
@@ -178,19 +188,19 @@ func BindZbDeviceNode(SrcSn string, SrcNodeNum byte,
 		return err
 	}
 
-	tx.Model(&SrcDNI).Updates(&ZbDeviceNodeInfo{DstBindList: SrcDNI.DstBindList})
-	if err = tx.Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	tx.Model(&DstBindDNI).Updates(&ZbDeviceNodeInfo{SrcBindList: DstBindDNI.SrcBindList})
-	if err = tx.Error; err != nil {
+	if err = tx.Model(&SrcDNI).
+		Updates(&ZbDeviceNodeInfo{DstBindList: SrcDNI.DstBindList}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	tx.Commit()
-	if err = tx.Error; err != nil {
+	if err = tx.Model(&DstBindDNI).
+		Updates(&ZbDeviceNodeInfo{SrcBindList: DstBindDNI.SrcBindList}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err = tx.Commit().Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -248,19 +258,19 @@ func UnZbBindDeviceNode(SrcSn string, SrcNodeNum byte,
 		return err
 	}
 
-	tx.Model(&SrcDNI).Updates(&ZbDeviceNodeInfo{DstBindList: SrcDNI.DstBindList})
-	if err = tx.Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	tx.Model(&DstBindDNI).Updates(&ZbDeviceNodeInfo{SrcBindList: DstBindDNI.SrcBindList})
-	if err = tx.Error; err != nil {
+	if err = tx.Model(&SrcDNI).
+		Updates(&ZbDeviceNodeInfo{DstBindList: SrcDNI.DstBindList}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	tx.Commit()
-	if err = tx.Error; err != nil {
+	if err = tx.Model(&DstBindDNI).
+		Updates(&ZbDeviceNodeInfo{SrcBindList: DstBindDNI.SrcBindList}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err = tx.Commit().Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -279,7 +289,7 @@ func BindFindZbDeviceNodeByNN(NwkAddr uint16, NodeNum byte, trunkID uint16) ([]*
 	}
 	strTkid := utils.FormatBaseTypes(trunkID)
 	// 源设备 是否包含输出集
-	if utils.IsSliceContainsStrNocase(srcDNI.outTrunk, strTkid) != true {
+	if !utils.IsSliceContainsStrNocase(srcDNI.outTrunk, strTkid) {
 		return nil, ErrNotContainTrunk
 	}
 
@@ -328,11 +338,12 @@ func BindFindZbDeviceNodeByIN(sn string, NodeNum byte, trunkID uint16) ([]*ZbDev
 }
 
 // 解析内部的string分隔
-func (this *ZbDeviceNodeInfo) parseInternalString() {
+func (this *ZbDeviceNodeInfo) parseInternalString() *ZbDeviceNodeInfo {
 	this.inTrunk = splitInternalString(this.InTrunkList)
 	this.outTrunk = splitInternalString(this.OutTrunkList)
 	this.srcBind = splitInternalString(this.SrcBindList)
 	this.dstBind = splitInternalString(this.DstBindList)
+	return this
 }
 
 // 获取设备节点id
@@ -350,7 +361,7 @@ func (this *ZbDeviceNodeInfo) GetNodeNum() byte {
 	return this.NodeNo
 }
 
-// 获取设备节点Ieee地址
+// 获取设备节点sn(Ieee地址)
 func (this *ZbDeviceNodeInfo) GetSn() string {
 	return this.Sn
 }
@@ -368,24 +379,18 @@ func (this *ZbDeviceNodeInfo) GetBindList() (srcBind, dstBind []string) {
 // 根据网络地址找到设备
 func LookupZbDeviceByNwkAddr(nwkAddr uint16) (*ZbDeviceInfo, error) {
 	oInfo := &ZbDeviceInfo{}
-	if db.Where(&ZbDeviceInfo{NwkAddr: nwkAddr}).First(oInfo).RecordNotFound() {
-		return nil, gorm.ErrRecordNotFound
-	}
-
-	return oInfo, nil
+	err := db.Where(&ZbDeviceInfo{NwkAddr: nwkAddr}).First(oInfo).Error
+	return oInfo, err
 }
 
 // 根据sn找到设备
 func LookupZbDeviceByIeeeAddr(sn string) (*ZbDeviceInfo, error) {
 	if len(sn) == 0 {
-		return nil, ErrInvalidSn
+		return nil, ErrInvalidParameter
 	}
 	oInfo := &ZbDeviceInfo{}
-	if db.Where(&ZbDeviceInfo{Sn: sn}).First(oInfo).RecordNotFound() {
-		return nil, gorm.ErrRecordNotFound
-	}
-
-	return oInfo, nil
+	err := db.Where(&ZbDeviceInfo{Sn: sn}).First(oInfo).Error
+	return oInfo, err
 }
 
 // 获取sn
@@ -417,9 +422,7 @@ func (this *ZbDeviceInfo) updateCapacity(newVal byte) error {
 	if newVal == this.Capacity {
 		return nil
 	}
-
-	db.Model(this).Update("capacity", newVal)
-	return db.Error
+	return db.Model(this).Update("capacity", newVal).Error
 }
 
 // 更新设备和设备节点所有节点的网络地址
@@ -427,24 +430,26 @@ func (this *ZbDeviceInfo) updateZbDeviceAndNodeNwkAddr(NewnwkAddr uint16) error 
 	var err error
 
 	tx := db.Begin()
-	if tx.Error != nil {
-		return tx.Error
+	if err = tx.Error; err != nil {
+		return err
 	}
 	// 更新设备网络地址
-	if err = tx.Model(this).Updates(&ZbDeviceInfo{NwkAddr: NewnwkAddr}).Error; err != nil {
+	if err = tx.Model(this).
+		Updates(&ZbDeviceInfo{NwkAddr: NewnwkAddr}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 	//更新所有节点网络地址
-	if err = tx.Model(&ZbDeviceNodeInfo{}).Where(&ZbDeviceNodeInfo{Sn: this.Sn}).Updates(&ZbDeviceNodeInfo{NwkAddr: NewnwkAddr}).Error; err != nil {
+	if err = tx.Model(&ZbDeviceNodeInfo{}).
+		Where(&ZbDeviceNodeInfo{Sn: this.Sn}).
+		Updates(&ZbDeviceNodeInfo{NwkAddr: NewnwkAddr}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 	if err = tx.Commit().Error; err != nil {
 		tx.Rollback()
-		return err
 	}
-	return nil
+	return err
 }
 
 // 创建设备和设备所有的节点,失败将不建立
@@ -458,14 +463,14 @@ func (this *ZbDeviceInfo) createZbDeveiceAndNode() error {
 	devNode := pdt.GetDeviceNodeDscList()
 
 	tx := db.Begin()
-	if tx.Error != nil {
-		return tx.Error
+	if err = tx.Error; err != nil {
+		return err
 	}
 	// 创建设备
-	tx.Create(this)
-	if tx.Error != nil {
+
+	if err = tx.Create(this).Error; err != nil {
 		tx.Rollback()
-		return tx.Error
+		return err
 	}
 
 	//创建除保留节点(0)外的所有节点
@@ -491,7 +496,6 @@ func (this *ZbDeviceInfo) createZbDeveiceAndNode() error {
 	}
 	if err = tx.Commit().Error; err != nil {
 		tx.Rollback()
-		return err
 	}
 
 	return nil
@@ -499,9 +503,11 @@ func (this *ZbDeviceInfo) createZbDeveiceAndNode() error {
 
 // 根据ieee地址删除设备,包含所有的设备节点
 func (this *ZbDeviceInfo) DeleteZbDeveiceAndNode() error {
+	var err error
+
 	tx := db.Begin()
-	if tx.Error != nil {
-		return tx.Error
+	if err = tx.Error; err != nil {
+		return err
 	}
 
 	var devNodes []ZbDeviceNodeInfo
@@ -519,11 +525,11 @@ func (this *ZbDeviceInfo) DeleteZbDeveiceAndNode() error {
 					tmpdevNode.dstBind = utils.DeleteFromSliceStrAll(tmpdevNode.dstBind, vid)
 					tmpdevNode.DstBindList = joinInternalString(tmpdevNode.dstBind)
 
-					tx.Model(tmpdevNode).
-						Updates(&ZbDeviceNodeInfo{DstBindList: tmpdevNode.DstBindList})
-					if tx.Error != nil {
+					err = tx.Model(tmpdevNode).
+						Updates(&ZbDeviceNodeInfo{DstBindList: tmpdevNode.DstBindList}).Error
+					if err != nil {
 						tx.Rollback()
-						return tx.Error
+						return err
 					}
 				}
 			}
@@ -538,31 +544,30 @@ func (this *ZbDeviceInfo) DeleteZbDeveiceAndNode() error {
 					tmpdevNode.srcBind = utils.DeleteFromSliceStrAll(tmpdevNode.srcBind, vid)
 					tmpdevNode.SrcBindList = joinInternalString(tmpdevNode.srcBind)
 
-					tx.Model(tmpdevNode).
-						Updates(&ZbDeviceNodeInfo{SrcBindList: tmpdevNode.SrcBindList})
-					if tx.Error != nil {
+					err = tx.Model(tmpdevNode).
+						Updates(&ZbDeviceNodeInfo{SrcBindList: tmpdevNode.SrcBindList}).Error
+					if err != nil {
 						tx.Rollback()
-						return tx.Error
+						return err
 					}
 				}
 			}
 		}
 
-		tx.Unscoped().Delete(v)
-		if tx.Error != nil {
+		if err = tx.Unscoped().Delete(v).Error; err != nil {
 			tx.Rollback()
-			return tx.Error
+			return err
 		}
 	}
 
-	if err := tx.Unscoped().Delete(this).Error; err != nil {
+	if err = tx.Unscoped().Delete(this).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if tx.Commit().Error != nil {
+	if err = tx.Commit().Error; err != nil {
 		tx.Rollback()
-		return tx.Error
+		return err
 	}
 
 	return nil

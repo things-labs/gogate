@@ -4,8 +4,13 @@ import (
 	"os"
 	"path"
 
-	"github.com/Unknwon/com"
+	"github.com/thinkgos/utils"
+
+	"github.com/astaxie/beego/logs"
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
@@ -13,33 +18,53 @@ const (
 	_DB_DRIVER = "sqlite3"
 )
 
-var db *gorm.DB
+type DbTableInitFunc func() error
 
-func init() {
+var (
+	db              *gorm.DB
+	dbTableInitList []DbTableInitFunc
+)
+
+// 数据库初始化,注册相应模型
+func DbInit() error {
 	var err error
+	var errs error
 
 	// 判断目录是否存在,不存在着创建对应的所有目录
-	if !com.IsExist(_DB_NAME) {
-		os.MkdirAll(path.Dir(_DB_NAME), os.ModePerm)
-		os.Create(_DB_NAME)
+	if !utils.IsExist(_DB_NAME) {
+		if err = os.MkdirAll(path.Dir(_DB_NAME), os.ModePerm); err != nil {
+			return err
+		}
+		if _, err = os.Create(_DB_NAME); err != nil {
+			return err
+		}
 	}
 
 	if db, err = gorm.Open(_DB_DRIVER, _DB_NAME); err != nil {
-		panic("devmodels: gorm open failed," + err.Error())
+		return errors.Wrapf(err, "db(%s-%s) open failed", _DB_DRIVER, _DB_NAME)
 	}
 	//default disable
 	//devDb.LogMode(misc.APPCfg.MustBool(goconfig.DEFAULT_SECTION, "ormDbLog", false))
 	db.LogMode(true)
 
-	db.AutoMigrate(&ZbDeviceInfo{})
-	if db.Error != nil {
-		panic("devmodels: gorm AutoMigrate failed," + err.Error())
+	for _, initF := range dbTableInitList {
+		if err = initF(); err != nil {
+			errs = err
+			logs.Error(err)
+		}
 	}
 
-	if !db.HasTable("general_device_infos") {
-		db.Raw(generaldeviceInfo_sql).Scan(&GeneralDeviceInfo{})
+	return errs
+}
+
+// 提供数据表注册初始函数
+func RegisterDbTableInitFunction(f DbTableInitFunc) {
+	if f != nil {
+		dbTableInitList = append(dbTableInitList, f)
 	}
-	if !db.HasTable("zb_device_node_infos") {
-		db.Raw(zbDeviceNodeInfos_Sql).Scan(&ZbDeviceNodeInfo{})
-	}
+}
+
+// 数据连接对象
+func DB() *gorm.DB {
+	return db
 }

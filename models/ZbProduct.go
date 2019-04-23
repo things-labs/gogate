@@ -46,7 +46,7 @@ var zbProduct map[int]*ZbProduct = map[int]*ZbProduct{
 // 根据产品id查找产品
 func LookupZbProduct(pid int) (*ZbProduct, error) {
 	if pid == PID_RESERVE {
-		return nil, ErrProductNotExist
+		return nil, ErrInvalidParameter
 	}
 	if o, exists := zbProduct[pid]; exists {
 		return o, nil
@@ -64,7 +64,7 @@ func HasZbProduct(pid int) bool {
 }
 
 // 根据产品Id获得产品的节点描述,不含保留默认节点0
-func LookupZbProductDeviceNodeDscList(pid int) ([]NodeDsc, error) {
+func GetDeviceNodeDscList(pid int) ([]NodeDsc, error) {
 	pdt, err := LookupZbProduct(pid)
 	if err != nil {
 		return nil, err

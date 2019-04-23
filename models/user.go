@@ -7,76 +7,87 @@ import (
 	"github.com/thinkgos/utils"
 )
 
+const (
+	SupperUser = 0 // 超级用户,超级权限,必定存在
+)
+
 type User struct {
 	gorm.Model
 	Uid int64 `gorm:"UNIQUE;NOT NULL"`
 }
-type localUser struct {
+
+type UserInfo struct {
 	sync.RWMutex
 	tab []int64
 }
 
-var lUser *localUser
+var localUser *UserInfo
 
 func init() {
-	db.AutoMigrate(&User{})
-	lUser = new(localUser)
-	users := getUsers()
-	lUser.tab = make([]int64, 0, len(users))
-	for _, v := range users {
-		lUser.tab = append(lUser.tab, v.Uid)
-	}
+	RegisterDbTableInitFunction(func() error {
+		db.AutoMigrate(&User{})
+		if db.Error != nil {
+			return db.Error
+		}
+		localUser = new(UserInfo)
+		users := []User{}
+		db.Find(&users)
+		localUser.tab = make([]int64, 0, len(users))
+		for _, v := range users {
+			localUser.tab = append(localUser.tab, v.Uid)
+		}
+
+		return nil
+	})
 }
 
+// 是否有对应用户,用户0为超级户,永远存在
 func HasUser(uid int64) bool {
-	if uid == 0 {
+	if uid == SupperUser {
 		return true
 	}
-	lUser.RLock()
-	b := utils.IsSliceContainsInt64(lUser.tab, uid)
-	lUser.RUnlock()
+	localUser.RLock()
+	b := utils.IsSliceContainsInt64(localUser.tab, uid)
+	localUser.RUnlock()
 	return b
 }
 
+// 添加用户
 func AddUser(uid int64) error {
-	if (uid == 0) || HasUser(uid) {
+	if HasUser(uid) {
 		return nil
 	}
 
 	if err := db.Create(&User{Uid: uid}).Error; err != nil {
 		return err
 	}
-	lUser.Lock()
-	lUser.tab = append(lUser.tab, uid)
-	lUser.Unlock()
+	localUser.Lock()
+	localUser.tab = append(localUser.tab, uid)
+	localUser.Unlock()
 
 	return nil
 }
 
+// 删除用户
 func DeleteUser(uid int64) error {
-	if (uid == 0) || !HasUser(uid) {
+	if !HasUser(uid) {
 		return nil
 	}
 	user := &User{Uid: uid}
 	if err := db.Where(user).Unscoped().Delete(user).Error; err != nil {
 		return err
 	}
-	lUser.Lock()
-	lUser.tab = utils.DeleteFromSliceInt64All(lUser.tab, uid)
-	lUser.Unlock()
+	localUser.Lock()
+	localUser.tab = utils.DeleteFromSliceInt64All(localUser.tab, uid)
+	localUser.Unlock()
 	return nil
 }
 
-func getUsers() []User {
-	users := []User{}
-	db.Find(&users)
-	return users
-}
-
+// 获取用户列表
 func GetUsers() []int64 {
-	lUser.RLock()
-	tb := make([]int64, len(lUser.tab))
-	copy(tb, lUser.tab)
-	lUser.RUnlock()
+	tb := make([]int64, len(localUser.tab))
+	localUser.RLock()
+	copy(tb, localUser.tab) // 拷贝
+	localUser.RUnlock()
 	return tb
 }

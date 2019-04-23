@@ -8,17 +8,22 @@ import (
 	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/elink"
 
-	_ "github.com/thinkgos/gogate/models"
+	"github.com/thinkgos/gogate/models"
 	_ "github.com/thinkgos/gogate/smartHome/routers"
 )
 
 func main() {
+	err := models.DbInit()
+	if err != nil {
+		panic(err)
+	}
 	elink.RegisterTopicInfo(misc.Mac(), elinkmd.ProductKey) // 注册网关产品Key
 	misc.CfgInit()
 	misc.LogsInit()
 	mq.MqInit(elinkmd.ProductKey, misc.Mac())
-	if npis.OpenZbApp() != nil {
-		panic("main: npi app init failed")
+	err = npis.OpenZbApp()
+	if err != nil {
+		panic(err)
 	}
 
 	discover.Run()
