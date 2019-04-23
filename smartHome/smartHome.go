@@ -12,6 +12,12 @@ import (
 	_ "github.com/thinkgos/gogate/smartHome/routers"
 )
 
+func init() {
+	// 注册设备模型初始化函数
+	models.RegisterDbTableInitFunction(models.GeneralDeviceDbTableInit)
+	models.RegisterDbTableInitFunction(models.ZbDeviceDbTableInit)
+}
+
 func main() {
 	err := models.DbInit()
 	if err != nil {
