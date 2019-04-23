@@ -63,8 +63,3 @@ func RegisterDbTableInitFunction(f DbTableInitFunc) {
 		dbTableInitList = append(dbTableInitList, f)
 	}
 }
-
-// 数据连接对象
-func DB() *gorm.DB {
-	return db
-}

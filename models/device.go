@@ -12,10 +12,6 @@ const generaldeviceInfo_sql = `CREATE TABLE "general_device_infos" (
 			"sn" bigint NOT NULL,
 			UNIQUE(product_id,sn) ON CONFLICT FAIL)`
 
-func init() {
-	RegisterDbTableInitFunction(GeneralDeviceDbTableInit)
-}
-
 // 通用设备数据表初始化
 func GeneralDeviceDbTableInit() error {
 	if !db.HasTable("general_device_infos") {

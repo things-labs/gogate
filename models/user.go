@@ -25,9 +25,8 @@ var localUser *UserInfo
 
 func init() {
 	RegisterDbTableInitFunction(func() error {
-		db.AutoMigrate(&User{})
-		if db.Error != nil {
-			return db.Error
+		if err := db.AutoMigrate(&User{}).Error; err != nil {
+			return err
 		}
 		localUser = new(UserInfo)
 		users := []User{}
@@ -36,12 +35,11 @@ func init() {
 		for _, v := range users {
 			localUser.tab = append(localUser.tab, v.Uid)
 		}
-
 		return nil
 	})
 }
 
-// 是否有对应用户,用户0为超级户,永远存在
+// 是否有对应用户,用户0为超级用户,永远存在
 func HasUser(uid int64) bool {
 	if uid == SupperUser {
 		return true

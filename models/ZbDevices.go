@@ -54,18 +54,17 @@ const zbDeviceNodeInfos_Sql = `CREATE TABLE "zb_device_node_infos" (
 	"status" integer default(0),
 	UNIQUE(sn,node_no) ON CONFLICT FAIL)`
 
-func init() {
-	RegisterDbTableInitFunction(func() error {
-		if err := db.AutoMigrate(&ZbDeviceInfo{}).Error; err != nil {
-			return errors.Wrap(err, "db AutoMigrate failed")
-		}
+// zigbee设备表初始化
+func ZbDeviceDbTableInit() error {
+	if err := db.AutoMigrate(&ZbDeviceInfo{}).Error; err != nil {
+		return errors.Wrap(err, "db AutoMigrate failed")
+	}
 
-		if !db.HasTable("zb_device_node_infos") {
-			return db.Raw(zbDeviceNodeInfos_Sql).Scan(&ZbDeviceNodeInfo{}).Error
-		}
+	if !db.HasTable("zb_device_node_infos") {
+		return db.Raw(zbDeviceNodeInfos_Sql).Scan(&ZbDeviceNodeInfo{}).Error
+	}
 
-		return nil
-	})
+	return nil
 }
 
 // 采用","分隔字符串
