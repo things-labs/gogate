@@ -93,7 +93,7 @@ func (this *DevPropertysController) zbDevicePropertysGet(pid int) int {
 			if err != nil {
 				return elink.CodeErrSysException
 			}
-			this.WriteResponse(elink.CodeSuccess, out)
+			this.WriteResponsePy(elink.CodeSuccess, out)
 		default:
 			return elink.CodeErrDevicePropertysNotSupport
 		}

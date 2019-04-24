@@ -12,8 +12,8 @@ import (
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gomo/elink"
 
-	"github.com/eclipse/paho.mqtt.golang"
-	"github.com/json-iterator/go"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+	jsoniter "github.com/json-iterator/go"
 )
 
 const (
@@ -108,21 +108,17 @@ func (this *Controller) Delete() {
 // 不带Payload错误回复,code为CodeSuccess将不进行回复
 func (this *Controller) ErrorResponse(code int) error {
 	if code != elink.CodeSuccess {
-		return this.WriteResponse(code, nil)
+		return this.WriteResponsePy(code, nil)
 	}
 	return nil
 }
 
 // 回复,只关注payload即可
-func (this *Controller) WriteResponse(code int, payload []byte) error {
-	return WriteResponse(this.Input.Client, this.Input.Topic, code,
-		jsoniter.Get(this.Input.Payload, "packetID").ToInt(), payload)
-}
-
-// 回复,向对应的请求主题主回复数据
-func WriteResponse(client mqtt.Client, reqtp *elink.TopicLayer,
-	code, packetID int, payload []byte) error {
-	brsp := &BaseResponse{PacketID: packetID, Code: code}
+func (this *Controller) WriteResponsePy(code int, payload []byte) error {
+	brsp := &BaseResponse{
+		PacketID: jsoniter.Get(this.Input.Payload, "packetID").ToInt(),
+		Code:     code,
+	}
 	if code != elink.CodeSuccess {
 		errMsg := elink.CodeErrorMessage(code)
 		brsp.CodeDetail = errMsg.Detail
@@ -138,7 +134,7 @@ func WriteResponse(client mqtt.Client, reqtp *elink.TopicLayer,
 		return err
 	}
 
-	return elink.WriteResponse(client, reqtp, out)
+	return this.WriteResponse(code, out)
 }
 
 // 推送数据,向对应的推送通道推送数据

@@ -46,7 +46,7 @@ func MqInit(productKey, mac string) {
 		chList := elink.ChannelSelectorList()
 		for _, ch := range chList {
 			s := fmt.Sprintf("%s/%s/%s/+/+/+/#", ch, productKey, mac)
-			cli.Subscribe(s, 2, elink.Server)
+			cli.Subscribe(s, 2, elink.MqHandle)
 		}
 		heartOnce.Do(func() { time.AfterFunc(time.Second, HeartBeatStatus) })
 	})

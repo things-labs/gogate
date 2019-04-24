@@ -32,7 +32,7 @@ func (this *SysUserController) Get() {
 		this.ErrorResponse(elink.CodeErrSysOperationFailed)
 		return
 	}
-	err = this.WriteResponse(elink.CodeSuccess, out)
+	err = this.WriteResponsePy(elink.CodeSuccess, out)
 	if err != nil {
 		logs.Error(err)
 	}
@@ -104,7 +104,7 @@ func (this *SysUserController) userDeal(isDel bool) {
 		return
 	}
 
-	err = this.WriteResponse(elink.CodeSuccess, out)
+	err = this.WriteResponsePy(elink.CodeSuccess, out)
 	if err != nil {
 		logs.Error(err)
 	}

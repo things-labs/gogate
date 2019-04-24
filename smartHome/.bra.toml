@@ -5,7 +5,7 @@ init_cmds = [                      # Commands run in start
   ["./smartHome.exe"]
 ]
 watch_all = true                   # Watch all sub-directories
-watch_dirs = []                    # Directories to watch
+watch_dirs = ["../"]                    # Directories to watch
 watch_exts = [".go", ".conf"]               # Extensions to watch
 ignore = [".git", ".md","node_modules"]  # Directories to exclude from watching
 ignore_files = []                  # Regexps for ignoring specific notifies

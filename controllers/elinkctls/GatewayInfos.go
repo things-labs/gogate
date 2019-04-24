@@ -36,7 +36,7 @@ func (this *GatewayInfos) Get() {
 		this.ErrorResponse(elink.CodeErrSysException)
 		return
 	}
-	err = this.WriteResponse(elink.CodeSuccess, out)
+	err = this.WriteResponsePy(elink.CodeSuccess, out)
 	if err != nil {
 		logs.Error(err)
 	}

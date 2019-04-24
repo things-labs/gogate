@@ -79,7 +79,7 @@ func (this *DevicesController) getGernalDevices(pid int) int {
 		return elink.CodeErrSysException
 	}
 
-	this.WriteResponse(elink.CodeSuccess, py)
+	this.WriteResponsePy(elink.CodeSuccess, py)
 	return elink.CodeSuccess
 }
 
@@ -172,6 +172,6 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) int {
 		}
 	}
 
-	this.WriteResponse(elink.CodeSuccess, py)
+	this.WriteResponsePy(elink.CodeSuccess, py)
 	return elink.CodeSuccess
 }

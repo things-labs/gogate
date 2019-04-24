@@ -96,7 +96,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 			code = elink.CodeErrDeviceCommandOperationFailed
 			return
 		}
-		this.WriteResponse(elink.CodeSuccess, nil)
+		this.WriteResponsePy(elink.CodeSuccess, nil)
 		return
 	}
 
@@ -125,7 +125,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 			code = elink.CodeErrDeviceCommandOperationFailed
 			return
 		}
-		this.WriteResponse(elink.CodeSuccess, nil)
+		this.WriteResponsePy(elink.CodeSuccess, nil)
 	default:
 		code = elink.CodeErrProudctFeatureUndefined
 		return

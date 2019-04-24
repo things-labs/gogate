@@ -70,7 +70,7 @@ func (this *GatewayUpgrade) Post() {
 		code = elink.CodeErrSysOperationFailed
 		return
 	}
-	this.WriteResponse(elink.CodeSuccess, nil)
+	this.WriteResponsePy(elink.CodeSuccess, nil)
 	time.Sleep(3) // give enough time to send the message to cliet
 	bin, err := os.Executable()
 	if err != nil {
