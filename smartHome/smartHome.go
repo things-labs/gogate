@@ -19,13 +19,14 @@ func init() {
 }
 
 func main() {
+	elink.RegisterTopicInfo(misc.Mac(), elinkmd.ProductKey) // 注册网关产品Key
+	misc.CfgInit()
+	misc.LogsInit()
 	err := models.DbInit()
 	if err != nil {
 		panic(err)
 	}
-	elink.RegisterTopicInfo(misc.Mac(), elinkmd.ProductKey) // 注册网关产品Key
-	misc.CfgInit()
-	misc.LogsInit()
+
 	mq.MqInit(elinkmd.ProductKey, misc.Mac())
 	err = npis.OpenZbApp()
 	if err != nil {

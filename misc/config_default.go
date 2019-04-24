@@ -2,7 +2,7 @@ package misc
 
 const (
 	SMARTAPP_DEFAULT_CFG = `#enable orm DB log 
-ormDbLog=true
+ormDbLog=false
 
 [logs]
 # 调试输出引擎(conn/console)
