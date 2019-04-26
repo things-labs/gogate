@@ -12,7 +12,6 @@ import (
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gomo/elink"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -134,11 +133,11 @@ func (this *Controller) WriteResponsePy(code int, payload []byte) error {
 		return err
 	}
 
-	return this.WriteResponse(code, out)
+	return this.WriteResponse(out)
 }
 
 // 推送数据,向对应的推送通道推送数据
-func WriteData(client mqtt.Client, resourse, method, messageType string, payload []byte) error {
+func WriteData(resourse, method, messageType string, payload []byte) error {
 	out, err := jsoniter.Marshal(
 		Data{
 			&BaseData{},
@@ -147,7 +146,7 @@ func WriteData(client mqtt.Client, resourse, method, messageType string, payload
 	if err != nil {
 		return err
 	}
-	return elink.WriteData(client, ChannelData, resourse, method, messageType, out)
+	return elink.WriteData(ChannelData, resourse, method, messageType, out)
 }
 
 //  签名mac + `@#$%` + timeStamp + `^&*()`拼接后md5 ,加盐值加密验证

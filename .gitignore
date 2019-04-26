@@ -1,4 +1,5 @@
 */views
 */data
 */static
-*.exe*
+*.exe
+*.exe~

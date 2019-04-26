@@ -10,16 +10,17 @@ import (
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
+	"github.com/thinkgos/gogate/protocol/elinkmq"
 	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego/logs"
-	"github.com/eclipse/paho.mqtt.golang"
-	"github.com/json-iterator/go"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+	jsoniter "github.com/json-iterator/go"
 )
 
 const (
 	mqtt_broker_address = "tcp://155.lchtime.com:1883" // 无ssl
-	//mqtt_broker_address  = "ssl://115.lchtime.com:8883" // 支持ssl
+	//mqtt_broker_address  = "ssl://155.lchtime.com:8883" // 支持ssl
 	mqtt_broker_username = "1"
 	mqtt_broker_password = "52399399"
 )
@@ -46,7 +47,7 @@ func MqInit(productKey, mac string) {
 		chList := elink.ChannelSelectorList()
 		for _, ch := range chList {
 			s := fmt.Sprintf("%s/%s/%s/+/+/+/#", ch, productKey, mac)
-			cli.Subscribe(s, 2, elink.MqHandle)
+			cli.Subscribe(s, 2, elinkmq.Handle)
 		}
 		heartOnce.Do(func() { time.AfterFunc(time.Second, HeartBeatStatus) })
 	})
@@ -63,6 +64,8 @@ func MqInit(productKey, mac string) {
 			out, 2, false)
 	}
 	Client = mqtt.NewClient(opts)
+
+	elink.ManagaClient(true, elink.NewClient(elinkmq.NewProvider(Client)))
 	go Connect()
 }
 func NewTLSConfig() (*tls.Config, error) {
@@ -127,7 +130,7 @@ func HeartBeatStatus() {
 			logs.Error("GatewayHeatbeats:", err)
 			return
 		}
-		err = elink.WriteSpecialData(Client, ctrl.ChannelData,
+		err = elink.WriteSpecialData(ctrl.ChannelData,
 			elinkmd.GatewayHeartbeat, elink.MethodPatch, elink.MessageTypeTime, out)
 		if err != nil {
 			logs.Error("GatewayHeatbeats:", err)
@@ -141,7 +144,7 @@ func HeartBeatStatus() {
 			logs.Error("GatewayMonitors:", err)
 			return
 		}
-		err = elink.WriteSpecialData(Client, ctrl.ChannelData,
+		err = elink.WriteSpecialData(ctrl.ChannelData,
 			elinkmd.SystemMonitor, elink.MethodPatch, elink.MessageTypeTime, out)
 		if err != nil {
 			logs.Error("GatewayHeatbeats:", err)
@@ -151,5 +154,5 @@ func HeartBeatStatus() {
 
 // ctrl data通道推送数据
 func WriteCtrlData(resourse, method, messageType string, payload []byte) error {
-	return ctrl.WriteData(Client, resourse, method, messageType, payload)
+	return ctrl.WriteData(resourse, method, messageType, payload)
 }
