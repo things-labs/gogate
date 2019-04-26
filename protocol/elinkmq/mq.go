@@ -1,9 +1,10 @@
 package elinkmq
 
 import (
+	"github.com/thinkgos/gomo/elink"
+
 	"github.com/astaxie/beego/logs"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/thinkgos/gomo/elink"
 )
 
 var _ elink.Provider = (*Provider)(nil)
@@ -12,9 +13,13 @@ type Provider struct {
 	C mqtt.Client
 }
 
-// 创建mqtt provider实例
-func NewProvider(c interface{}) elink.Provider {
-	return &Provider{c.(mqtt.Client)}
+func NewProvider(c mqtt.Client) *Provider {
+	return &Provider{c}
+}
+
+// 错误加在主题上的回复
+func (this *Provider) ErrorDefaultResponse(topic string) error {
+	return this.WriteResponse(topic, "{}")
 }
 
 // 应答信息

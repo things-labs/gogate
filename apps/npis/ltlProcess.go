@@ -4,7 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/thinkgos/gogate/apps/mq"
+	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
+
 	"github.com/thinkgos/gogate/controllers/elinkpsh"
 	"github.com/thinkgos/gogate/middle/ewait"
 	"github.com/thinkgos/gogate/models"
@@ -14,7 +15,7 @@ import (
 	"github.com/thinkgos/gomo/protocol/limp"
 
 	"github.com/astaxie/beego/logs"
-	"github.com/json-iterator/go"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type deviceAnnce struct {
@@ -115,7 +116,7 @@ func (this *ZbnpiApp) ProInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []l
 	if err != nil {
 		return err
 	}
-	return mq.WriteCtrlData(
+	return ctrl.Publish(
 		elink.FormatResouce(elinkmd.DevicePropertys, zbdnode.ProductId),
 		elink.MethodPatch, elink.MessageTypeAnnce, out)
 }

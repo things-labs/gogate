@@ -9,11 +9,12 @@ import (
 )
 
 type GwMonitor struct {
+	Topic          string `json:"topic,omitempty"`
 	SystemMemInfos *syscall.Sysinfo_t
 	AppMemInfos    *runtime.MemStats
 }
 
-func GatewayMonitors() *GwMonitor {
+func GatewayMonitors(tp string) *GwMonitor {
 	memStats := new(runtime.MemStats)
 	runtime.ReadMemStats(memStats)
 
@@ -22,5 +23,5 @@ func GatewayMonitors() *GwMonitor {
 	if err != nil {
 		fmt.Println("syscall sysinfo failed")
 	}
-	return &GwMonitor{sysInfo, memStats}
+	return &GwMonitor{tp, sysInfo, memStats}
 }

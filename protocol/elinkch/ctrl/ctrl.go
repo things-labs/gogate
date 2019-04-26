@@ -114,7 +114,9 @@ func (this *Controller) ErrorResponse(code int) error {
 
 // 回复,只关注payload即可
 func (this *Controller) WriteResponsePy(code int, payload []byte) error {
+	tp := elink.FromatRspTopic(this.Input.Topic)
 	brsp := &BaseResponse{
+		Topic:    tp,
 		PacketID: jsoniter.Get(this.Input.Payload, "packetID").ToInt(),
 		Code:     code,
 	}
@@ -133,20 +135,22 @@ func (this *Controller) WriteResponsePy(code int, payload []byte) error {
 		return err
 	}
 
-	return this.WriteResponse(out)
+	return this.WriteResponse(tp, out)
 }
 
 // 推送数据,向对应的推送通道推送数据
-func WriteData(resourse, method, messageType string, payload []byte) error {
+func Publish(resourse, method, messageType string, payload []byte) error {
+	tp := elink.FormatPshCommonTopic(ChannelData, resourse, method, messageType)
 	out, err := jsoniter.Marshal(
 		Data{
-			&BaseData{},
+			&BaseData{tp},
 			&BaseRawPayload{payload},
 		})
 	if err != nil {
 		return err
 	}
-	return elink.WriteData(ChannelData, resourse, method, messageType, out)
+
+	return elink.Publish(tp, out)
 }
 
 //  签名mac + `@#$%` + timeStamp + `^&*()`拼接后md5 ,加盐值加密验证

@@ -1,11 +1,11 @@
 package elinkpsh
 
 import (
-	"github.com/thinkgos/gogate/apps/mq"
+	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/elink"
 
-	"github.com/json-iterator/go"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type DevSnPy struct {
@@ -24,6 +24,6 @@ func DeviceAnnce(pid int, sn string, isjoin bool) error {
 		method = elink.MethodPost
 	}
 
-	return mq.WriteCtrlData(elink.FormatResouce(elinkmd.Devices, pid),
+	return ctrl.Publish(elink.FormatResouce(elinkmd.Devices, pid),
 		method, elink.MessageTypeAnnce, v)
 }

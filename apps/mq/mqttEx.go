@@ -19,6 +19,10 @@ import (
 )
 
 const (
+	HeartBeatTime = 10 * time.Second
+)
+
+const (
 	mqtt_broker_address = "tcp://155.lchtime.com:1883" // 无ssl
 	//mqtt_broker_address  = "ssl://155.lchtime.com:8883" // 支持ssl
 	mqtt_broker_username = "1"
@@ -56,7 +60,7 @@ func MqInit(productKey, mac string) {
 		logs.Warn("mqtt client connection lost, ", err)
 	})
 
-	if out, err := jsoniter.Marshal(elinkmd.GatewayHeatbeats(false)); err != nil {
+	if out, err := jsoniter.Marshal(elinkmd.GatewayHeatbeats("", false)); err != nil {
 		logs.Error("mqtt %s", err.Error())
 	} else {
 		opts.SetBinaryWill(
@@ -65,7 +69,7 @@ func MqInit(productKey, mac string) {
 	}
 	Client = mqtt.NewClient(opts)
 
-	elink.ManagaClient(true, elink.NewClient(elinkmq.NewProvider(Client)))
+	elink.ManagaClient(true, elink.NewClient(elink.Hub, elinkmq.NewProvider(Client)))
 	go Connect()
 }
 func NewTLSConfig() (*tls.Config, error) {
@@ -118,20 +122,21 @@ func Connect() {
 
 // 网关心跳包
 func HeartBeatStatus() {
-	defer time.AfterFunc(time.Second*30, HeartBeatStatus)
+	defer time.AfterFunc(HeartBeatTime, HeartBeatStatus)
 	if !Client.IsConnected() {
 		return
 	}
 
 	// 心跳包推送
 	func() {
-		out, err := jsoniter.Marshal(elinkmd.GatewayHeatbeats(true))
+		tp := elink.FormatPshSpecialTopic(ctrl.ChannelData,
+			elinkmd.GatewayHeartbeat, elink.MethodPatch, elink.MessageTypeTime)
+		out, err := jsoniter.Marshal(elinkmd.GatewayHeatbeats(tp, true))
 		if err != nil {
 			logs.Error("GatewayHeatbeats:", err)
 			return
 		}
-		err = elink.WriteSpecialData(ctrl.ChannelData,
-			elinkmd.GatewayHeartbeat, elink.MethodPatch, elink.MessageTypeTime, out)
+		err = elink.Publish(tp, out)
 		if err != nil {
 			logs.Error("GatewayHeatbeats:", err)
 		}
@@ -139,20 +144,17 @@ func HeartBeatStatus() {
 
 	// 系统监控信息推送
 	func() {
-		out, err := jsoniter.Marshal(elinkmd.GatewayMonitors())
+		tp := elink.FormatPshSpecialTopic(ctrl.ChannelData,
+			elinkmd.SystemMonitor, elink.MethodPatch, elink.MessageTypeTime)
+
+		out, err := jsoniter.Marshal(elinkmd.GatewayMonitors(tp))
 		if err != nil {
 			logs.Error("GatewayMonitors:", err)
 			return
 		}
-		err = elink.WriteSpecialData(ctrl.ChannelData,
-			elinkmd.SystemMonitor, elink.MethodPatch, elink.MessageTypeTime, out)
+		err = elink.Publish(tp, out)
 		if err != nil {
 			logs.Error("GatewayHeatbeats:", err)
 		}
 	}()
-}
-
-// ctrl data通道推送数据
-func WriteCtrlData(resourse, method, messageType string, payload []byte) error {
-	return ctrl.WriteData(resourse, method, messageType, payload)
 }

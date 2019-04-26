@@ -1,7 +1,6 @@
 package elinkws
 
 import (
-	"context"
 	"errors"
 	"time"
 
@@ -16,9 +15,9 @@ import (
 var _ elink.Provider = (*Provider)(nil)
 
 type Provider struct {
-	C      *websocket.Conn
-	ctx    context.Context
-	cancel context.CancelFunc
+	C *websocket.Conn
+	// ctx    context.Context
+	// cancel context.CancelFunc
 
 	send chan []byte
 }
@@ -29,17 +28,31 @@ type message struct {
 }
 
 // 创建mqtt provider实例
-func NewProvider(c interface{}) elink.Provider {
-	ctx, cancel := context.WithCancel(context.Background())
-	return &Provider{c.(*websocket.Conn),
-		ctx,
-		cancel,
+func NewProvider(c *websocket.Conn) *Provider {
+	// ctx, cancel := context.WithCancel(context.Background())
+	return &Provider{c,
+		// ctx,
+		// cancel,
 		make(chan []byte, 32),
 	}
 }
 
+func (this *Provider) ErrorDefaultResponse(topic string) error {
+	o, err := jsoniter.Marshal(ctrl.BaseData{topic})
+	if err != nil {
+		return err
+	}
+	this.send <- o
+	return nil
+}
+
 // 应答信息
 func (this *Provider) WriteResponse(tp string, data interface{}) error {
+	return this.Publish(tp, data)
+}
+
+// 数据推送
+func (this *Provider) Publish(tp string, data interface{}) error {
 	var py []byte
 
 	switch data.(type) {
@@ -48,56 +61,37 @@ func (this *Provider) WriteResponse(tp string, data interface{}) error {
 	case []byte:
 		py = data.([]byte)
 	default:
-		return errors.New("Unknown payload type")
+		return errors.New("Unknown data type")
 	}
 
-	rsp := &struct {
-		*ctrl.BaseResponse
-		*ctrl.BaseRawPayload
-	}{}
-
-	err := jsoniter.Unmarshal(py, rsp)
-	if err != nil {
-		return err
-	}
-	rsp.Topic = tp
-	o, err := jsoniter.Marshal(rsp)
-	if err != nil {
-		return err
-	}
-
-	this.send <- o
+	this.send <- py
 	return nil
 }
 
-// 数据推送
-func (this *Provider) Publish(tp string, data interface{}) error {
-	this.send <- []byte(tp)
-	return nil
-}
+func (this *Provider) Run() {
+	client := elink.NewClient(elink.Hub, this)
+	client.Hub.ManagaClient(true, client)
+	go func() {
+		defer func() {
+			this.C.Close()
+			client.Hub.ManagaClient(false, client)
+		}()
+		for {
+			select {
+			case msg, ok := <-this.send:
+				this.C.SetWriteDeadline(time.Now().Add(10 * time.Second))
+				if !ok {
+					this.C.WriteMessage(websocket.CloseMessage, []byte{})
+					return
+				}
 
-func (this *Provider) RunWrite(client *elink.Client) {
-	defer func() {
-		this.C.Close()
-		elink.ManagaClient(false, client)
-	}()
-	for {
-		select {
-		case msg, ok := <-this.send:
-			this.C.SetWriteDeadline(time.Now().Add(10 * time.Second))
-			if !ok {
-				this.C.WriteMessage(websocket.CloseMessage, []byte{})
-				return
-			}
-
-			if err := this.C.WriteMessage(websocket.TextMessage, msg); err != nil {
-				return
+				if err := this.C.WriteMessage(websocket.TextMessage, msg); err != nil {
+					return
+				}
 			}
 		}
-	}
-}
+	}()
 
-func (this *Provider) RunRead(client *elink.Client) {
 	for {
 		_, msg, err := this.C.ReadMessage()
 		if err != nil {
@@ -112,9 +106,9 @@ func (this *Provider) RunRead(client *elink.Client) {
 			logs.Warn("Handle: Invalid topic discard")
 			continue
 		}
-		elink.Server(NewProvider(this.C), tp, msg)
+		elink.Server(this, tp, msg)
 	}
 
 	this.C.Close()
-	elink.ManagaClient(false, client)
+	client.Hub.ManagaClient(false, client)
 }

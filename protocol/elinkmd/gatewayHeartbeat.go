@@ -30,16 +30,18 @@ type Info struct {
 }
 
 type GatewayHeatbeat struct {
-	Info Info `json:"info"`
+	Topic string `json:"topic,omitempty"`
+	Info  Info   `json:"info"`
 }
 
-func GatewayHeatbeats(isonline bool) *GatewayHeatbeat {
+func GatewayHeatbeats(tp string, isonline bool) *GatewayHeatbeat {
 	status := "online"
 	if !isonline {
 		status = "offline"
 	}
 	mac := misc.Mac()
 	return &GatewayHeatbeat{
+		Topic: tp,
 		Info: Info{
 			Uid:        models.GetUsers(),
 			DeviceInfo: DeviceInfo{Sn: mac},

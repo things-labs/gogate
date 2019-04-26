@@ -11,5 +11,5 @@ type HomeController struct {
 func (this *HomeController) Get() {
 	this.Data["Website"] = "www.lchtime.com"
 	this.Data["Email"] = "jgb40@qq.com"
-	this.TplName = "home.html"
+	this.TplName = "index.html"
 }
