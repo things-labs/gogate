@@ -4,17 +4,26 @@ import (
 	"github.com/thinkgos/gogate/apps/mq"
 	"github.com/thinkgos/gogate/apps/npis"
 	"github.com/thinkgos/gogate/misc"
+	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gogate/plugin/discover"
+	"github.com/thinkgos/gogate/protocol/elinkmd"
+	_ "github.com/thinkgos/gogate/smartIndustrial/routers"
+	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego"
-
-	_ "github.com/thinkgos/gogate/models"
-	_ "github.com/thinkgos/gogate/smartIndustrial/routers"
 )
 
+func init() {
+	// 注册设备模型初始化函数
+	models.RegisterDbTableInitFunction(models.GeneralDeviceDbTableInit)
+	models.RegisterDbTableInitFunction(models.ZbDeviceDbTableInit)
+}
+
 func main() {
+	elink.RegisterTopicInfo(misc.Mac(), elinkmd.ProductKey) // 注册网关产品Key
+	misc.CfgInit()
 	misc.LogsInit()
-	mq.MqInit()
+	mq.MqInit(elinkmd.ProductKey, misc.Mac())
 	if npis.OpenZbApp() != nil {
 		panic("main: npi app init failed")
 	}

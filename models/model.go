@@ -45,7 +45,7 @@ func DbInit() error {
 		return errors.Wrapf(err, "db(%s-%s) open failed", _DB_DRIVER, _DB_NAME)
 	}
 	//default disable
-	db.LogMode(misc.APPCfg.Section(ini.DefaultSection).Key("ormDbLog").MustBool(false))
+	db.LogMode(misc.APPCfg.Section(ini.DEFAULT_SECTION).Key("ormDbLog").MustBool(false))
 	//db.LogMode(true)
 
 	for _, initF := range dbTableInitList {
