@@ -97,16 +97,12 @@ func (this *Provider) Run() {
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err,
 				websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				logs.Warn("RunRead: %v", err)
+				logs.Warn("Run: %v", err)
 			}
 			break
 		}
-		tp := jsoniter.Get(msg, "topic").ToString()
-		if len(tp) == 0 {
-			logs.Warn("Handle: Invalid topic discard")
-			continue
-		}
-		elink.Server(this, tp, msg)
+
+		elink.Server(this, jsoniter.Get(msg, "topic").ToString(), msg)
 	}
 
 	this.C.Close()
