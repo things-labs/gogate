@@ -1,6 +1,8 @@
 package webctls
 
 import (
+	"context"
+
 	"github.com/thinkgos/gogate/protocol/elinkws"
 
 	"github.com/astaxie/beego"
@@ -18,22 +20,6 @@ func (this *ElwsController) Get() {
 		logs.Error(err)
 		return
 	}
-	defer conn.Close()
 
-	p := elinkws.NewProvider(conn)
-	p.Run()
-	// for {
-
-	// 	mt, message, err := conn.ReadMessage()
-	// 	if err != nil {
-	// 		log.Println("read:", err)
-	// 		break
-	// 	}
-	// 	logs.Debug("recv: %s", message)
-	// 	err = conn.WriteMessage(mt, message)
-	// 	if err != nil {
-	// 		logs.Debug("write:", err)
-	// 		break
-	// 	}
-	// }
+	elinkws.NewProvider(conn).Run(context.TODO())
 }

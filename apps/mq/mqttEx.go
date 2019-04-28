@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	HeartBeatTime = 10 * time.Second
+	HeartBeatTime = 30 * time.Second
 )
 
 const (
