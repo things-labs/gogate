@@ -25,6 +25,8 @@ var (
 )
 
 func init() {
+	// 注册设备模型初始化函数
+	RegisterDbTableInitFunction(ZbDeviceDbTableInit)
 	if err := DbInit(); err != nil {
 		panic(err)
 	}

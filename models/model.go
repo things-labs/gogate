@@ -4,14 +4,15 @@ import (
 	"os"
 	"path"
 
-	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/utils"
+	ini "gopkg.in/ini.v1"
 
 	"github.com/astaxie/beego/logs"
-	"github.com/go-ini/ini"
 	"github.com/jinzhu/gorm"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
+	"github.com/thinkgos/gogate/misc"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
