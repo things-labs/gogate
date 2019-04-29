@@ -7,7 +7,7 @@ import (
 const (
 	tuple              = 3
 	DefaultWriteWait   = 1 * time.Second
-	DefaultKeepAlive   = 10 * time.Second
+	DefaultKeepAlive   = 60 * time.Second
 	DefaultRadtio      = 110
 	DefaultMessageSize = 32
 )
