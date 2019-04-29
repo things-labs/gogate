@@ -41,13 +41,17 @@ func NewProvider(c *websocket.Conn, cfg ...*Config) *Provider {
 	}
 }
 
-// 默认错误回误,加在topic
+// 默认错误回复,加在topic
 func (this *Provider) ErrorDefaultResponse(topic string) error {
 	o, err := jsoniter.Marshal(ctrl.BaseData{topic})
 	if err != nil {
 		return errors.Wrap(err, "websocket")
 	}
-	this.outBound <- o
+	select {
+	case this.outBound <- o:
+	default:
+		return errors.New("Provide buffer is full")
+	}
 	return nil
 }
 
@@ -68,11 +72,17 @@ func (this *Provider) Publish(tp string, data interface{}) error {
 	default:
 		return errors.New("Unknown data type")
 	}
-	this.outBound <- py
+
+	select {
+	case this.outBound <- py:
+	default:
+		return errors.New("Provide buffer is full")
+	}
+
 	return nil
 }
 
-func (this *Provider) writeDump(ctx context.Context) {
+func (this *Provider) writePump(ctx context.Context) {
 	var retries int
 
 	cfg := this.cfg
@@ -115,18 +125,17 @@ func (this *Provider) writeDump(ctx context.Context) {
 	}
 }
 
-func (this *Provider) Run(ctx context.Context) {
+func (this *Provider) Run() {
 	client := elink.NewClient(elink.Hub, this)
 	client.Hub.ManagaClient(true, client)
 
-	lctx, cancel := context.WithCancel(ctx)
-	go this.writeDump(lctx)
+	lctx, cancel := context.WithCancel(context.Background())
+	go this.writePump(lctx)
 
 	readWait := this.cfg.KeepAlive * time.Duration(this.cfg.Radtio) /
 		100 * (tuple + 1)
 
 	this.Conn.SetPongHandler(func(string) error {
-
 		atomic.StoreInt32(&this.alive, 0)
 		this.Conn.SetReadDeadline(time.Now().Add(readWait))
 		logs.Debug("%s pong", this.Conn.RemoteAddr().String())
@@ -138,11 +147,8 @@ func (this *Provider) Run(ctx context.Context) {
 		err := this.Conn.WriteControl(websocket.PongMessage,
 			[]byte(message), time.Now().Add(this.cfg.WriteWait))
 		if err != nil {
-			if err == websocket.ErrCloseSent {
-				// see default handler
-			} else if e, ok := err.(net.Error); ok && e.Temporary() {
-				// see default handler
-			} else {
+			if e, ok := err.(net.Error); !(ok && e.Temporary() ||
+				err == websocket.ErrCloseSent) {
 				return err
 			}
 		}
@@ -160,6 +166,7 @@ func (this *Provider) Run(ctx context.Context) {
 			logs.Error("Run Read: ", err)
 			break
 		}
+		atomic.StoreInt32(&this.alive, 0)
 		elink.Server(this, jsoniter.Get(msg, "topic").ToString(), msg)
 	}
 

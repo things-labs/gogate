@@ -1,8 +1,6 @@
 package webctls
 
 import (
-	"context"
-
 	"github.com/thinkgos/gogate/protocol/elinkws"
 
 	"github.com/astaxie/beego"
@@ -21,5 +19,5 @@ func (this *ElwsController) Get() {
 		return
 	}
 
-	elinkws.NewProvider(conn).Run(context.TODO())
+	elinkws.NewProvider(conn).Run()
 }
