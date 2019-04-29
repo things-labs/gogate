@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/thinkgos/gogate/misc"
-	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gogate/protocol/elinkmq"
 	"github.com/thinkgos/gomo/elink"
@@ -129,7 +128,7 @@ func HeartBeatStatus() {
 
 	// 心跳包推送
 	func() {
-		tp := elink.FormatPshSpecialTopic(ctrl.ChannelData,
+		tp := elink.FormatPshTopic(elink.ChannelInternal,
 			elinkmd.GatewayHeartbeat, elink.MethodPatch, elink.MessageTypeTime)
 		out, err := jsoniter.Marshal(elinkmd.GatewayHeatbeats(tp, true))
 		if err != nil {
@@ -144,7 +143,7 @@ func HeartBeatStatus() {
 
 	// 系统监控信息推送
 	func() {
-		tp := elink.FormatPshSpecialTopic(ctrl.ChannelData,
+		tp := elink.FormatPshTopic(elink.ChannelInternal,
 			elinkmd.SystemMonitor, elink.MethodPatch, elink.MessageTypeTime)
 
 		out, err := jsoniter.Marshal(elinkmd.GatewayMonitors(tp))

@@ -140,7 +140,7 @@ func (this *Controller) WriteResponsePy(code int, payload []byte) error {
 
 // 推送数据,向对应的推送通道推送数据
 func Publish(resourse, method, messageType string, payload []byte) error {
-	tp := elink.FormatPshCommonTopic(ChannelData, resourse, method, messageType)
+	tp := elink.FormatPshTopic(ChannelData, resourse, method, messageType)
 	out, err := jsoniter.Marshal(
 		Data{
 			&BaseData{tp},
