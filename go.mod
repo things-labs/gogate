@@ -22,7 +22,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
-	github.com/thinkgos/easyjms v0.1.0
+	github.com/thinkgos/easyjms v0.1.1
 	github.com/thinkgos/go-cache v2.2.0+incompatible
 	github.com/thinkgos/gomo v0.0.0-20190429121624-6c78bb3f652b
 	github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede
