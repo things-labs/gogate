@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	SMARTAPP_CFG_PATH = "conf/smartapp.conf" // 应用配置路径
-	USART_CFG_PATH    = "conf/usart.conf"    // 串口配置
+	SmartAppCfgPath = "conf/smartapp.conf" // 应用配置路径
+	UsartCfgPath    = "conf/usart.conf"    // 串口配置
 )
 
 var (
@@ -26,28 +26,28 @@ var (
 func CfgInit() error {
 	var err error
 
-	if dir := path.Dir(SMARTAPP_CFG_PATH); !com.IsExist(dir) {
+	if dir := path.Dir(SmartAppCfgPath); !com.IsExist(dir) {
 		os.MkdirAll(dir, os.ModePerm)
 		FactorySmartAppCfg()
 		FactoryUsartCfg()
 	}
 
-	if !com.IsExist(SMARTAPP_CFG_PATH) {
+	if !com.IsExist(SmartAppCfgPath) {
 		FactorySmartAppCfg()
 	}
 
-	if APPCfg, err = ini.LooseLoad(SMARTAPP_CFG_PATH); err != nil {
-		if APPCfg, err = ini.Load([]byte(SMARTAPP_DEFAULT_CFG)); err != nil {
+	if APPCfg, err = ini.LooseLoad(SmartAppCfgPath); err != nil {
+		if APPCfg, err = ini.Load([]byte(SmartAppDefaultCfg)); err != nil {
 			logs.Critical("config load failed,", err)
 		}
 	}
 
-	if !com.IsExist(USART_CFG_PATH) {
+	if !com.IsExist(UsartCfgPath) {
 		FactoryUsartCfg()
 	}
 
-	if UartCfg, err = ini.LooseLoad(USART_CFG_PATH); err != nil {
-		if UartCfg, err = ini.Load([]byte(USART_DEFAULT_CFG)); err != nil {
+	if UartCfg, err = ini.LooseLoad(UsartCfgPath); err != nil {
+		if UartCfg, err = ini.Load([]byte(UsartDefaultCfg)); err != nil {
 			logs.Critical("config load failed,", err)
 		}
 	}
@@ -57,21 +57,21 @@ func CfgInit() error {
 }
 
 func FactorySmartAppCfg() error {
-	f, err := os.Create(SMARTAPP_CFG_PATH)
+	f, err := os.Create(SmartAppCfgPath)
 	if err != nil {
 		return err
 	}
-	f.WriteString(SMARTAPP_DEFAULT_CFG)
+	f.WriteString(SmartAppDefaultCfg)
 	f.Close()
 	return nil
 }
 
 func FactoryUsartCfg() error {
-	f, err := os.Create(USART_CFG_PATH)
+	f, err := os.Create(UsartCfgPath)
 	if err != nil {
 		return err
 	}
-	f.WriteString(USART_DEFAULT_CFG)
+	f.WriteString(UsartDefaultCfg)
 	f.Close()
 	return nil
 }
@@ -79,7 +79,7 @@ func FactoryUsartCfg() error {
 func LogsInit() {
 	logs.Reset() // 复位日志输出流
 	sec, err := APPCfg.GetSection("logs")
-	if err != nil {
+	if err != nil { // 使用默认控制台配置
 		level := 7
 		if beego.BConfig.RunMode == "prod" {
 			level = 3
@@ -89,6 +89,7 @@ func LogsInit() {
 		logs.Debug("use adapter: console,level: %d", level)
 		return
 	}
+
 	adapter := sec.Key("adapter").MustString("console")
 	tmpll := sec.Key("level").MustInt(7)
 	if adapter == logs.AdapterConn {
@@ -120,7 +121,7 @@ func watch() {
 	}
 	defer watcher.Close()
 
-	watcher.Add(SMARTAPP_CFG_PATH)
+	watcher.Add(SmartAppCfgPath)
 	for {
 		select {
 		case err, ok := <-watcher.Errors:

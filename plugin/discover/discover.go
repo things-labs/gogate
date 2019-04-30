@@ -13,6 +13,7 @@ import (
 
 	"github.com/astaxie/beego/logs"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -20,7 +21,6 @@ const (
 )
 
 // Run discover application.
-// discover.Run() default run on HttpPort
 // discover.Run("localhost:8091")
 // discover.Run(":8091")
 // discover.Run("127.0.0.1:8091")
@@ -35,9 +35,9 @@ func Run(params ...string) {
 			listenAddr = strs[0]
 		}
 		if len(strs) > 1 && strs[1] != "" {
+			// 转换错误使用默认的端口
 			if listenPort, err = strconv.Atoi(strs[1]); err != nil {
-				logs.Critical("discover: ", err)
-				return
+				logs.Error("discover: ", err)
 			}
 		}
 	}
@@ -59,10 +59,12 @@ func Run(params ...string) {
 		return
 	}
 	defer conn.Close()
-
 	logs.Debug("discover: server Running on %s", listenAddr)
 	for {
-		handleClient(conn)
+		err := handleClient(conn)
+		if err != nil {
+			logs.Error("discover handle,", err)
+		}
 	}
 }
 
@@ -80,24 +82,21 @@ type GatewayDiscoverRsp struct {
 	Version    string `json:"version"`
 }
 
-func handleClient(conn *net.UDPConn) {
+func handleClient(conn *net.UDPConn) error {
 	buf := make([]byte, 2048)
 	m, remoteAddr, err := conn.ReadFromUDP(buf)
 	if err != nil {
-		logs.Error("read failed!", err)
-		return
+		return errors.Wrap(err, "read failed")
 	}
 	rawData := buf[:m]
 	req := &GatewayDiscoverReq{}
 	err = jsoniter.Unmarshal(rawData, req)
 	if err != nil {
-		logs.Error(err)
-		return
+		return errors.Wrap(err, "Unmarshal")
 	}
 
 	if req.ProductKey != elink.TpInfos.ProductKey {
-		logs.Error("productkey not match")
-		return
+		return errors.Wrap(err, "productkey not match")
 	}
 
 	rsp := &GatewayDiscoverRsp{
@@ -111,8 +110,9 @@ func handleClient(conn *net.UDPConn) {
 	out, err := jsoniter.Marshal(rsp)
 	if err != nil {
 		logs.Error(err)
-		return
+		return errors.Wrap(err, "Marshal")
 	}
 
-	conn.WriteToUDP(out, remoteAddr)
+	_, err = conn.WriteToUDP(out, remoteAddr)
+	return err
 }
