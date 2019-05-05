@@ -1,4 +1,4 @@
-package mq
+package broad
 
 const (
 	cacert_pem = `-----BEGIN CERTIFICATE-----

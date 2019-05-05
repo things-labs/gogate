@@ -1,11 +1,10 @@
 package webctls
 
 import (
-	"github.com/thinkgos/gogate/protocol/elinkws"
+	"github.com/thinkgos/gogate/apps/broad"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
-	"github.com/gorilla/websocket"
 )
 
 type ElwsController struct {
@@ -13,11 +12,9 @@ type ElwsController struct {
 }
 
 func (this *ElwsController) Get() {
-	conn, err := websocket.Upgrade(this.Ctx.ResponseWriter, this.Ctx.Request, nil, 1024, 1024)
+	err := broad.WsHub.UpgradeWithRun(this.Ctx.ResponseWriter, this.Ctx.Request)
 	if err != nil {
 		logs.Error(err)
 		return
 	}
-
-	elinkws.NewProvider(conn).Run()
 }

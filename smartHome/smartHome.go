@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/thinkgos/gogate/apps/mq"
+	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/apps/npis"
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/plugin/discover"
@@ -27,8 +27,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	mq.MqInit(elinkmd.ProductKey, misc.Mac())
+	broad.BroadInit()
 	err = npis.OpenZbApp()
 	if err != nil {
 		panic(err)

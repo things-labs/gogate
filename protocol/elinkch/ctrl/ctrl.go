@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/thinkgos/gogate/apps/broad"
+
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gomo/elink"
 
@@ -71,7 +73,7 @@ func init() {
 }
 
 func (this *Controller) Prepare() {
-	if !models.HasUser(this.Input.Topic.UserId) {
+	if !models.HasUser(this.Input.Topic.UserID) {
 		this.ErrorResponse(elink.CodeErrCommonUserNoAccess)
 		this.StopRun()
 	}
@@ -150,7 +152,7 @@ func Publish(resourse, method, messageType string, payload []byte) error {
 		return err
 	}
 
-	return elink.Publish(tp, out)
+	return broad.Disrup.Publish(tp, out)
 }
 
 //  签名mac + `@#$%` + timeStamp + `^&*()`拼接后md5 ,加盐值加密验证

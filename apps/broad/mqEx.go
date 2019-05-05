@@ -1,24 +1,18 @@
-package mq
+package broad
 
 import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
-	"github.com/thinkgos/gogate/protocol/elinkmq"
 	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego/logs"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	jsoniter "github.com/json-iterator/go"
-)
-
-const (
-	HeartBeatTime = 30 * time.Second
 )
 
 const (
@@ -29,7 +23,6 @@ const (
 )
 
 var Client mqtt.Client
-var heartOnce sync.Once
 
 func MqInit(productKey, mac string) {
 	opts := mqtt.NewClientOptions()
@@ -50,9 +43,8 @@ func MqInit(productKey, mac string) {
 		chList := elink.ChannelSelectorList()
 		for _, ch := range chList {
 			s := fmt.Sprintf("%s/%s/%s/+/+/+/#", ch, productKey, mac)
-			cli.Subscribe(s, 2, elinkmq.Handle)
+			cli.Subscribe(s, 2, MessageHandle)
 		}
-		heartOnce.Do(func() { time.AfterFunc(time.Second, HeartBeatStatus) })
 	})
 
 	opts.SetConnectionLostHandler(func(cli mqtt.Client, err error) {
@@ -68,7 +60,6 @@ func MqInit(productKey, mac string) {
 	}
 	Client = mqtt.NewClient(opts)
 
-	elink.ManagaClient(true, elink.NewClient(elink.Hub, elinkmq.NewProvider(Client)))
 	go Connect()
 }
 func NewTLSConfig() (*tls.Config, error) {
@@ -117,43 +108,4 @@ func Connect() {
 		logs.Warn("mqtt client connect failed, ", token.Error())
 		time.AfterFunc(time.Second*30, Connect)
 	}
-}
-
-// 网关心跳包
-func HeartBeatStatus() {
-	defer time.AfterFunc(HeartBeatTime, HeartBeatStatus)
-	if !Client.IsConnected() {
-		return
-	}
-
-	// 心跳包推送
-	func() {
-		tp := elink.FormatPshTopic(elink.ChannelInternal,
-			elinkmd.GatewayHeartbeat, elink.MethodPatch, elink.MessageTypeTime)
-		out, err := jsoniter.Marshal(elinkmd.GatewayHeatbeats(tp, true))
-		if err != nil {
-			logs.Error("GatewayHeatbeats:", err)
-			return
-		}
-		err = elink.Publish(tp, out)
-		if err != nil {
-			logs.Error("GatewayHeatbeats:", err)
-		}
-	}()
-
-	// 系统监控信息推送
-	func() {
-		tp := elink.FormatPshTopic(elink.ChannelInternal,
-			elinkmd.SystemMonitor, elink.MethodPatch, elink.MessageTypeTime)
-
-		out, err := jsoniter.Marshal(elinkmd.GatewayMonitors(tp))
-		if err != nil {
-			logs.Error("GatewayMonitors:", err)
-			return
-		}
-		err = elink.Publish(tp, out)
-		if err != nil {
-			logs.Error("GatewayHeatbeats:", err)
-		}
-	}()
 }
