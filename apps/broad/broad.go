@@ -3,6 +3,8 @@ package broad
 import (
 	"time"
 
+	"github.com/thinkgos/easyws"
+
 	"github.com/astaxie/beego/logs"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/thinkgos/gogate/misc"
@@ -15,14 +17,15 @@ const (
 	HeartBeatTime = 30 * time.Second
 )
 
+var WsHub *easyws.Hub
 var Disrup *lmax.Lmax
 
 func BroadInit() {
 	Disrup = lmax.New()
-	MqInit(elinkmd.ProductKey, misc.Mac())
-	WsInit()
-	go Disrup.Run(&mqConsume{Client, Disrup},
-		&wsConsume{WsHub, Disrup})
+	mqCli := NewMqClient(elinkmd.ProductKey, misc.Mac())
+	WsHub = NewWsHub()
+	go Disrup.Run(&mqConsume{mqCli, Disrup}, &wsConsume{WsHub, Disrup})
+	time.Sleep(time.Millisecond * 1)
 	HeartBeatStatus()
 }
 
@@ -60,4 +63,8 @@ func HeartBeatStatus() {
 			logs.Error("GatewayHeatbeats:", err)
 		}
 	}()
+}
+
+func Publish(tp string, data interface{}) error {
+	return Disrup.Publish(tp, data)
 }

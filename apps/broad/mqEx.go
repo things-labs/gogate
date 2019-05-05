@@ -3,6 +3,7 @@ package broad
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"time"
 
@@ -16,20 +17,18 @@ import (
 )
 
 const (
-	mqtt_broker_address = "tcp://155.lchtime.com:1883" // 无ssl
+	mqttBrokerAddress = "tcp://155.lchtime.com:1883" // 无ssl
 	//mqtt_broker_address  = "ssl://155.lchtime.com:8883" // 支持ssl
-	mqtt_broker_username = "1"
-	mqtt_broker_password = "52399399"
+	mqttBrokerUsername = "1"
+	mqttBrokerPassword = "52399399"
 )
 
-var Client mqtt.Client
-
-func MqInit(productKey, mac string) {
+func NewMqClient(productKey, mac string) mqtt.Client {
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(mqtt_broker_address)
+	opts.AddBroker(mqttBrokerAddress)
 	opts.SetClientID(misc.Mac())
-	opts.SetUsername(mqtt_broker_username)
-	opts.SetPassword(mqtt_broker_password)
+	opts.SetUsername(mqttBrokerUsername)
+	opts.SetPassword(mqttBrokerPassword)
 	opts.SetCleanSession(true)
 	opts.SetAutoReconnect(true)
 	//	tlscfg, err := NewTLSConfig()
@@ -58,16 +57,42 @@ func MqInit(productKey, mac string) {
 			fmt.Sprintf("data/0/%s/%s/patch/time", misc.Mac(), elinkmd.GatewayHeartbeat),
 			out, 2, false)
 	}
-	Client = mqtt.NewClient(opts)
+	c := mqtt.NewClient(opts)
+	connect := func() error {
+		logs.Info("mqtt client connecting...")
+		if token := c.Connect(); !token.WaitTimeout(time.Second*10) ||
+			(token.Error() != nil) {
+			logs.Warn("mqtt client connect failed, ", token.Error())
+			return errors.New("mqtt client connect failed")
+		}
+		return nil
+	}
 
-	go Connect()
+	go func() {
+		if connect() == nil {
+			return
+		}
+		t := time.NewTimer(time.Second * 30)
+		for {
+			<-t.C
+			if err := connect(); err != nil {
+				t.Reset(time.Second * 30)
+				continue
+			}
+			t.Stop()
+			return
+		}
+	}()
+
+	return c
 }
+
 func NewTLSConfig() (*tls.Config, error) {
 	// Import trusted certificates from CAfile.pem.
 	// Alternatively, manually add CA certificates to
 	// default openssl CA bundle.
 	certpool := x509.NewCertPool()
-	certpool.AppendCertsFromPEM([]byte(cacert_pem))
+	certpool.AppendCertsFromPEM([]byte(cacertPem))
 
 	//	// Import client certificate/key pair
 	//	cert, err := tls.X509KeyPair([]byte(cert_pem), []byte(key_pem))
@@ -99,13 +124,4 @@ func NewTLSConfig() (*tls.Config, error) {
 		MinVersion: tls.VersionTLS12,
 		MaxVersion: tls.VersionTLS12,
 	}, nil
-}
-
-// 启动连接mqtt
-func Connect() {
-	logs.Info("mqtt client connecting...")
-	if token := Client.Connect(); !token.WaitTimeout(time.Second*10) || (token.Error() != nil) {
-		logs.Warn("mqtt client connect failed, ", token.Error())
-		time.AfterFunc(time.Second*30, Connect)
-	}
 }

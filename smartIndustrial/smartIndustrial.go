@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/thinkgos/gogate/apps/mq"
+	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/apps/npis"
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/models"
@@ -23,7 +23,7 @@ func main() {
 	elink.RegisterTopicInfo(misc.Mac(), elinkmd.ProductKey) // 注册网关产品Key
 	misc.CfgInit()
 	misc.LogsInit()
-	mq.MqInit(elinkmd.ProductKey, misc.Mac())
+	broad.BroadInit()
 	if npis.OpenZbApp() != nil {
 		panic("main: npi app init failed")
 	}

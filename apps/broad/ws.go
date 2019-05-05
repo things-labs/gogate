@@ -18,7 +18,7 @@ type WsProvider struct {
 }
 
 type DefaultError struct {
-	Topic string `json:"topic,omitempty"`
+	Topic string `json:"topic"`
 }
 
 // 默认错误回复,加在topic
