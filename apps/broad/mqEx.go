@@ -50,12 +50,12 @@ func NewMqClient(productKey, mac string) mqtt.Client {
 		logs.Warn("mqtt client connection lost, ", err)
 	})
 
-	if out, err := jsoniter.Marshal(elinkmd.GatewayHeatbeats("", false)); err != nil {
+	tp := elink.FormatPshTopic(elink.ChannelInternal, elinkmd.GatewayHeartbeat,
+		elink.MethodPatch, elink.MessageTypeTime)
+	if out, err := jsoniter.Marshal(elinkmd.GatewayHeatbeats(tp, false)); err != nil {
 		logs.Error("mqtt %s", err.Error())
 	} else {
-		opts.SetBinaryWill(
-			fmt.Sprintf("data/0/%s/%s/patch/time", misc.Mac(), elinkmd.GatewayHeartbeat),
-			out, 2, false)
+		opts.SetBinaryWill(tp, out, 2, false)
 	}
 	c := mqtt.NewClient(opts)
 	connect := func() error {
