@@ -9,15 +9,15 @@ import (
 	"github.com/astaxie/beego"
 )
 
-type LoginController struct {
+type UserLogController struct {
 	beego.Controller
 }
 
-func (this *LoginController) Get() {
+func (this *UserLogController) Get() {
 	this.TplName = "login.html"
 }
 
-func (this *LoginController) Post() {
+func (this *UserLogController) Post() {
 	uname := this.Input().Get("username")
 	pwd := this.Input().Get("password")
 	if len(uname) == 0 || len(pwd) == 0 {
@@ -33,6 +33,11 @@ func (this *LoginController) Post() {
 		this.Redirect("/index.html", 302) // 重定向到首页
 	}
 
+	this.Redirect("/login.html", 302)
+}
+
+func (this *UserLogController) Delete() {
+	this.DestroySession()
 	this.Redirect("/login.html", 302)
 }
 

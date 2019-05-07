@@ -12,7 +12,7 @@ import (
 // web router setting
 func init() {
 	beego.Router("/", &webctls.HomeController{}, "*:Get")
-	beego.Router("/login", &webctls.LoginController{})
+	beego.Router("/user/log", &webctls.UserLogController{})
 	beego.Router("/index", &webctls.HomeController{})
 }
 
