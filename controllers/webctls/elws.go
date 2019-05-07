@@ -11,10 +11,10 @@ type ElwsController struct {
 	beego.Controller
 }
 
-func (this *ElwsController) Get() {
+func (this *ElwsController) ConnectWs() {
 	err := broad.WsHub.UpgradeWithRun(this.Ctx.ResponseWriter, this.Ctx.Request)
 	if err != nil {
 		logs.Error(err)
-		return
 	}
+	return
 }

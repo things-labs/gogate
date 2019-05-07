@@ -15,7 +15,8 @@ const generaldeviceInfo_sql = `CREATE TABLE "general_device_infos" (
 // 通用设备数据表初始化
 func GeneralDeviceDbTableInit() error {
 	if !db.HasTable("general_device_infos") {
-		return db.Raw(generaldeviceInfo_sql).Scan(&GeneralDeviceInfo{}).Error
+		//TODO: check error?
+		db.Raw(generaldeviceInfo_sql).Scan(&GeneralDeviceInfo{})
 	}
 	return nil
 }

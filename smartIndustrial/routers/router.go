@@ -11,8 +11,9 @@ import (
 
 // web router setting
 func init() {
-	beego.Router("/", &webctls.HomeController{})
-	beego.Router("/login/:id([0-9]+)", &webctls.LoginController{})
+	beego.Router("/", &webctls.HomeController{}, "*:Get")
+	beego.Router("/login", &webctls.LoginController{})
+	beego.Router("/index", &webctls.HomeController{})
 }
 
 // elink router setting
@@ -23,5 +24,4 @@ func init() {
 	elink.Router(ctrl.ChannelCtrl, "devices.@", &elinkctls.DevicesController{})
 	elink.Router(ctrl.ChannelCtrl, "device.commands.@", &elinkctls.DevCommandController{})
 	elink.Router(ctrl.ChannelCtrl, "device.propertys.@", &elinkctls.DevPropertysController{})
-	elink.Router(ctrl.ChannelCtrl, "zigbee.network", &elinkctls.ZbNetworkController{})
 }

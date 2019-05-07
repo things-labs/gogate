@@ -61,9 +61,9 @@ func ZbDeviceDbTableInit() error {
 	}
 
 	if !db.HasTable("zb_device_node_infos") {
-		return db.Raw(zbDeviceNodeInfos_Sql).Scan(&ZbDeviceNodeInfo{}).Error
+		//TODO: check error?
+		db.Raw(zbDeviceNodeInfos_Sql).Scan(&ZbDeviceNodeInfo{})
 	}
-
 	return nil
 }
 

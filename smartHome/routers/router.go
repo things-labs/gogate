@@ -20,5 +20,5 @@ func init() {
 }
 
 func init() {
-	beego.Router("/elws", &webctls.ElwsController{})
+	beego.Router("/elws", &webctls.ElwsController{}, "*:ConnectWs")
 }
