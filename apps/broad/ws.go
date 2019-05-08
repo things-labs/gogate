@@ -43,7 +43,7 @@ type wsConsume struct {
 
 func (this *wsConsume) Consume(lower, upper int64) {
 	for seq := lower; seq <= upper; seq++ {
-		msg := this.L.RingBuffer[seq&lmax.RingBufferMask]
+		msg := this.L.RingBuffer[seq&lmax.RingBufferDefaultMask]
 
 		err := this.Hub.BroadCast(websocket.BinaryMessage, msg.Data)
 		if err != nil {

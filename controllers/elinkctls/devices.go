@@ -6,7 +6,7 @@ import (
 	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego/logs"
-	"github.com/json-iterator/go"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type DevSnPy struct {
@@ -74,12 +74,7 @@ func (this *DevicesController) getGernalDevices(pid int) int {
 		sns = append(sns, v.Sn)
 	}
 
-	py, err := jsoniter.Marshal(DevMultiSnPy{pid, sns})
-	if err != nil {
-		return elink.CodeErrSysException
-	}
-
-	this.WriteResponsePy(elink.CodeSuccess, py)
+	this.WriteResponsePyServerJSON(elink.CodeSuccess, &DevMultiSnPy{pid, sns})
 	return elink.CodeSuccess
 }
 
@@ -158,20 +153,19 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) int {
 		return elink.CodeErrDeviceCommandOperationFailed
 	}
 
-	var py []byte
+	var py interface{}
 	if isArray {
-		if py, err = jsoniter.Marshal(DevMultiSnPy{pid, snSuc}); err != nil {
-			return elink.CodeErrSysException
-		}
+		py = &DevMultiSnPy{pid, snSuc}
 	} else {
 		if snSuc[0] == "" {
 			return elink.CodeErrDeviceCommandOperationFailed
 		}
-		if py, err = jsoniter.Marshal(DevSnPy{pid, snSuc[0]}); err != nil {
-			return elink.CodeErrSysException
-		}
+		py = &DevSnPy{pid, snSuc[0]}
 	}
 
-	this.WriteResponsePy(elink.CodeSuccess, py)
+	err = this.WriteResponsePyServerJSON(elink.CodeSuccess, py)
+	if err != nil {
+		return elink.CodeErrSysException
+	}
 	return elink.CodeSuccess
 }

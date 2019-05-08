@@ -20,7 +20,7 @@ net = udp
 addr = 192.168.1.199:9000
 `
 	UsartDefaultCfg = `[COM0]
-Name=COM5
+Name=/dev/ttyS1
 BaudRate=115200
 DataBit=8
 Parity=N

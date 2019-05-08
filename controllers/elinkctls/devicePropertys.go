@@ -10,7 +10,7 @@ import (
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/protocol/limp"
 
-	"github.com/json-iterator/go"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type DevPropReqPy struct {
@@ -89,11 +89,8 @@ func (this *DevPropertysController) zbDevicePropertysGet(pid int) int {
 			if !ok {
 				return elink.CodeErrDeviceCommandOperationFailed
 			}
-			out, err := jsoniter.Marshal(DevPropRspPy{rpl.ProductID, rpl.Sn, rpl.NodeNo, item})
-			if err != nil {
-				return elink.CodeErrSysException
-			}
-			this.WriteResponsePy(elink.CodeSuccess, out)
+
+			this.WriteResponsePyServerJSON(elink.CodeSuccess, &DevPropRspPy{rpl.ProductID, rpl.Sn, rpl.NodeNo, item})
 		default:
 			return elink.CodeErrDevicePropertysNotSupport
 		}

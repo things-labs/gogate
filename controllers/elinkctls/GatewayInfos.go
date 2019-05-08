@@ -9,7 +9,6 @@ import (
 	"github.com/thinkgos/utils"
 
 	"github.com/astaxie/beego/logs"
-	jsoniter "github.com/json-iterator/go"
 )
 
 type GwInfosRspPy struct {
@@ -24,21 +23,17 @@ type GatewayInfos struct {
 }
 
 func (this *GatewayInfos) Get() {
-	rsp := &GwInfosRspPy{
-		misc.BuildDate(),
-		misc.Version(),
-		utils.RunningTime(),
-		GetOutboundIP(),
-	}
-
-	out, err := jsoniter.Marshal(rsp)
+	err := this.WriteResponsePyServerJSON(elink.CodeSuccess,
+		&GwInfosRspPy{
+			misc.BuildDate(),
+			misc.Version(),
+			utils.RunningTime(),
+			GetOutboundIP(),
+		})
 	if err != nil {
 		this.ErrorResponse(elink.CodeErrSysException)
-		return
-	}
-	err = this.WriteResponsePy(elink.CodeSuccess, out)
-	if err != nil {
 		logs.Error(err)
+		return
 	}
 }
 

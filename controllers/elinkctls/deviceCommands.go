@@ -8,7 +8,7 @@ import (
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/ltl/ltlspec"
 
-	"github.com/json-iterator/go"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type DevCmdPara struct {
@@ -96,7 +96,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 			code = elink.CodeErrDeviceCommandOperationFailed
 			return
 		}
-		this.WriteResponsePy(elink.CodeSuccess, nil)
+		this.WriteResponsePyServerJSON(elink.CodeSuccess, nil)
 		return
 	}
 
@@ -125,7 +125,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 			code = elink.CodeErrDeviceCommandOperationFailed
 			return
 		}
-		this.WriteResponsePy(elink.CodeSuccess, nil)
+		this.WriteResponsePyServerJSON(elink.CodeSuccess, nil)
 	default:
 		code = elink.CodeErrProudctFeatureUndefined
 		return

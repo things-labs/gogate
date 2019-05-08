@@ -7,13 +7,12 @@ import (
 )
 
 type GwMonitor struct {
-	Topic       string `json:"topic,omitempty"`
 	AppMemInfos *runtime.MemStats
 }
 
-func GatewayMonitors(tp string) *GwMonitor {
+func GatewayMonitors() (*GwMonitor, error) {
 	memStats := new(runtime.MemStats)
 	runtime.ReadMemStats(memStats)
 
-	return &GwMonitor{tp, memStats}
+	return &GwMonitor{memStats}, nil
 }

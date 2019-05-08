@@ -32,7 +32,7 @@ func (this *ZbNetworkController) Post() {
 	npis.SetNetworkSteering(true)
 	logs.Debug("elinkctls: zigbee network steering open")
 
-	err = this.WriteResponsePy(elink.CodeSuccess, nil)
+	err = this.WriteResponsePyServerJSON(elink.CodeSuccess, nil)
 	if err != nil {
 		logs.Error(err)
 	}
@@ -49,7 +49,7 @@ func (this *ZbNetworkController) Delete() {
 	npis.SetNetworkSteering(false)
 	logs.Debug("elinkctls: zigbee network steering close")
 
-	err = this.WriteResponsePy(elink.CodeSuccess, nil)
+	err = this.WriteResponsePyServerJSON(elink.CodeSuccess, nil)
 	if err != nil {
 		logs.Error(err)
 	}

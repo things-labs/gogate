@@ -41,7 +41,7 @@ func (this *GatewayCommands) Post() {
 	case "identify":
 	}
 
-	err := this.WriteResponsePy(elink.CodeSuccess, nil)
+	err := this.WriteResponsePyServerJSON(elink.CodeSuccess, nil)
 	if err != nil {
 		logs.Error(err)
 	}

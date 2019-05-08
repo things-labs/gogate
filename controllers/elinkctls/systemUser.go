@@ -6,7 +6,7 @@ import (
 	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego/logs"
-	"github.com/json-iterator/go"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type SysMultiUserPy struct {
@@ -27,12 +27,8 @@ type SysUserController struct {
 }
 
 func (this *SysUserController) Get() {
-	out, err := jsoniter.Marshal(&SysMultiUserPy{Uid: models.GetUsers()})
-	if err != nil {
-		this.ErrorResponse(elink.CodeErrSysOperationFailed)
-		return
-	}
-	err = this.WriteResponsePy(elink.CodeSuccess, out)
+	err := this.WriteResponsePyServerJSON(elink.CodeSuccess,
+		&SysMultiUserPy{Uid: models.GetUsers()})
 	if err != nil {
 		logs.Error(err)
 	}
@@ -92,19 +88,13 @@ func (this *SysUserController) userDeal(isDel bool) {
 	}
 
 	var rspPy interface{}
-
 	if isArray {
 		rspPy = &SysMultiUserPy{Uid: sucUid}
 	} else {
 		rspPy = &SysUserPy{Uid: sucUid[0]}
 	}
-	out, err := jsoniter.Marshal(rspPy)
-	if err != nil {
-		code = elink.CodeErrSysOperationFailed
-		return
-	}
 
-	err = this.WriteResponsePy(elink.CodeSuccess, out)
+	err = this.WriteResponsePyServerJSON(elink.CodeSuccess, rspPy)
 	if err != nil {
 		logs.Error(err)
 	}

@@ -1,11 +1,10 @@
 package elinkpsh
 
 import (
+	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/elink"
-
-	jsoniter "github.com/json-iterator/go"
 )
 
 type DevSnPy struct {
@@ -15,15 +14,11 @@ type DevSnPy struct {
 
 // 设备加入或离开通知
 func DeviceAnnce(pid int, sn string, isjoin bool) error {
-	v, err := jsoniter.Marshal(DevSnPy{pid, sn})
-	if err != nil {
-		return err
-	}
 	method := elink.MethodDelete
 	if isjoin {
 		method = elink.MethodPost
 	}
-
-	return ctrl.Publish(elink.FormatResouce(elinkmd.Devices, pid),
-		method, elink.MessageTypeAnnce, v)
+	tp := elink.FormatPshTopic(ctrl.ChannelData, elink.FormatResouce(elinkmd.Devices, pid),
+		method, elink.MessageTypeAnnce)
+	return broad.PublishPyServerJSON(tp, DevSnPy{pid, sn})
 }

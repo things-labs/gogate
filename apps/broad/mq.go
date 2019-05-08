@@ -46,7 +46,7 @@ type mqConsume struct {
 
 func (this *mqConsume) Consume(lower, upper int64) {
 	for seq := lower; seq <= upper; seq++ {
-		msg := this.L.RingBuffer[seq&lmax.RingBufferMask]
+		msg := this.L.RingBuffer[seq&lmax.RingBufferDefaultMask]
 		err := this.Client.Publish(msg.Topic, 1, false, msg.Data).Error()
 		if err != nil {
 			logs.Debug(err)

@@ -3,18 +3,16 @@ package ctrl
 
 import (
 	"crypto/md5"
-	"errors"
 	"fmt"
 	"io"
 	"strconv"
 	"strings"
 
-	"github.com/thinkgos/gogate/apps/broad"
-
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gomo/elink"
 
 	jsoniter "github.com/json-iterator/go"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -53,17 +51,32 @@ type BaseRawPayload struct {
 
 type Request struct {
 	*BaseRequest
+	Payload interface{} `json:"payload,omitempty"`
+}
+type Response struct {
+	*BaseResponse
+	Payload interface{} `json:"payload,omitempty"`
+}
+
+type Data struct {
+	BaseData
+	Payload interface{} `json:"payload,omitempty"`
+}
+
+type RawRequest struct {
+	*BaseRequest
 	*BaseRawPayload
 }
 
-type Response struct {
+type RawResponse struct {
 	*BaseResponse
 	*BaseRawPayload
 }
-type Data struct {
+type RawData struct {
 	*BaseData
 	*BaseRawPayload
 }
+
 type Controller struct {
 	elink.Controller
 }
@@ -109,50 +122,32 @@ func (this *Controller) Delete() {
 // 不带Payload错误回复,code为CodeSuccess将不进行回复
 func (this *Controller) ErrorResponse(code int) error {
 	if code != elink.CodeSuccess {
-		return this.WriteResponsePy(code, nil)
+		return this.WriteResponsePyServerJSON(code, nil)
 	}
 	return nil
 }
 
-// 回复,只关注payload即可
-func (this *Controller) WriteResponsePy(code int, payload []byte) error {
+// 回复,只关注payload即可,json序列化由底层处理
+func (this *Controller) WriteResponsePyServerJSON(code int, payload interface{}) error {
 	tp := elink.FromatRspTopic(this.Input.Topic)
 	brsp := &BaseResponse{
 		Topic:    tp,
 		PacketID: jsoniter.Get(this.Input.Payload, "packetID").ToInt(),
 		Code:     code,
 	}
+
 	if code != elink.CodeSuccess {
 		errMsg := elink.CodeErrorMessage(code)
 		brsp.CodeDetail = errMsg.Detail
 		brsp.Message = errMsg.Message
 	}
 
-	out, err := jsoniter.Marshal(
-		Response{
-			brsp,
-			&BaseRawPayload{payload},
-		})
+	out, err := jsoniter.Marshal(&Response{brsp, payload})
 	if err != nil {
-		return err
+		return errors.Wrap(err, "json marshal failed")
 	}
 
 	return this.WriteResponse(tp, out)
-}
-
-// 推送数据,向对应的推送通道推送数据
-func Publish(resourse, method, messageType string, payload []byte) error {
-	tp := elink.FormatPshTopic(ChannelData, resourse, method, messageType)
-	out, err := jsoniter.Marshal(
-		Data{
-			&BaseData{tp},
-			&BaseRawPayload{payload},
-		})
-	if err != nil {
-		return err
-	}
-
-	return broad.Publish(tp, out)
 }
 
 //  签名mac + `@#$%` + timeStamp + `^&*()`拼接后md5 ,加盐值加密验证

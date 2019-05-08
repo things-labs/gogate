@@ -4,18 +4,17 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
-
+	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/controllers/elinkpsh"
 	"github.com/thinkgos/gogate/middle/ewait"
 	"github.com/thinkgos/gogate/models"
+	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/protocol/limp"
 
 	"github.com/astaxie/beego/logs"
-	jsoniter "github.com/json-iterator/go"
 )
 
 type deviceAnnce struct {
@@ -112,13 +111,11 @@ func (this *ZbnpiApp) ProInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []l
 		return errors.New("no fix trunkid")
 	}
 
-	out, err := jsoniter.Marshal(v)
-	if err != nil {
-		return err
-	}
-	return ctrl.Publish(
+	tp := elink.FormatPshTopic(ctrl.ChannelData,
 		elink.FormatResouce(elinkmd.DevicePropertys, zbdnode.ProductId),
-		elink.MethodPatch, elink.MessageTypeAnnce, out)
+		elink.MethodPatch, elink.MessageTypeAnnce)
+
+	return broad.PublishPyServerJSON(tp, v)
 }
 
 func (this *ZbnpiApp) ProInDefaultRsp(srcAddr uint16, hdr *ltl.FrameHdr, dfStatus *ltl.DefaultRsp, val interface{}) error {

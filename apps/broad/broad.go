@@ -4,13 +4,15 @@ import (
 	"time"
 
 	"github.com/thinkgos/easyws"
-
-	"github.com/astaxie/beego/logs"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/thinkgos/gogate/misc"
+	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/lmax"
+
+	"github.com/astaxie/beego/logs"
+	jsoniter "github.com/json-iterator/go"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -35,14 +37,9 @@ func HeartBeatStatus() {
 
 	// 心跳包推送
 	func() {
-		tp := elink.FormatPshTopic(elink.ChannelInternal,
-			elinkmd.GatewayHeartbeat, elink.MethodPatch, elink.MessageTypeTime)
-		out, err := jsoniter.Marshal(elinkmd.GatewayHeatbeats(tp, true))
-		if err != nil {
-			logs.Error("GatewayHeatbeats:", err)
-			return
-		}
-		err = Disrup.Publish(tp, out)
+		tp := elink.FormatPshTopic(elink.ChannelInternal, elinkmd.GatewayHeartbeat,
+			elink.MethodPatch, elink.MessageTypeTime)
+		err := PublishServerJSON(tp, elinkmd.GatewayHeatbeats(tp, true))
 		if err != nil {
 			logs.Error("GatewayHeatbeats:", err)
 		}
@@ -50,21 +47,29 @@ func HeartBeatStatus() {
 
 	// 系统监控信息推送
 	func() {
-		tp := elink.FormatPshTopic(elink.ChannelInternal,
-			elinkmd.SystemMonitor, elink.MethodPatch, elink.MessageTypeTime)
-
-		out, err := jsoniter.Marshal(elinkmd.GatewayMonitors(tp))
+		gm, err := elinkmd.GatewayMonitors()
 		if err != nil {
-			logs.Error("GatewayMonitors:", err)
+			logs.Error("GatewayHeatbeats:", err)
 			return
 		}
-		err = Disrup.Publish(tp, out)
+		tp := elink.FormatPshTopic(elink.ChannelInternal, elinkmd.SystemMonitor,
+			elink.MethodPatch, elink.MessageTypeTime)
+		err = PublishPyServerJSON(tp, gm)
 		if err != nil {
 			logs.Error("GatewayHeatbeats:", err)
 		}
 	}()
 }
 
-func Publish(tp string, data interface{}) error {
-	return Disrup.Publish(tp, data)
+func PublishServerJSON(tp string, data interface{}) error {
+	out, err := jsoniter.Marshal(data)
+	if err != nil {
+		return errors.Wrap(err, "json marshal failed")
+	}
+	return Disrup.Publish(tp, out)
+}
+
+// 推送数据,向对应的推送通道推送数据
+func PublishPyServerJSON(tp string, payload interface{}) error {
+	return PublishServerJSON(tp, &ctrl.Data{ctrl.BaseData{tp}, payload})
 }
