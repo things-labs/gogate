@@ -3,46 +3,56 @@ package elinkctls
 import (
 	"os/exec"
 
-	"github.com/astaxie/beego/logs"
-
 	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gomo/elink"
 
 	jsoniter "github.com/json-iterator/go"
 )
 
-type GwCmdReqPy struct {
-	Command string `json:"url"`
+// GwCmd 网关命令
+type GwCmd struct {
+	Command string `json:"Command"`
 }
 
+// GwCmdRequest 网关命令请求
 type GwCmdRequest struct {
 	ctrl.BaseRequest
-	Payload GwCmdReqPy `json:"payload"`
+	Payload GwCmd `json:"payload"`
 }
 
+// GatewayCommands 网关命令控制器
 type GatewayCommands struct {
 	ctrl.Controller
 }
 
+// Post 接收网关控制命令
 func (this *GatewayCommands) Post() {
+	code := elink.CodeSuccess
+	defer func() {
+		this.ErrorResponse(code)
+	}()
+
 	req := &GwCmdRequest{}
 	if err := jsoniter.Unmarshal(this.Input.Payload, req); err != nil {
-		this.ErrorResponse(elink.CodeErrSysInvalidParameter)
+		code = elink.CodeErrSysInvalidParameter
 		return
 	}
 
 	switch req.Payload.Command {
 	case "reboot":
 		if err := exec.Command("reboot").Run(); err != nil {
-			this.ErrorResponse(elink.CodeErrSysOperationFailed)
+			code = elink.CodeErrSysOperationFailed
 			return
 		}
 	case "factoryReset":
 	case "identify":
+	default:
+		code = elink.CodeErrSysNotSupport
+		return
 	}
 
 	err := this.WriteResponsePyServerJSON(elink.CodeSuccess, nil)
 	if err != nil {
-		logs.Error(err)
+		code = elink.CodeErrSysException
 	}
 }

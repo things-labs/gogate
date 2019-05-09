@@ -23,7 +23,7 @@ type NetInfo struct {
 }
 
 type GatewayHeatbeat struct {
-	Uid          []int64      `json:"uid"`
+	UID          []int64      `json:"uid"`
 	DeviceInfo   DeviceInfo   `json:"device_info"`
 	DeviceStatus DeviceStatus `json:"device_status"`
 	NetInfo      NetInfo      `json:"net_info"`
@@ -36,7 +36,7 @@ func GatewayHeatbeats(isonline bool) *GatewayHeatbeat {
 	}
 	mac := misc.Mac()
 	return &GatewayHeatbeat{
-		Uid:        models.GetUsers(),
+		UID:        models.GetUsers(),
 		DeviceInfo: DeviceInfo{Sn: mac},
 		DeviceStatus: DeviceStatus{
 			CurrentTime:   time.Now().Local().Format("2006-01-02 15:04:05"),

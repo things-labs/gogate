@@ -9,26 +9,30 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-type DevSnPy struct {
+// DevSn 单设备负载
+type DevSn struct {
 	ProductID int    `json:"productID"`
 	Sn        string `json:"sn"`
 }
 
-type DevMultiSnPy struct {
+// DevMultiSn 多设备负载
+type DevMultiSn struct {
 	ProductID int      `json:"productID"`
 	Sn        []string `json:"sn"`
 }
 
+// DevMultiSnRequest 多设备请求
 type DevMultiSnRequest struct {
 	ctrl.BaseRequest
-	Payload DevMultiSnPy `json:"payload,omitempty"`
+	Payload DevMultiSn `json:"payload,omitempty"`
 }
 
+// DevicesController 设备控制器
 type DevicesController struct {
 	ctrl.Controller
 }
 
-// 获取产品Id下的设备列表
+// Get 获取产品Id下的设备列表
 func (this *DevicesController) Get() {
 	code := elink.CodeSuccess
 	defer func() {
@@ -50,32 +54,33 @@ func (this *DevicesController) Get() {
 	// 根据不同的设备类型分发
 	switch pInfo.Types {
 	case models.PTypes_General: // 获取通用设备
-		this.getGernalDevices(pid)
+		err = this.getGernalDevices(pid)
+		if err != nil {
+			code = elink.CodeErrSysException
+		}
 	default:
 		code = elink.CodeErrProudctFeatureUndefined
 	}
 }
 
-// 添加设备
+// Post 添加设备
 func (this *DevicesController) Post() {
 	this.dealAddDelGernalDevices(false)
 }
 
-// 删除设备
+// Delete 删除设备
 func (this *DevicesController) Delete() {
 	this.dealAddDelGernalDevices(true)
 }
 
 // 获取通用设备列表
-func (this *DevicesController) getGernalDevices(pid int) int {
+func (this *DevicesController) getGernalDevices(pid int) error {
 	devs := models.FindGeneralDevice(pid)
 	sns := make([]string, 0, len(devs))
 	for _, v := range devs {
 		sns = append(sns, v.Sn)
 	}
-
-	this.WriteResponsePyServerJSON(elink.CodeSuccess, &DevMultiSnPy{pid, sns})
-	return elink.CodeSuccess
+	return this.WriteResponsePyServerJSON(elink.CodeSuccess, &DevMultiSn{pid, sns})
 }
 
 func (this *DevicesController) dealAddDelGernalDevices(isDel bool) {
@@ -155,12 +160,12 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) int {
 
 	var py interface{}
 	if isArray {
-		py = &DevMultiSnPy{pid, snSuc}
+		py = &DevMultiSn{pid, snSuc}
 	} else {
 		if snSuc[0] == "" {
 			return elink.CodeErrDeviceCommandOperationFailed
 		}
-		py = &DevSnPy{pid, snSuc[0]}
+		py = &DevSn{pid, snSuc[0]}
 	}
 
 	err = this.WriteResponsePyServerJSON(elink.CodeSuccess, py)

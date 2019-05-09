@@ -90,7 +90,11 @@ func (this *DevPropertysController) zbDevicePropertysGet(pid int) int {
 				return elink.CodeErrDeviceCommandOperationFailed
 			}
 
-			this.WriteResponsePyServerJSON(elink.CodeSuccess, &DevPropRspPy{rpl.ProductID, rpl.Sn, rpl.NodeNo, item})
+			err = this.WriteResponsePyServerJSON(elink.CodeSuccess,
+				&DevPropRspPy{rpl.ProductID, rpl.Sn, rpl.NodeNo, item})
+			if err != nil {
+				return elink.CodeErrSysException
+			}
 		default:
 			return elink.CodeErrDevicePropertysNotSupport
 		}

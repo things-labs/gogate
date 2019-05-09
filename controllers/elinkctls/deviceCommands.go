@@ -11,6 +11,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
+// DevCmdPara 命令参数
 type DevCmdPara struct {
 	Command string                 `json:"command"`
 	CmdPara map[string]interface{} `json:"cmdPara"`
@@ -24,17 +25,18 @@ type DevCmdReqPy struct {
 	Params    DevCmdPara `json:"params"`
 }
 
-// 命令json组合
+// DevCmdRequest 命令请求
 type DevCmdRequest struct {
 	ctrl.BaseRequest
 	Payload DevCmdReqPy `json:"payload,omitempty"`
 }
 
+// DevCommandController 命令控制器
 type DevCommandController struct {
 	ctrl.Controller
 }
 
-// 下发控制命令
+// Post 控制命令
 func (this *DevCommandController) Post() {
 	pid, err := this.AcquireParamPid()
 	if err != nil {
@@ -59,8 +61,6 @@ func (this *DevCommandController) Post() {
 }
 
 func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
-	var cmdID byte
-
 	code := elink.CodeSuccess
 	defer func() {
 		this.ErrorResponse(code)
@@ -72,6 +72,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 		return
 	}
 	rpl := req.Payload
+	// 通用命令
 	if rpl.NodeNo == ltl.NodeNumReserved {
 		dev, err := models.LookupZbDeviceByIeeeAddr(rpl.Sn)
 		if err != nil {
@@ -101,6 +102,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 		}
 		return
 	}
+	// 设备特殊命令
 
 	dinfo, err := models.LookupZbDeviceNodeByIN(rpl.Sn, byte(rpl.NodeNo))
 	if err != nil {
@@ -108,6 +110,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 		return
 	}
 
+	var cmdID byte
 	switch pid {
 	case models.PID_DZSW01, models.PID_DZSW02, models.PID_DZSW03:
 		cmd := rpl.Params.Command
@@ -130,9 +133,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 		if err = this.WriteResponsePyServerJSON(elink.CodeSuccess, nil); err != nil {
 			code = elink.CodeErrSysException
 		}
-		return
 	default:
 		code = elink.CodeErrProudctFeatureUndefined
-		return
 	}
 }

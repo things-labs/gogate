@@ -11,40 +11,40 @@ import (
 	"github.com/astaxie/beego/logs"
 )
 
-type GwInfosRspPy struct {
+// GwInfos 网关信息
+type GwInfos struct {
 	BuildDate   string `json:"buildDate"`
 	Version     string `json:"version"`
 	RunningTime string `json:"runningTime"`
 	LocalIP     string `json:"localIP"`
 }
 
-type GatewayInfos struct {
+// GatewayInfosController 网关信息控制器
+type GatewayInfosController struct {
 	ctrl.Controller
 }
 
-func (this *GatewayInfos) Get() {
-	err := this.WriteResponsePyServerJSON(elink.CodeSuccess,
-		&GwInfosRspPy{
-			misc.BuildDate(),
-			misc.Version(),
-			utils.RunningTime(),
-			GetOutboundIP(),
-		})
+// Get 获取网关信息
+func (this *GatewayInfosController) Get() {
+	err := this.WriteResponsePyServerJSON(elink.CodeSuccess, &GwInfos{
+		misc.BuildDate(),
+		misc.Version(),
+		utils.RunningTime(),
+		GetOutboundIP(),
+	})
 	if err != nil {
 		this.ErrorResponse(elink.CodeErrSysException)
-		logs.Error(err)
-		return
+		logs.Error("GatewayInfo: ", err)
 	}
 }
 
-// Get preferred outbound ip of this machine
+// GetOutboundIP Get preferred outbound ip of this machine
 func GetOutboundIP() string {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
 		return ""
 	}
 	defer conn.Close()
-	localAddr := conn.LocalAddr().(*net.UDPAddr)
 
-	return localAddr.IP.String()
+	return conn.LocalAddr().(*net.UDPAddr).IP.String()
 }

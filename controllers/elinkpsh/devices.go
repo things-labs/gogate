@@ -7,13 +7,13 @@ import (
 	"github.com/thinkgos/gomo/elink"
 )
 
-// DevSnPy 设备通知负载
-type DevSnPy struct {
+// DevSn 设备通知payload
+type DevSn struct {
 	ProductID int    `json:"productID"`
 	Sn        string `json:"sn"`
 }
 
-// DeviceAnnce 设备加入或离开通知
+// DeviceAnnce 设备加入,离开通知
 func DeviceAnnce(pid int, sn string, isjoin bool) error {
 	method := elink.MethodDelete
 	if isjoin {
@@ -21,5 +21,5 @@ func DeviceAnnce(pid int, sn string, isjoin bool) error {
 	}
 	tp := elink.FormatPshTopic(ctrl.ChannelData, elink.FormatResouce(elinkmd.Devices, pid),
 		method, elink.MessageTypeAnnce)
-	return broad.PublishPyServerJSON(tp, &DevSnPy{pid, sn})
+	return broad.PublishPyServerJSON(tp, &DevSn{pid, sn})
 }

@@ -12,34 +12,39 @@ import (
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/validation"
-	"github.com/inconshreveable/go-update"
-	"github.com/json-iterator/go"
+	update "github.com/inconshreveable/go-update"
+	jsoniter "github.com/json-iterator/go"
 )
 
+// GwUpReqPy 负载
 type GwUpReqPy struct {
-	Url       string `json:"url"`
+	URL       string `json:"url"`
 	Checksum  string `json:"checksum"`
 	PublicKey string `json:"publicKey"`
 	Signature string `json:"signature"`
 	IsPatcher bool   `json:"isPatcher"`
 }
 
+// GwUpRequest 升级请求
 type GwUpRequest struct {
 	ctrl.BaseRequest
 	Payload GwUpReqPy `json:"payload"`
 }
 
-type GatewayUpgrade struct {
+// GatewayUpgradeController 网关应用程序升级控制器
+type GatewayUpgradeController struct {
 	ctrl.Controller
 }
 
-var isUpgradeInProcess bool = false
+var isUpgradeInProcess bool
 
-// 更新程序
-func (this *GatewayUpgrade) Post() {
+// Post 更新程序
+func (this *GatewayUpgradeController) Post() {
 	code := elink.CodeSuccess
 	defer func() {
-		isUpgradeInProcess = false
+		if code != elink.CodeErrSysInProcess {
+			isUpgradeInProcess = false
+		}
 		this.ErrorResponse(code)
 	}()
 
@@ -57,7 +62,7 @@ func (this *GatewayUpgrade) Post() {
 	rpl := req.Payload
 	// check request parameter valid
 	valid := validation.Validation{}
-	valid.Required(rpl.Url, "url")
+	valid.Required(rpl.URL, "url")
 	//	valid.Required(rpl.Checksum, "checksum")
 	//	valid.Required(rpl.Signature, "signature")
 	//	valid.Required(rpl.PublicKey, "publicKey")
@@ -70,8 +75,10 @@ func (this *GatewayUpgrade) Post() {
 		code = elink.CodeErrSysOperationFailed
 		return
 	}
-	this.WriteResponsePyServerJSON(elink.CodeSuccess, nil)
-	time.Sleep(3) // give enough time to send the message to cliet
+	if err := this.WriteResponsePyServerJSON(elink.CodeSuccess, nil); err != nil {
+		logs.Error("response failed!", err)
+	}
+	time.Sleep(time.Second) // give enough time to send the message to client
 	bin, err := os.Executable()
 	if err != nil {
 		code = elink.CodeErrSysException
@@ -82,7 +89,7 @@ func (this *GatewayUpgrade) Post() {
 	err = syscall.Exec(bin, []string{file}, os.Environ())
 	if err != nil {
 		code = elink.CodeErrSysException
-		logs.Error("exec failed!%s", err.Error())
+		logs.Error("exec failed!", err.Error())
 		return
 	}
 }
@@ -109,7 +116,7 @@ func doUpdate(iop *GwUpReqPy) error {
 	//		opt.Patcher = update.NewBSDiffPatcher()
 	//	}
 
-	resp, err := http.Get(iop.Url) // get the new file
+	resp, err := http.Get(iop.URL) // get the new file
 	if err != nil {
 		logs.Debug("failed go get:　%s\n", err)
 		return err

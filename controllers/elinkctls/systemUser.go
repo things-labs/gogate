@@ -10,11 +10,11 @@ import (
 )
 
 type SysMultiUserPy struct {
-	Uid []int64 `json:"uid"`
+	UID []int64 `json:"uid"`
 }
 
 type SysUserPy struct {
-	Uid int64 `json:"uid"`
+	UID int64 `json:"uid"`
 }
 
 type SysMultiUserRequest struct {
@@ -28,7 +28,7 @@ type SysUserController struct {
 
 func (this *SysUserController) Get() {
 	err := this.WriteResponsePyServerJSON(elink.CodeSuccess,
-		&SysMultiUserPy{Uid: models.GetUsers()})
+		&SysMultiUserPy{UID: models.GetUsers()})
 	if err != nil {
 		logs.Error(err)
 	}
@@ -64,13 +64,13 @@ func (this *SysUserController) userDeal(isDel bool) {
 			code = elink.CodeErrSysInvalidParameter
 			return
 		}
-		uid = req.Payload.Uid
+		uid = req.Payload.UID
 	default:
 		code = elink.CodeErrSysInvalidParameter
 		return
 	}
 
-	sucUid := make([]int64, 0, len(uid))
+	sucUID := make([]int64, 0, len(uid))
 	for _, v := range uid {
 		if isDel {
 			err = models.DeleteUser(v)
@@ -80,22 +80,22 @@ func (this *SysUserController) userDeal(isDel bool) {
 		if err != nil {
 			continue
 		}
-		sucUid = append(sucUid, v)
+		sucUID = append(sucUID, v)
 	}
-	if len(sucUid) == 0 {
+	if len(sucUID) == 0 {
 		code = elink.CodeErrSysOperationFailed
 		return
 	}
 
 	var rspPy interface{}
 	if isArray {
-		rspPy = &SysMultiUserPy{Uid: sucUid}
+		rspPy = &SysMultiUserPy{UID: sucUID}
 	} else {
-		rspPy = &SysUserPy{Uid: sucUid[0]}
+		rspPy = &SysUserPy{UID: sucUID[0]}
 	}
 
 	err = this.WriteResponsePyServerJSON(elink.CodeSuccess, rspPy)
 	if err != nil {
-		logs.Error(err)
+		code = elink.CodeErrSysException
 	}
 }

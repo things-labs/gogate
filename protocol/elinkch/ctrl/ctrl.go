@@ -168,7 +168,6 @@ func (this *Controller) WriteResponsePyServerJSON(code int, payload interface{})
 	if err != nil {
 		return errors.Wrap(err, "json marshal failed")
 	}
-
 	return this.WriteResponse(tp, out)
 }
 
