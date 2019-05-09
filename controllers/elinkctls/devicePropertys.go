@@ -2,10 +2,9 @@ package elinkctls
 
 import (
 	"github.com/thinkgos/easyjms"
+	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/npis"
-	"github.com/thinkgos/gogate/middle/ewait"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/protocol/limp"
@@ -77,11 +76,12 @@ func (this *DevPropertysController) zbDevicePropertysGet(pid int) int {
 			if err != nil {
 				return elink.CodeErrDeviceNotExist
 			}
-			id := ewait.ObainID()
+			id := this.SyncManage.ObainID()
 			if err = npis.ZbApps.SendReadReqBasic(dinfo.NwkAddr, id); err != nil {
 				return elink.CodeErrDeviceCommandOperationFailed
 			}
-			v, ok := ewait.Add(id).Wait()
+
+			v, ok := this.SyncManage.Wait(id)
 			if !ok {
 				return elink.CodeErrDeviceCommandOperationFailed
 			}

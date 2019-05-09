@@ -1,8 +1,8 @@
 package elinkctls
 
 import (
+	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego/logs"
@@ -134,7 +134,7 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) int {
 		return elink.CodeErrSysInvalidParameter
 	}
 
-	snSuc := []string{}
+	sucSn := []string{}
 	// 处理要添加或删除的设备
 	for _, v := range sn {
 		if models.HasGeneralDevice(pid, v) { // 设备存在
@@ -152,20 +152,20 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) int {
 				}
 			}
 		}
-		snSuc = append(snSuc, v)
+		sucSn = append(sucSn, v)
 	}
-	if len(snSuc) == 0 {
+	if len(sucSn) == 0 {
 		return elink.CodeErrDeviceCommandOperationFailed
 	}
 
 	var py interface{}
 	if isArray {
-		py = &DevMultiSn{pid, snSuc}
+		py = &DevMultiSn{pid, sucSn}
 	} else {
-		if snSuc[0] == "" {
+		if sucSn[0] == "" {
 			return elink.CodeErrDeviceCommandOperationFailed
 		}
-		py = &DevSn{pid, snSuc[0]}
+		py = &DevSn{pid, sucSn[0]}
 	}
 
 	err = this.WriteResponsePyServerJSON(elink.CodeSuccess, py)

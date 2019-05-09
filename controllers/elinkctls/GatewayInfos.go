@@ -3,8 +3,8 @@ package elinkctls
 import (
 	"net"
 
+	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/misc"
-	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/utils"
 

@@ -1,9 +1,9 @@
 package elinkctls
 
 import (
+	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/npis"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/ltl/ltlspec"

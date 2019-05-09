@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/thinkgos/gogate/middle/synccall"
+
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gomo/elink"
 
@@ -95,10 +97,14 @@ type RawPublishData struct {
 // Controller 控制器
 type Controller struct {
 	elink.Controller
+	SyncManage *synccall.Manage
 }
+
+var SyncManage = synccall.New()
 
 func init() {
 	elink.RegisterChannelSelector(ChannelCtrl)
+
 }
 
 // Prepare 前期准备
@@ -114,6 +120,8 @@ func (this *Controller) Prepare() {
 		this.ErrorResponse(elink.CodeErrCommonAuthorizationSignatureVerificationFailed)
 		this.StopRun()
 	}
+	// 初始化必要资源
+	this.SyncManage = SyncManage
 }
 
 // Get 方法

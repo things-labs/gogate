@@ -2,8 +2,8 @@ package elinkpsh
 
 import (
 	"github.com/thinkgos/gogate/apps/broad"
-	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
-	"github.com/thinkgos/gogate/protocol/elinkmd"
+	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
+	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gomo/elink"
 )
 

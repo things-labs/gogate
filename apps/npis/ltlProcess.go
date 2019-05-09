@@ -5,11 +5,10 @@ import (
 	"fmt"
 
 	"github.com/thinkgos/gogate/apps/broad"
+	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
+	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gogate/controllers/elinkpsh"
-	"github.com/thinkgos/gogate/middle/ewait"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
-	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/protocol/limp"
@@ -51,7 +50,7 @@ func (this *ZbnpiApp) ProInReadRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rdRspSt
 			}
 			return nil
 		}
-		ewait.Done(id, gba)
+		ctrl.SyncManage.Done(id, gba)
 	default:
 		return errors.New(fmt.Sprintf("trunk not implementation: %d", hdr.TrunkID))
 	}

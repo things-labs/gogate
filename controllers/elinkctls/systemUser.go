@@ -1,8 +1,8 @@
 package elinkctls
 
 import (
+	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego/logs"
