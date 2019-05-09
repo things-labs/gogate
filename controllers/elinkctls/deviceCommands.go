@@ -16,7 +16,7 @@ type DevCmdPara struct {
 	CmdPara map[string]interface{} `json:"cmdPara"`
 }
 
-// 设备命令负载
+// DevCmdReqPy 设备命令负载
 type DevCmdReqPy struct {
 	ProductID int        `json:"productID"`
 	Sn        string     `json:"sn"`
@@ -96,7 +96,9 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 			code = elink.CodeErrDeviceCommandOperationFailed
 			return
 		}
-		this.WriteResponsePyServerJSON(elink.CodeSuccess, nil)
+		if err = this.WriteResponsePyServerJSON(elink.CodeSuccess, nil); err != nil {
+			code = elink.CodeErrSysException
+		}
 		return
 	}
 
@@ -125,7 +127,10 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 			code = elink.CodeErrDeviceCommandOperationFailed
 			return
 		}
-		this.WriteResponsePyServerJSON(elink.CodeSuccess, nil)
+		if err = this.WriteResponsePyServerJSON(elink.CodeSuccess, nil); err != nil {
+			code = elink.CodeErrSysException
+		}
+		return
 	default:
 		code = elink.CodeErrProudctFeatureUndefined
 		return

@@ -1,4 +1,5 @@
-// ctrl通道的实现
+// package ctrl 通道的实现
+
 package ctrl
 
 import (
@@ -15,17 +16,20 @@ import (
 	"github.com/pkg/errors"
 )
 
+// 签名加盐值
 const (
-	Signature_salt0 = `@#$%`
-	Signature_salt1 = `^&*()`
+	SignatureSalt0 = `@#$%`
+	SignatureSalt1 = `^&*()`
 )
 
+// 通道定义
 const (
 	ChannelData      = "data"
 	ChannelCtrl      = "ctrl"
 	ChannelCtrlReply = "ctrl_reply"
 )
 
+// BaseRequest 请求基本格式
 type BaseRequest struct {
 	Topic     string `json:"topic,omitempty"`
 	Timestamp string `json:"timestamp"`
@@ -33,6 +37,7 @@ type BaseRequest struct {
 	PacketID  int    `json:"packetID"`
 }
 
+// BaseResponse 回复基本格式
 type BaseResponse struct {
 	Topic      string `json:"topic,omitempty"`
 	PacketID   int    `json:"packetID"`
@@ -41,42 +46,53 @@ type BaseResponse struct {
 	Message    string `json:"message,omitempty"`
 }
 
-type BaseData struct {
+// BasePublishData 推送基本格式
+type BasePublishData struct {
 	Topic string `json:"topic,omitempty"`
 }
 
+// BaseRawPayload Raw payload
 type BaseRawPayload struct {
 	Payload jsoniter.RawMessage `json:"payload,omitempty"`
 }
 
+// Request 请求含payload
 type Request struct {
 	*BaseRequest
 	Payload interface{} `json:"payload,omitempty"`
 }
+
+// Response 回复含payload
 type Response struct {
 	*BaseResponse
 	Payload interface{} `json:"payload,omitempty"`
 }
 
-type Data struct {
-	BaseData
+// PublishData 推送含payload
+type PublishData struct {
+	*BasePublishData
 	Payload interface{} `json:"payload,omitempty"`
 }
 
+// RawRequest 请求含raw payload
 type RawRequest struct {
 	*BaseRequest
 	*BaseRawPayload
 }
 
+// RawResponse 回复含raw payload
 type RawResponse struct {
 	*BaseResponse
 	*BaseRawPayload
 }
-type RawData struct {
-	*BaseData
+
+// RawPublishData 推送含raw payload
+type RawPublishData struct {
+	*BasePublishData
 	*BaseRawPayload
 }
 
+// Controller 控制器
 type Controller struct {
 	elink.Controller
 }
@@ -85,6 +101,7 @@ func init() {
 	elink.RegisterChannelSelector(ChannelCtrl)
 }
 
+// Prepare 前期准备
 func (this *Controller) Prepare() {
 	if !models.HasUser(this.Input.Topic.UserID) {
 		this.ErrorResponse(elink.CodeErrCommonUserNoAccess)
@@ -99,27 +116,32 @@ func (this *Controller) Prepare() {
 	}
 }
 
+// Get 方法
 func (this *Controller) Get() {
 	this.ErrorResponse(elink.CodeErrCommonResourceMethodNotImplemented)
 }
 
+// Post 方法
 func (this *Controller) Post() {
 	this.ErrorResponse(elink.CodeErrCommonResourceMethodNotImplemented)
 }
 
+// Put 方法
 func (this *Controller) Put() {
 	this.ErrorResponse(elink.CodeErrCommonResourceMethodNotImplemented)
 }
 
+// Patch 方法
 func (this *Controller) Patch() {
 	this.ErrorResponse(elink.CodeErrCommonResourceMethodNotImplemented)
 }
 
+// Delete 方法
 func (this *Controller) Delete() {
 	this.ErrorResponse(elink.CodeErrCommonResourceMethodNotImplemented)
 }
 
-// 不带Payload错误回复,code为CodeSuccess将不进行回复
+// ErrorResponse 不带Payload错误回复,code为CodeSuccess将不进行回复
 func (this *Controller) ErrorResponse(code int) error {
 	if code != elink.CodeSuccess {
 		return this.WriteResponsePyServerJSON(code, nil)
@@ -127,7 +149,7 @@ func (this *Controller) ErrorResponse(code int) error {
 	return nil
 }
 
-// 回复,只关注payload即可,json序列化由底层处理
+// WriteResponsePyServerJSON 回复,只关注payload即可,json序列化由底层处理
 func (this *Controller) WriteResponsePyServerJSON(code int, payload interface{}) error {
 	tp := elink.FromatRspTopic(this.Input.Topic)
 	brsp := &BaseResponse{
@@ -150,17 +172,17 @@ func (this *Controller) WriteResponsePyServerJSON(code int, payload interface{})
 	return this.WriteResponse(tp, out)
 }
 
-//  签名mac + `@#$%` + timeStamp + `^&*()`拼接后md5 ,加盐值加密验证
+// GenerateSignature 签名mac + `@#$%` + timeStamp + `^&*()`拼接后md5 ,加盐值加密验证
 func GenerateSignature(mac, timestamp string) string {
 	h := md5.New()
 	io.WriteString(h, mac)
-	io.WriteString(h, Signature_salt0)
+	io.WriteString(h, SignatureSalt0)
 	io.WriteString(h, timestamp)
-	io.WriteString(h, Signature_salt1)
+	io.WriteString(h, SignatureSalt1)
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-// 获取主题上的productID参数,resource.productID
+// AcquireParamPid 获取主题上的productID参数,格式resource.productID
 func (this *Controller) AcquireParamPid() (int, error) {
 	spid := this.Input.Param.Get("productID")
 	if spid == "" { // never happen but deal,may be other used
@@ -172,5 +194,5 @@ func (this *Controller) AcquireParamPid() (int, error) {
 		return 0, errors.New("resource productID invalid")
 	}
 
-	return int(pid), nil
+	return pid, nil
 }

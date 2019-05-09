@@ -22,39 +22,31 @@ type NetInfo struct {
 	Mac string `json:"mac"`
 }
 
-type Info struct {
+type GatewayHeatbeat struct {
 	Uid          []int64      `json:"uid"`
 	DeviceInfo   DeviceInfo   `json:"device_info"`
 	DeviceStatus DeviceStatus `json:"device_status"`
 	NetInfo      NetInfo      `json:"net_info"`
 }
 
-type GatewayHeatbeat struct {
-	Topic string `json:"topic,omitempty"`
-	Info  Info   `json:"info"`
-}
-
-func GatewayHeatbeats(tp string, isonline bool) *GatewayHeatbeat {
+func GatewayHeatbeats(isonline bool) *GatewayHeatbeat {
 	status := "online"
 	if !isonline {
 		status = "offline"
 	}
 	mac := misc.Mac()
 	return &GatewayHeatbeat{
-		Topic: tp,
-		Info: Info{
-			Uid:        models.GetUsers(),
-			DeviceInfo: DeviceInfo{Sn: mac},
-			DeviceStatus: DeviceStatus{
-				CurrentTime:   time.Now().Local().Format("2006-01-02 15:04:05"),
-				StartDateTime: utils.SetupTime(),
-				RunningTime:   utils.RunningTime(),
-				Status:        status,
-			},
-			NetInfo: NetInfo{
-				MAC: misc.MAC(),
-				Mac: mac,
-			},
+		Uid:        models.GetUsers(),
+		DeviceInfo: DeviceInfo{Sn: mac},
+		DeviceStatus: DeviceStatus{
+			CurrentTime:   time.Now().Local().Format("2006-01-02 15:04:05"),
+			StartDateTime: utils.SetupTime(),
+			RunningTime:   utils.RunningTime(),
+			Status:        status,
+		},
+		NetInfo: NetInfo{
+			MAC: misc.MAC(),
+			Mac: mac,
 		},
 	}
 }

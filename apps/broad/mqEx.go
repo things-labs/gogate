@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
+
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/elink"
@@ -52,7 +54,9 @@ func NewMqClient(productKey, mac string) mqtt.Client {
 
 	tp := elink.FormatPshTopic(elink.ChannelInternal, elinkmd.GatewayHeartbeat,
 		elink.MethodPatch, elink.MessageTypeTime)
-	if out, err := jsoniter.Marshal(elinkmd.GatewayHeatbeats(tp, false)); err != nil {
+	if out, err := jsoniter.Marshal(&ctrl.PublishData{
+		&ctrl.BasePublishData{tp},
+		elinkmd.GatewayHeatbeats(false)}); err != nil {
 		logs.Error("mqtt %s", err.Error())
 	} else {
 		opts.SetBinaryWill(tp, out, 2, false)

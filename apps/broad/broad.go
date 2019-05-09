@@ -3,9 +3,10 @@ package broad
 import (
 	"time"
 
+	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
+
 	"github.com/thinkgos/easyws"
 	"github.com/thinkgos/gogate/misc"
-	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gogate/protocol/elinkmd"
 	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/lmax"
@@ -31,7 +32,20 @@ func BroadInit() {
 	HeartBeatStatus()
 }
 
-// 网关心跳包
+func PublishServerJSON(tp string, data interface{}) error {
+	out, err := jsoniter.Marshal(data)
+	if err != nil {
+		return errors.Wrap(err, "json marshal failed")
+	}
+	return Disrup.Publish(tp, out)
+}
+
+// PublishPyServerJSON 推送数据,通道推送数据
+func PublishPyServerJSON(tp string, payload interface{}) error {
+	return PublishServerJSON(tp, &ctrl.PublishData{&ctrl.BasePublishData{tp}, payload})
+}
+
+// HeartBeatStatus 网关心跳包
 func HeartBeatStatus() {
 	defer time.AfterFunc(HeartBeatTime, HeartBeatStatus)
 
@@ -39,7 +53,7 @@ func HeartBeatStatus() {
 	func() {
 		tp := elink.FormatPshTopic(elink.ChannelInternal, elinkmd.GatewayHeartbeat,
 			elink.MethodPatch, elink.MessageTypeTime)
-		err := PublishServerJSON(tp, elinkmd.GatewayHeatbeats(tp, true))
+		err := PublishPyServerJSON(tp, elinkmd.GatewayHeatbeats(true))
 		if err != nil {
 			logs.Error("GatewayHeatbeats:", err)
 		}
@@ -49,27 +63,14 @@ func HeartBeatStatus() {
 	func() {
 		gm, err := elinkmd.GatewayMonitors()
 		if err != nil {
-			logs.Error("GatewayHeatbeats:", err)
+			logs.Error("GatewayMonitors:", err)
 			return
 		}
 		tp := elink.FormatPshTopic(elink.ChannelInternal, elinkmd.SystemMonitor,
 			elink.MethodPatch, elink.MessageTypeTime)
 		err = PublishPyServerJSON(tp, gm)
 		if err != nil {
-			logs.Error("GatewayHeatbeats:", err)
+			logs.Error("GatewayMonitors:", err)
 		}
 	}()
-}
-
-func PublishServerJSON(tp string, data interface{}) error {
-	out, err := jsoniter.Marshal(data)
-	if err != nil {
-		return errors.Wrap(err, "json marshal failed")
-	}
-	return Disrup.Publish(tp, out)
-}
-
-// 推送数据,向对应的推送通道推送数据
-func PublishPyServerJSON(tp string, payload interface{}) error {
-	return PublishServerJSON(tp, &ctrl.Data{ctrl.BaseData{tp}, payload})
 }
