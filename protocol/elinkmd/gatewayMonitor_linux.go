@@ -19,7 +19,7 @@ func GatewayMonitors() (*GwMonitor, error) {
 	sysInfo := new(syscall.Sysinfo_t)
 	err := syscall.Sysinfo(sysInfo)
 	if err != nil {
-		return nil, error
+		return nil, err
 	}
 	return &GwMonitor{sysInfo, memStats}, nil
 }
