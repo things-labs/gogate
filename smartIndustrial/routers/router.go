@@ -1,9 +1,9 @@
 package routers
 
 import (
+	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/controllers/elinkctls"
 	"github.com/thinkgos/gogate/controllers/webctls"
-	"github.com/thinkgos/gogate/protocol/elinkch/ctrl"
 	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego"

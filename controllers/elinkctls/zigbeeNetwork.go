@@ -34,9 +34,9 @@ func (this *ZbNetworkController) Post() {
 
 	err = this.WriteResponsePyServerJSON(elink.CodeSuccess, nil)
 	if err != nil {
-		logs.Error(err)
+		this.ErrorResponse(elink.CodeErrSysException)
+		logs.Error("response failed", err)
 	}
-
 }
 
 // 关闭zigbee组网
