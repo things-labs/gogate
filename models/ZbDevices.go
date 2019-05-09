@@ -28,7 +28,7 @@ type ZbDeviceNodeInfo struct {
 	Sn           string //`gorm:"NOT NULL"`
 	NodeNo       byte   //`gorm:"UNIQUE;NOT NULL"`
 	NwkAddr      uint16 //`gorm:"UNIQUE;NOT NULL"`
-	ProductId    int
+	ProductID    int
 	InTrunkList  string // 输入集表
 	OutTrunkList string // 输出集表
 	SrcBindList  string // 源绑定表 : 谁绑定了本设备
@@ -245,10 +245,10 @@ func UnZbBindDeviceNode(SrcSn string, SrcNodeNum byte,
 		return nil
 	}
 	// 删除源的目标绑定 和 目标的源绑定
-	SrcDNI_DstBd := utils.DeleteFromSliceStr(SrcDNI.dstBind, dstid)
+	SrcDNI_DstBdd := utils.DeleteFromSliceStr(SrcDNI.dstBind, dstid)
 	DstBindDNI_SrcBd := utils.DeleteFromSliceStr(DstBindDNI.srcBind, srcid)
 
-	SrcDNI.DstBindList = joinInternalString(SrcDNI_DstBd)
+	SrcDNI.DstBindList = joinInternalString(SrcDNI_DstBdd)
 	DstBindDNI.SrcBindList = joinInternalString(DstBindDNI_SrcBd)
 
 	// 开始更新表
@@ -274,7 +274,7 @@ func UnZbBindDeviceNode(SrcSn string, SrcNodeNum byte,
 		return err
 	}
 	// 成功更新本地
-	SrcDNI.dstBind = SrcDNI_DstBd
+	SrcDNI.dstBind = SrcDNI_DstBdd
 	DstBindDNI.srcBind = DstBindDNI_SrcBd
 
 	return nil
@@ -478,7 +478,7 @@ func (this *ZbDeviceInfo) createZbDeveiceAndNode() error {
 			Sn:        this.Sn,
 			NodeNo:    byte(i + 1),
 			NwkAddr:   this.NwkAddr,
-			ProductId: this.ProductId,
+			ProductID: this.ProductId,
 		}
 
 		dnode.InTrunkList = strings.Replace(

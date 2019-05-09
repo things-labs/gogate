@@ -4,6 +4,7 @@ const (
 	ProductKey = "lc_gzs100"
 )
 
+// resource 资源
 const (
 	SystemUser          = "system.user"
 	SystemMonitor       = "system.monitor"

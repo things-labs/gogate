@@ -53,7 +53,7 @@ func (this *DevCommandController) Post() {
 
 	// 根据产品类型分发命令
 	switch pInfo.Types {
-	case models.PTypes_Zigbee:
+	case models.PTypesZigbee:
 		this.zbDeviceCommandDeal(pid)
 	default:
 		this.ErrorResponse(elink.CodeErrProudctFeatureUndefined)

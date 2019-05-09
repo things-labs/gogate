@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	_DB_NAME   = "data/models.db"
-	_DB_DRIVER = "sqlite3"
+	_DbName   = "data/models.db"
+	_DbDriver = "sqlite3"
 )
 
 type DbTableInitFunc func() error
@@ -33,17 +33,17 @@ func DbInit() error {
 	var errs error
 
 	// 判断目录是否存在,不存在着创建对应的所有目录
-	if !utils.IsExist(_DB_NAME) {
-		if err = os.MkdirAll(path.Dir(_DB_NAME), os.ModePerm); err != nil {
+	if !utils.IsExist(_DbName) {
+		if err = os.MkdirAll(path.Dir(_DbName), os.ModePerm); err != nil {
 			return err
 		}
-		if _, err = os.Create(_DB_NAME); err != nil {
+		if _, err = os.Create(_DbName); err != nil {
 			return err
 		}
 	}
 
-	if db, err = gorm.Open(_DB_DRIVER, _DB_NAME); err != nil {
-		return errors.Wrapf(err, "db(%s-%s) open failed", _DB_DRIVER, _DB_NAME)
+	if db, err = gorm.Open(_DbDriver, _DbName); err != nil {
+		return errors.Wrapf(err, "db(%s-%s) open failed", _DbDriver, _DbName)
 	}
 	//default disable
 	db.LogMode(misc.APPCfg.Section(ini.DEFAULT_SECTION).Key("ormDbLog").MustBool(false))

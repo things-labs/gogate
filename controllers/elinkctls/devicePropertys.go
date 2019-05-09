@@ -55,7 +55,7 @@ func (this *DevPropertysController) Get() {
 	}
 
 	switch pInfo.Types {
-	case models.PTypes_Zigbee:
+	case models.PTypesZigbee:
 		code = this.zbDevicePropertysGet(pid)
 	default:
 		code = elink.CodeErrProudctFeatureUndefined

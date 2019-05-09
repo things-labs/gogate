@@ -7,11 +7,13 @@ import (
 	"syscall"
 )
 
+// GwMonitor 监控
 type GwMonitor struct {
 	SystemMemInfos *syscall.Sysinfo_t
 	AppMemInfos    *runtime.MemStats
 }
 
+// GatewayMonitors 获取监控信息
 func GatewayMonitors() (*GwMonitor, error) {
 	memStats := new(runtime.MemStats)
 	runtime.ReadMemStats(memStats)

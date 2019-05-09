@@ -13,7 +13,7 @@ const (
 
 type User struct {
 	gorm.Model
-	Uid int64 `gorm:"UNIQUE;NOT NULL"`
+	UID int64 `gorm:"UNIQUE;NOT NULL"`
 }
 
 type UserInfo struct {
@@ -33,7 +33,7 @@ func init() {
 		db.Find(&users)
 		localUser.tab = make([]int64, 0, len(users))
 		for _, v := range users {
-			localUser.tab = append(localUser.tab, v.Uid)
+			localUser.tab = append(localUser.tab, v.UID)
 		}
 		return nil
 	})
@@ -56,7 +56,7 @@ func AddUser(uid int64) error {
 		return nil
 	}
 
-	if err := db.Create(&User{Uid: uid}).Error; err != nil {
+	if err := db.Create(&User{UID: uid}).Error; err != nil {
 		return err
 	}
 	localUser.Lock()
@@ -71,7 +71,7 @@ func DeleteUser(uid int64) error {
 	if !HasUser(uid) {
 		return nil
 	}
-	user := &User{Uid: uid}
+	user := &User{UID: uid}
 	if err := db.Where(user).Unscoped().Delete(user).Error; err != nil {
 		return err
 	}

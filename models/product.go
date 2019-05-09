@@ -2,9 +2,9 @@ package models
 
 // 设备产品类型
 const (
-	PTypes_General = iota // 通用产品
-	PTypes_Zigbee         // zigbee产品
-	PTypes_Modbus
+	PTypesGeneral = iota // 通用产品
+	PTypesZigbee         // zigbee产品
+	PTypesModbus
 )
 
 // 所有的产品id列表, 必需注册到DeviceProductInfos, zigbee的产品需要另外注册到zigbee的设备产品里
@@ -29,22 +29,22 @@ type ProductInfo struct {
 	ManufacturerName string // 制造商名字
 }
 
-var productInfos map[int]*ProductInfo = map[int]*ProductInfo{
-	PID_GENERAL_TEST: &ProductInfo{0, PTypes_General, "general", "LC_GTEST", "普通设备测试", "普通设备测试", "lchtime"},
-	PID_DZMS01:       &ProductInfo{0, PTypes_Zigbee, "smart zigbee", "LC_DZMS01", "温湿度传感器", "温湿度传感器", "lchtime"},
-	PID_DZSW01:       &ProductInfo{0, PTypes_Zigbee, "smart zigbee", "LC_DZSW01", "一位智能开关", "一开智能开关", "lchtime"},
-	PID_DZSW02:       &ProductInfo{0, PTypes_Zigbee, "smart zigbee", "LC_DZSW02", "二位智能开关", "二位智能开关", "lchtime"},
-	PID_DZSW03:       &ProductInfo{0, PTypes_Zigbee, "smart zigbee", "LC_DZSW03", "三位智能开关", "三位智能开关", "lchtime"},
+var productInfos = map[int]*ProductInfo{
+	PID_GENERAL_TEST: &ProductInfo{0, PTypesGeneral, "general", "LC_GTEST", "普通设备测试", "普通设备测试", "lchtime"},
+	PID_DZMS01:       &ProductInfo{0, PTypesZigbee, "smart zigbee", "LC_DZMS01", "温湿度传感器", "温湿度传感器", "lchtime"},
+	PID_DZSW01:       &ProductInfo{0, PTypesZigbee, "smart zigbee", "LC_DZSW01", "一位智能开关", "一开智能开关", "lchtime"},
+	PID_DZSW02:       &ProductInfo{0, PTypesZigbee, "smart zigbee", "LC_DZSW02", "二位智能开关", "二位智能开关", "lchtime"},
+	PID_DZSW03:       &ProductInfo{0, PTypesZigbee, "smart zigbee", "LC_DZSW03", "三位智能开关", "三位智能开关", "lchtime"},
 }
 
-// 注册产品列表
+// RegisterProducts 注册产品列表
 func RegisterProducts(pis map[int]*ProductInfo) {
 	for k, v := range pis {
 		_ = RegisterProduct(k, v)
 	}
 }
 
-// 注册相应产品
+// RegisterProduct 注册相应产品
 func RegisterProduct(pid int, pi *ProductInfo) error {
 	if pid == PID_RESERVE || pi == nil {
 		return ErrInvalidParameter
@@ -53,7 +53,7 @@ func RegisterProduct(pid int, pi *ProductInfo) error {
 	return nil
 }
 
-// 查找对应pid产品信息
+// LookupProduct 查找对应pid产品信息
 func LookupProduct(pid int) (*ProductInfo, error) {
 	if pid == PID_RESERVE {
 		return nil, ErrInvalidParameter
@@ -64,7 +64,7 @@ func LookupProduct(pid int) (*ProductInfo, error) {
 	return nil, ErrProductNotExist
 }
 
-// 判断对应id产品信息是否存在
+// HasProduct 判断对应id产品信息是否存在
 func HasProduct(pid int) bool {
 	if pid == PID_RESERVE {
 		return false

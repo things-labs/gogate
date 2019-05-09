@@ -53,7 +53,7 @@ func (this *DevicesController) Get() {
 
 	// 根据不同的设备类型分发
 	switch pInfo.Types {
-	case models.PTypes_General: // 获取通用设备
+	case models.PTypesGeneral: // 获取通用设备
 		err = this.getGernalDevices(pid)
 		if err != nil {
 			code = elink.CodeErrSysException
@@ -103,7 +103,7 @@ func (this *DevicesController) dealAddDelGernalDevices(isDel bool) {
 
 	// 根据不同的设备类型分发
 	switch pInfo.Types {
-	case models.PTypes_General: // 通用设备处理s
+	case models.PTypesGeneral: // 通用设备处理s
 		code = this.addDelGernalDevices(isDel, int(pid))
 	default:
 		code = elink.CodeErrProudctFeatureUndefined

@@ -89,7 +89,7 @@ func (this *ZbnpiApp) ProInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []l
 	switch hdr.TrunkID {
 	case ltl.TrunkID_GeneralOnoff:
 		v = ProReportPayload{
-			ProductID: zbdnode.ProductId,
+			ProductID: zbdnode.ProductID,
 			Sn:        zbdnode.Sn,
 			NodeNo:    int(hdr.NodeNo),
 			Data:      limp.OnoffAttribute(rRec),
@@ -101,7 +101,7 @@ func (this *ZbnpiApp) ProInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []l
 		}
 
 		v = ProReportPayload{
-			ProductID: zbdnode.ProductId,
+			ProductID: zbdnode.ProductID,
 			Sn:        zbdnode.Sn,
 			NodeNo:    int(hdr.NodeNo),
 			Data:      ms,
@@ -112,7 +112,7 @@ func (this *ZbnpiApp) ProInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []l
 	}
 
 	tp := elink.FormatPshTopic(ctrl.ChannelData,
-		elink.FormatResouce(elinkmd.DevicePropertys, zbdnode.ProductId),
+		elink.FormatResouce(elinkmd.DevicePropertys, zbdnode.ProductID),
 		elink.MethodPatch, elink.MessageTypeAnnce)
 
 	return broad.PublishPyServerJSON(tp, v)

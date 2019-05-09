@@ -2,7 +2,7 @@ package models
 
 type GeneralDeviceInfo struct {
 	ID        uint
-	ProductId int
+	ProductID int
 	Sn        string
 }
 
@@ -26,7 +26,7 @@ func HasGeneralDevice(pid int, sn string) bool {
 	if !HasProduct(pid) || len(sn) == 0 {
 		return false
 	}
-	return db.Where(&GeneralDeviceInfo{ProductId: pid, Sn: sn}).
+	return db.Where(&GeneralDeviceInfo{ProductID: pid, Sn: sn}).
 		First(&GeneralDeviceInfo{}).Error == nil
 }
 
@@ -37,23 +37,23 @@ func LookupGeneralDevice(pid int, sn string) (*GeneralDeviceInfo, error) {
 	}
 
 	dev := &GeneralDeviceInfo{}
-	err := db.Where(&GeneralDeviceInfo{ProductId: pid, Sn: sn}).First(dev).Error
+	err := db.Where(&GeneralDeviceInfo{ProductID: pid, Sn: sn}).First(dev).Error
 	return dev, err
 }
 
 // 创建通用设备
 func CreateGeneralDevice(pid int, sn string) error {
-	return (&GeneralDeviceInfo{ProductId: pid, Sn: sn}).CreateGeneralDevice()
+	return (&GeneralDeviceInfo{ProductID: pid, Sn: sn}).CreateGeneralDevice()
 }
 
 // 删除通用设备
 func DeleteGeneralDevice(pid int, sn string) error {
-	return (&GeneralDeviceInfo{ProductId: pid, Sn: sn}).DeleteGeneralDevice()
+	return (&GeneralDeviceInfo{ProductID: pid, Sn: sn}).DeleteGeneralDevice()
 }
 
 // 创建通用设备
 func (this *GeneralDeviceInfo) CreateGeneralDevice() error {
-	if HasGeneralDevice(this.ProductId, this.Sn) {
+	if HasGeneralDevice(this.ProductID, this.Sn) {
 		return nil
 	}
 	return db.Create(this).Error
@@ -61,7 +61,7 @@ func (this *GeneralDeviceInfo) CreateGeneralDevice() error {
 
 // 删除通用设备
 func (this *GeneralDeviceInfo) DeleteGeneralDevice() error {
-	if HasGeneralDevice(this.ProductId, this.Sn) {
+	if HasGeneralDevice(this.ProductID, this.Sn) {
 		return db.Where(this).Unscoped().Delete(this).Error
 	}
 	return nil
@@ -73,6 +73,6 @@ func FindGeneralDevice(pid int) []GeneralDeviceInfo {
 	if !HasProduct(pid) {
 		return devs
 	}
-	db.Where(&GeneralDeviceInfo{ProductId: pid}).Find(&devs)
+	db.Where(&GeneralDeviceInfo{ProductID: pid}).Find(&devs)
 	return devs
 }
