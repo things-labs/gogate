@@ -34,7 +34,9 @@ var zbProduct = map[int]*ZbProduct{
 		{[]uint16{ltl.TrunkID_GeneralOnoff}, []uint16{}},
 		{[]uint16{ltl.TrunkID_GeneralOnoff}, []uint16{}}},
 		"三位智能开关"},
-
+	PID_DZCT01: &ZbProduct{[]NodeDsc{
+		{[]uint16{ltl.TrunkID_GeneralOnoff}, []uint16{}}},
+		"窗帘控制器"},
 	// 例子
 	PID_ZIGBEE_TEST: &ZbProduct{[]NodeDsc{
 		{[]uint16{}, []uint16{}},             // 节点1 集描述

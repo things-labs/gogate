@@ -7,8 +7,9 @@ import (
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gogate/plugin/discover"
-	_ "github.com/thinkgos/gogate/smartHome/routers"
 	"github.com/thinkgos/gomo/elink"
+
+	_ "github.com/thinkgos/gogate/smartHome/routers"
 
 	"github.com/astaxie/beego"
 )

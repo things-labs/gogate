@@ -9,35 +9,43 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
+// SysMultiUserPy 多用户负载
 type SysMultiUserPy struct {
 	UID []int64 `json:"uid"`
 }
 
+// SysUserPy 单用户负载
 type SysUserPy struct {
 	UID int64 `json:"uid"`
 }
 
+// SysMultiUserRequest 多用户请求
 type SysMultiUserRequest struct {
 	ctrl.BaseRequest
 	Payload SysMultiUserPy `json:"payload,omitempty"`
 }
 
+// SysUserController 用户控制控制器
 type SysUserController struct {
 	ctrl.Controller
 }
 
+// Get 获取用户
 func (this *SysUserController) Get() {
 	err := this.WriteResponsePyServerJSON(elink.CodeSuccess,
 		&SysMultiUserPy{UID: models.GetUsers()})
 	if err != nil {
-		logs.Error(err)
+		this.ErrorResponse(elink.CodeErrSysException)
+		logs.Error("response", err)
 	}
 }
 
+// Post 增加用户
 func (this *SysUserController) Post() {
 	this.userDeal(false)
 }
 
+// Delete 删除用户
 func (this *SysUserController) Delete() {
 	this.userDeal(true)
 }

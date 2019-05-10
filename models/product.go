@@ -13,6 +13,7 @@ const (
 	PID_DZSW01                      // LC_DZSW01型号一位智能开关
 	PID_DZSW02                      // LC_DZSW02型号二位智能开关
 	PID_DZSW03                      // LC_DZSW03型号三位智能开关
+	PID_DZCT01                      // LC_DZCT01型号窗帘控制器
 	PID_RESERVE      = 0            // 保留pid号
 	PID_ZIGBEE_TEST  = 80000        // zigbee测试号
 	PID_GENERAL_TEST = 80001        // 普通设备测试号
@@ -35,6 +36,7 @@ var productInfos = map[int]*ProductInfo{
 	PID_DZSW01:       &ProductInfo{0, PTypesZigbee, "smart zigbee", "LC_DZSW01", "一位智能开关", "一开智能开关", "lchtime"},
 	PID_DZSW02:       &ProductInfo{0, PTypesZigbee, "smart zigbee", "LC_DZSW02", "二位智能开关", "二位智能开关", "lchtime"},
 	PID_DZSW03:       &ProductInfo{0, PTypesZigbee, "smart zigbee", "LC_DZSW03", "三位智能开关", "三位智能开关", "lchtime"},
+	PID_DZCT01:       &ProductInfo{0, PTypesZigbee, "smart zigbee", "LC_DZCT01", "窗帘控制器", "窗帘控制器", "lchtime"},
 }
 
 // RegisterProducts 注册产品列表
