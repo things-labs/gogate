@@ -78,27 +78,23 @@ func RegisterProduct(pid int, pi *ProductInfo) error {
 	return nil
 }
 
-// LookupProduct 查找对应pid产品信息
-func LookupProduct(pid int) (*ProductInfo, error) {
+// LookupProduct 查找对应pid产品信息,types指定的产品类型
+func LookupProduct(pid int, types ...int) (*ProductInfo, error) {
 	if pid == PID_RESERVE {
 		return nil, ErrInvalidParameter
 	}
-	if v, exist := productInfos[pid]; exist {
+	v, exist := productInfos[pid]
+	if exist && (len(types) == 0 || (v.Types == types[0])) {
 		return v, nil
 	}
+
 	return nil, ErrProductNotExist
 }
 
 // HasProduct 判断对应id产品信息是否存在,types指定的产品类型
 func HasProduct(pid int, types ...int) bool {
-	info, err := LookupProduct(pid)
-	if err != nil {
-		return false
-	}
-	if len(types) > 0 {
-		return info.Types == types[0]
-	}
-	return true
+	_, err := LookupProduct(pid, types...)
+	return err == nil
 }
 
 /*****************************************************************************
