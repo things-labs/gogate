@@ -20,6 +20,7 @@ const (
 	_DbDriver = "sqlite3"
 )
 
+// DbTableInitFunc 数据表初始化函数
 type DbTableInitFunc func() error
 
 var (
@@ -27,7 +28,11 @@ var (
 	dbTableInitList []DbTableInitFunc
 )
 
-// 数据库初始化,注册相应模型
+func init() {
+	RegisterDbTableInitFunc(UserDbTableInit)
+}
+
+// DbInit 数据库初始化,注册相应模型
 func DbInit() error {
 	var err error
 	var errs error
@@ -59,8 +64,8 @@ func DbInit() error {
 	return errs
 }
 
-// 提供数据表注册初始函数
-func RegisterDbTableInitFunction(f DbTableInitFunc) {
+// RegisterDbTableInitFunc 提供数据表注册初始函数
+func RegisterDbTableInitFunc(f DbTableInitFunc) {
 	if f != nil {
 		dbTableInitList = append(dbTableInitList, f)
 	}

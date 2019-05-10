@@ -16,8 +16,8 @@ import (
 
 func init() {
 	// 注册设备模型初始化函数
-	models.RegisterDbTableInitFunction(models.GeneralDeviceDbTableInit)
-	models.RegisterDbTableInitFunction(models.ZbDeviceDbTableInit)
+	models.RegisterDbTableInitFunc(models.GeneralDeviceDbTableInit)
+	models.RegisterDbTableInitFunc(models.ZbDeviceDbTableInit)
 }
 
 func main() {

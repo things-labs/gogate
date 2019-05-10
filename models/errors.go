@@ -4,6 +4,7 @@ import (
 	"errors"
 )
 
+// 错误
 var (
 	ErrInvalidParameter      = errors.New("invalid parameter")             // 无效参数
 	ErrProductNotExist       = errors.New("product not exist")             // 产品不存在

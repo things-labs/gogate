@@ -7,15 +7,18 @@ import (
 	"github.com/thinkgos/utils"
 )
 
+// 超级用户
 const (
 	SupperUser = 0 // 超级用户,超级权限,必定存在
 )
 
+// User 用户表
 type User struct {
 	gorm.Model
 	UID int64 `gorm:"UNIQUE;NOT NULL"`
 }
 
+// UserInfo 用户信息
 type UserInfo struct {
 	sync.RWMutex
 	tab []int64
@@ -23,23 +26,22 @@ type UserInfo struct {
 
 var localUser *UserInfo
 
-func init() {
-	RegisterDbTableInitFunction(func() error {
-		if err := db.AutoMigrate(&User{}).Error; err != nil {
-			return err
-		}
-		localUser = new(UserInfo)
-		users := []User{}
-		db.Find(&users)
-		localUser.tab = make([]int64, 0, len(users))
-		for _, v := range users {
-			localUser.tab = append(localUser.tab, v.UID)
-		}
-		return nil
-	})
+// UserDbTableInit 用户表初始化
+func UserDbTableInit() error {
+	if err := db.AutoMigrate(&User{}).Error; err != nil {
+		return err
+	}
+	localUser = new(UserInfo)
+	users := []User{}
+	db.Find(&users)
+	localUser.tab = make([]int64, 0, len(users))
+	for _, v := range users {
+		localUser.tab = append(localUser.tab, v.UID)
+	}
+	return nil
 }
 
-// 是否有对应用户,用户0为超级用户,永远存在
+// HasUser 是否有对应用户,用户0为超级用户,永远存在
 func HasUser(uid int64) bool {
 	if uid == SupperUser {
 		return true
@@ -50,7 +52,7 @@ func HasUser(uid int64) bool {
 	return b
 }
 
-// 添加用户
+// AddUser 添加用户
 func AddUser(uid int64) error {
 	if HasUser(uid) {
 		return nil
@@ -66,7 +68,7 @@ func AddUser(uid int64) error {
 	return nil
 }
 
-// 删除用户
+// DeleteUser 删除用户
 func DeleteUser(uid int64) error {
 	if !HasUser(uid) {
 		return nil
@@ -81,7 +83,7 @@ func DeleteUser(uid int64) error {
 	return nil
 }
 
-// 获取用户列表
+// GetUsers 获取用户列表
 func GetUsers() []int64 {
 	tb := make([]int64, len(localUser.tab))
 	localUser.RLock()
