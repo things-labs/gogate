@@ -23,7 +23,7 @@ func GeneralDeviceDbTableInit() error {
 
 // 是否有通用对应的设备(pid sn)
 func HasGeneralDevice(pid int, sn string) bool {
-	if !HasProduct(pid) || len(sn) == 0 {
+	if !HasProduct(pid, PTypesGeneral) || len(sn) == 0 {
 		return false
 	}
 	return db.Where(&GeneralDeviceInfo{ProductID: pid, Sn: sn}).
@@ -32,7 +32,7 @@ func HasGeneralDevice(pid int, sn string) bool {
 
 // 查找通用设备对应的信息
 func LookupGeneralDevice(pid int, sn string) (*GeneralDeviceInfo, error) {
-	if !HasProduct(pid) || len(sn) == 0 {
+	if !HasProduct(pid, PTypesGeneral) || len(sn) == 0 {
 		return nil, ErrDeviceNotExist
 	}
 
@@ -70,7 +70,7 @@ func (this *GeneralDeviceInfo) DeleteGeneralDevice() error {
 // 查找通用设备列表
 func FindGeneralDevice(pid int) []GeneralDeviceInfo {
 	devs := []GeneralDeviceInfo{}
-	if !HasProduct(pid) {
+	if !HasProduct(pid, PTypesGeneral) {
 		return devs
 	}
 	db.Where(&GeneralDeviceInfo{ProductID: pid}).Find(&devs)

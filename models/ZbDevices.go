@@ -83,7 +83,7 @@ func joinInternalString(s []string) string {
 
 // 是否有指定的设备
 func HasZbDevice(sn string, pid int) bool {
-	if !HasZbProduct(pid) || len(sn) == 0 {
+	if !HasProduct(pid, PTypesZigbee) || len(sn) == 0 {
 		return false
 	}
 	return db.Where(&ZbDeviceInfo{Sn: sn}).First(&ZbDeviceInfo{}).Error == nil
@@ -454,12 +454,12 @@ func (this *ZbDeviceInfo) updateZbDeviceAndNodeNwkAddr(NewnwkAddr uint16) error 
 // 创建设备和设备所有的节点,失败将不建立
 func (this *ZbDeviceInfo) createZbDeveiceAndNode() error {
 	// 查询对应产品
-	pdt, err := LookupZbProduct(this.ProductId)
+	pdt, err := LookupProduct(this.ProductId)
 	if err != nil {
 		return err
 	}
 
-	devNode := pdt.GetDeviceNodeDscList()
+	devNode := pdt.GetZbDeviceNodeDscList()
 
 	tx := db.Begin()
 	if err = tx.Error; err != nil {
@@ -576,7 +576,7 @@ func (this *ZbDeviceInfo) DeleteZbDeveiceAndNode() error {
 func UpdateZbDeviceAndNode(sn string, nwkAddr uint16, capacity byte, productID int) error {
 	var err error
 
-	if !HasZbProduct(productID) || len(sn) == 0 {
+	if !HasProduct(productID, PTypesZigbee) || len(sn) == 0 {
 		return ErrProductNotExist
 	}
 	dev, err := LookupZbDeviceByIeeeAddr(sn)
