@@ -1,13 +1,14 @@
 package main
 
 import (
+	"github.com/thinkgos/gomo/elink"
+
 	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gogate/apps/npis"
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gogate/plugin/discover"
-	"github.com/thinkgos/gomo/elink"
 
 	_ "github.com/thinkgos/gogate/smartHome/routers"
 
@@ -33,7 +34,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	
 	go discover.Run()
 	beego.Run()
 }

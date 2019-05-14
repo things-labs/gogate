@@ -4,11 +4,12 @@ import (
 	"time"
 
 	"github.com/thinkgos/easyws"
+	"github.com/thinkgos/gomo/elink"
+	"github.com/thinkgos/gomo/lmax"
+
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gogate/misc"
-	"github.com/thinkgos/gomo/elink"
-	"github.com/thinkgos/gomo/lmax"
 
 	"github.com/astaxie/beego/logs"
 	jsoniter "github.com/json-iterator/go"

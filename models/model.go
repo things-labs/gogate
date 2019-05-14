@@ -4,12 +4,12 @@ import (
 	"os"
 	"path"
 
-	"github.com/thinkgos/utils"
-	ini "gopkg.in/ini.v1"
-
 	"github.com/astaxie/beego/logs"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"github.com/thinkgos/utils"
+	"gopkg.in/ini.v1"
+
 	"github.com/thinkgos/gogate/misc"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -50,9 +50,9 @@ func DbInit() error {
 	if db, err = gorm.Open(_DbDriver, _DbName); err != nil {
 		return errors.Wrapf(err, "db(%s-%s) open failed", _DbDriver, _DbName)
 	}
-	//default disable
+	// default disable
 	db.LogMode(misc.APPCfg.Section(ini.DEFAULT_SECTION).Key("ormDbLog").MustBool(false))
-	//db.LogMode(true)
+	// db.LogMode(true)
 
 	for _, initF := range dbTableInitList {
 		if err = initF(); err != nil {

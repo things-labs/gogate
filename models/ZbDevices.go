@@ -24,10 +24,10 @@ type ZbDeviceInfo struct {
 // NOTE: 表内数组全部以逗号","分隔
 // 节点表
 type ZbDeviceNodeInfo struct {
-	ID           uint   //`gorm:"primary_key"`
-	Sn           string //`gorm:"NOT NULL"`
-	NodeNo       byte   //`gorm:"UNIQUE;NOT NULL"`
-	NwkAddr      uint16 //`gorm:"UNIQUE;NOT NULL"`
+	ID           uint   // `gorm:"primary_key"`
+	Sn           string // `gorm:"NOT NULL"`
+	NodeNo       byte   // `gorm:"UNIQUE;NOT NULL"`
+	NwkAddr      uint16 // `gorm:"UNIQUE;NOT NULL"`
 	ProductID    int
 	InTrunkList  string // 输入集表
 	OutTrunkList string // 输出集表
@@ -41,7 +41,7 @@ type ZbDeviceNodeInfo struct {
 	dstBind  []string // 目的绑定表: 本设备绑定了谁
 }
 
-const zbDeviceNodeInfos_Sql = `CREATE TABLE "zb_device_node_infos" (
+const zbdevicenodeinfosSql = `CREATE TABLE "zb_device_node_infos" (
 	"id" integer primary key autoincrement,
 	"sn" varchar(255) NOT NULL,
 	"node_no" integer NOT NULL,
@@ -61,8 +61,8 @@ func ZbDeviceDbTableInit() error {
 	}
 
 	if !db.HasTable("zb_device_node_infos") {
-		//TODO: check error?
-		db.Raw(zbDeviceNodeInfos_Sql).Scan(&ZbDeviceNodeInfo{})
+		// TODO: check error?
+		db.Raw(zbdevicenodeinfosSql).Scan(&ZbDeviceNodeInfo{})
 	}
 	return nil
 }
