@@ -16,6 +16,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// 默认端口
 const (
 	DefaultDiscoverPort = 8091
 )
