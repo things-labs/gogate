@@ -61,17 +61,18 @@ func NewMqClient(productKey, mac string) mqtt.Client {
 		opts.SetBinaryWill(tp, out, 2, false)
 	}
 	c := mqtt.NewClient(opts)
-	connect := func() error {
-		logs.Info("mqtt client connecting...")
-		if token := c.Connect(); !token.WaitTimeout(time.Second*10) ||
-			(token.Error() != nil) {
-			logs.Warn("mqtt client connect failed, ", token.Error())
-			return errors.New("mqtt client connect failed")
-		}
-		return nil
-	}
 
 	go func() {
+		connect := func() error {
+			logs.Info("mqtt client connecting...")
+			if token := c.Connect(); !token.WaitTimeout(time.Second*10) ||
+				(token.Error() != nil) {
+				logs.Warn("mqtt client connect failed, ", token.Error())
+				return errors.New("mqtt client connect failed")
+			}
+			return nil
+		}
+
 		if connect() == nil {
 			return
 		}
