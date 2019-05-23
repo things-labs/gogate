@@ -10,7 +10,6 @@ require (
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/go-ini/ini v1.42.0
-	github.com/goburrow/serial v0.1.0
 	github.com/gorilla/websocket v1.4.0
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/jinzhu/gorm v1.9.4
@@ -25,7 +24,6 @@ require (
 	github.com/thinkgos/easyws v0.0.0-20190505084523-7cd15563c23d
 	github.com/thinkgos/go-cache v2.2.0+incompatible
 	github.com/thinkgos/gomo v0.0.0-20190510003535-ac284ab58ffd
-	github.com/thinkgos/gomodbus v1.1.2
 	github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede
 	github.com/thinkgos/utils v0.1.0
 	go.uber.org/dig v1.7.0

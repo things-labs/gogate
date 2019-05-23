@@ -61,8 +61,6 @@ github.com/go-redis/redis v6.14.2+incompatible/go.mod h1:NAIEuMOZ/fxfXJIrKDQDz8w
 github.com/go-sql-driver/mysql v1.4.1 h1:g24URVg0OFbNUTx9qqY1IRZ9D9z3iPyi5zKhQZpNwpA=
 github.com/go-sql-driver/mysql v1.4.1/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
-github.com/goburrow/serial v0.1.0 h1:v2T1SQa/dlUqQiYIT8+Cu7YolfqAi3K96UmhwYyuSrA=
-github.com/goburrow/serial v0.1.0/go.mod h1:sAiqG0nRVswsm1C97xsttiYCzSLBmUZ/VSlVLZJ8haA=
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/gogo/protobuf v1.2.0/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
@@ -186,8 +184,6 @@ github.com/thinkgos/go-cache v2.2.0+incompatible h1:xx18hxj956l/nj+1VS5pJYuJKDUU
 github.com/thinkgos/go-cache v2.2.0+incompatible/go.mod h1:OJpYWSJ94LXhwtqi2I+iWY4c1sMf8J0irWfWxhaL/sc=
 github.com/thinkgos/gomo v0.0.0-20190510003535-ac284ab58ffd h1:neHAKipOoT8nMq0LcKUis+Lfu88xy0gsLLfCAM+L5qQ=
 github.com/thinkgos/gomo v0.0.0-20190510003535-ac284ab58ffd/go.mod h1:XbJrDUQjcw8YT0wcUJa0UzvSv5oZwdX+/4C9RRUxj2U=
-github.com/thinkgos/gomodbus v1.1.2 h1:ITLNOwPN95oUHTjBHZ/IB0GPXUKu1IevSr0h4h4b8V8=
-github.com/thinkgos/gomodbus v1.1.2/go.mod h1:RKnccREas1lVVqQd8OR3zgP7Nkn8ApGTlpZ30XRACtY=
 github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede h1:qz2UFWBp31P1KdLdFlXVqK2yANHV078UdzDgxcZRVWU=
 github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede/go.mod h1:JCgYwOUDeijVmjhw3JPjVEZuo0v4b7uhJNGpbCCuz0k=
 github.com/thinkgos/tsm v0.2.2 h1:/jRJUtdO84MH7GuQzAJ7RBpsgcbq+0oAVTJt21LaKbk=
