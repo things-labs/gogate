@@ -55,9 +55,14 @@ func mbappInit() error {
 		return err
 	}
 	err := port1.Start()
-
 	srv := modbus.NewTCPServer(":502")
 	srv.AddNode(port1.GetNodeRegister())
 	go srv.ServerModbus()
+	srv.RegisterFunctionHandler(modbus.FuncCodeWriteSingleCoil, port1.FuncWriteSingleCoil)
+	srv.RegisterFunctionHandler(modbus.FuncCodeWriteMultipleCoils, port1.FuncWriteMultiCoil)
+	srv.RegisterFunctionHandler(modbus.FuncCodeWriteSingleRegister, port1.FuncWriteSingleRegister)
+	srv.RegisterFunctionHandler(modbus.FuncCodeWriteMultipleRegisters, port1.FuncWriteMultiHoldingRegisters)
+	srv.RegisterFunctionHandler(modbus.FuncCodeReadWriteMultipleRegisters, port1.FuncReadWriteMultiHoldingRegisters)
+	srv.RegisterFunctionHandler(modbus.FuncCodeMaskWriteRegister, port1.FuncMaskWriteRegisters)
 	return err
 }

@@ -3,6 +3,7 @@ package mb
 import (
 	"container/list"
 	"context"
+	"encoding/binary"
 	"errors"
 	"sync"
 	"time"
@@ -34,7 +35,7 @@ type Mbj struct {
 	mu            sync.Mutex          // 请求列表锁
 	readyReq      chan *GatherRequest // 就绪表
 	register      *modbus.NodeRegister
-	//	node                   sync.Map            // 节点信息存储表
+	virtual2real  []*GatherPara // 虚拟地址和真实设备地址的互映射
 }
 
 // GatherPara 采集参数
@@ -112,11 +113,12 @@ func (this *Mbj) Close() error {
 
 // AddReadPoll 新建一个读轮询功能码
 func (this *Mbj) AddReadPoll(gp *GatherPara) error {
-	addReaList := func(req *GatherRequest) {
+	addReqList := func(req *GatherRequest) {
 		this.mu.Lock()
 		this.reqlist.PushBack(req)
 		this.mu.Unlock()
 	}
+
 	if gp.HasCoil {
 		// 虚拟地址超范围
 		if int(gp.CoilVirtualAddress)+int(gp.CoilQuantity) > VirtualCoilDefaultQuantity {
@@ -182,7 +184,7 @@ func (this *Mbj) AddReadPoll(gp *GatherPara) error {
 		if count > modbus.ReadBitsQuantityMax {
 			count = modbus.ReadBitsQuantityMax
 		}
-		addReaList(&GatherRequest{
+		addReqList(&GatherRequest{
 			SlaveId:        gp.SlaveID,
 			FuncCode:       modbus.FuncCodeReadCoils,
 			Address:        address,
@@ -204,7 +206,7 @@ func (this *Mbj) AddReadPoll(gp *GatherPara) error {
 			count = modbus.ReadBitsQuantityMax
 		}
 
-		addReaList(&GatherRequest{
+		addReqList(&GatherRequest{
 			SlaveId:        gp.SlaveID,
 			FuncCode:       modbus.FuncCodeReadDiscreteInputs,
 			Address:        address,
@@ -225,7 +227,7 @@ func (this *Mbj) AddReadPoll(gp *GatherPara) error {
 		if remain > modbus.ReadRegQuantityMax {
 			count = modbus.ReadRegQuantityMax
 		}
-		addReaList(&GatherRequest{
+		addReqList(&GatherRequest{
 			SlaveId:        gp.SlaveID,
 			FuncCode:       modbus.FuncCodeReadInputRegisters,
 			Address:        address,
@@ -246,7 +248,7 @@ func (this *Mbj) AddReadPoll(gp *GatherPara) error {
 		if remain > modbus.ReadRegQuantityMax {
 			count = modbus.ReadRegQuantityMax
 		}
-		addReaList(&GatherRequest{
+		addReqList(&GatherRequest{
 			SlaveId:        gp.SlaveID,
 			FuncCode:       modbus.FuncCodeReadHoldingRegisters,
 			Address:        address,
@@ -258,8 +260,143 @@ func (this *Mbj) AddReadPoll(gp *GatherPara) error {
 		virtualAddress += uint16(count) // 虚拟地址偏移
 		remain -= count                 // 剩下
 	}
-
+	this.virtual2real = append(this.virtual2real, gp)
 	return nil
+}
+
+func (this *Mbj) virtual2realPara(isHolding bool, vaddr uint16) (byte, uint16, error) {
+	for _, para := range this.virtual2real {
+		if !isHolding {
+			if vaddr >= para.CoilVirtualAddress && vaddr < para.CoilVirtualAddress+para.CoilQuantity {
+				return para.SlaveID, para.CoilAddress + (vaddr - para.CoilVirtualAddress), nil
+			}
+		} else {
+			if vaddr >= para.HoldingVirtualAddress && vaddr < para.HoldingVirtualAddress+para.HoldingQuantity {
+				return para.SlaveID, para.HoldingAddress + (vaddr - para.HoldingVirtualAddress), nil
+			}
+		}
+	}
+	return 0, 0, &modbus.ExceptionError{ExceptionCode: modbus.ExceptionCodeIllegalDataAddress}
+}
+
+func (this *Mbj) FuncWriteSingleCoil(reg *modbus.NodeRegister, data []byte) ([]byte, error) {
+	if len(data) != modbus.FuncWriteMinSize {
+		return nil, &modbus.ExceptionError{ExceptionCode: modbus.ExceptionCodeIllegalDataValue}
+	}
+	vaddr := binary.BigEndian.Uint16(data)
+	slaveID, raddr, err := this.virtual2realPara(false, vaddr)
+	if err != nil {
+		return nil, err
+	}
+	binary.BigEndian.PutUint16(data, raddr) // 将实际地址填上去
+	_, err = this.Send(slaveID, &modbus.ProtocolDataUnit{
+		FuncCode: modbus.FuncCodeWriteSingleCoil,
+		Data:     data,
+	})
+	binary.BigEndian.PutUint16(data, vaddr) // 将虚拟地址填回去作回复
+	return data, err
+}
+
+func (this *Mbj) FuncWriteMultiCoil(reg *modbus.NodeRegister, data []byte) ([]byte, error) {
+	if len(data) < modbus.FuncWriteMinSize {
+		return nil, &modbus.ExceptionError{ExceptionCode: modbus.ExceptionCodeIllegalDataValue}
+	}
+	vaddr := binary.BigEndian.Uint16(data)
+	slaveID, raddr, err := this.virtual2realPara(false, vaddr)
+	if err != nil {
+		return nil, err
+	}
+	binary.BigEndian.PutUint16(data, raddr) // 将实际地址填上去
+	_, err = this.Send(slaveID, &modbus.ProtocolDataUnit{
+		FuncCode: modbus.FuncCodeWriteMultipleCoils,
+		Data:     data,
+	})
+	binary.BigEndian.PutUint16(data, vaddr) // 将虚拟地址填回去作回复
+	return data[0:4], err
+}
+
+func (this *Mbj) FuncWriteSingleRegister(reg *modbus.NodeRegister, data []byte) ([]byte, error) {
+	if len(data) != modbus.FuncWriteMinSize {
+		return nil, &modbus.ExceptionError{ExceptionCode: modbus.ExceptionCodeIllegalDataValue}
+	}
+	vaddr := binary.BigEndian.Uint16(data)
+	slaveID, raddr, err := this.virtual2realPara(true, vaddr)
+	if err != nil {
+		return nil, err
+	}
+	binary.BigEndian.PutUint16(data, raddr) // 将实际地址填上去
+	_, err = this.Send(slaveID, &modbus.ProtocolDataUnit{
+		FuncCode: modbus.FuncCodeWriteSingleRegister,
+		Data:     data,
+	})
+	if err != nil {
+		logs.Debug(err)
+		return nil, &modbus.ExceptionError{ExceptionCode: modbus.ExceptionCodeIllegalDataValue}
+	}
+	binary.BigEndian.PutUint16(data, vaddr) // 将虚拟地址填回去作回复
+	return data[:4], err
+}
+
+func (this *Mbj) FuncWriteMultiHoldingRegisters(reg *modbus.NodeRegister, data []byte) ([]byte, error) {
+	if len(data) < modbus.FuncWriteMultiMinSize {
+		return nil, &modbus.ExceptionError{ExceptionCode: modbus.ExceptionCodeIllegalDataValue}
+	}
+	vaddr := binary.BigEndian.Uint16(data)
+	slaveID, raddr, err := this.virtual2realPara(true, vaddr)
+	if err != nil {
+		return nil, err
+	}
+	binary.BigEndian.PutUint16(data, raddr) // 将实际地址填上去
+	_, err = this.Send(slaveID, &modbus.ProtocolDataUnit{
+		FuncCode: modbus.FuncCodeWriteMultipleRegisters,
+		Data:     data,
+	})
+	binary.BigEndian.PutUint16(data, vaddr) // 将虚拟地址填回去作回复
+	return data[:4], err
+}
+
+func (this *Mbj) FuncReadWriteMultiHoldingRegisters(reg *modbus.NodeRegister, data []byte) ([]byte, error) {
+	if len(data) < modbus.FuncReadWriteMinSize {
+		return nil, &modbus.ExceptionError{ExceptionCode: modbus.ExceptionCodeIllegalDataValue}
+	}
+	vreadAddress := binary.BigEndian.Uint16(data)
+	vwriteAddress := binary.BigEndian.Uint16(data[4:])
+	slaveID, rreadAddress, err := this.virtual2realPara(true, vreadAddress)
+	if err != nil {
+		return nil, err
+	}
+	_, rwriteAddress, err := this.virtual2realPara(true, vwriteAddress)
+	if err != nil {
+		return nil, err
+	}
+	binary.BigEndian.PutUint16(data, rreadAddress)      // 将实际地址填上去
+	binary.BigEndian.PutUint16(data[4:], rwriteAddress) // 将实际地址填上去
+	response, err := this.Send(slaveID, &modbus.ProtocolDataUnit{
+		FuncCode: modbus.FuncCodeReadWriteMultipleRegisters,
+		Data:     data,
+	})
+
+	return response.Data, err
+}
+
+// funcMaskWriteRegisters 屏蔽写寄存器
+func (this *Mbj) FuncMaskWriteRegisters(reg *modbus.NodeRegister, data []byte) ([]byte, error) {
+	if len(data) != modbus.FuncMaskWriteMinSize {
+		return nil, &modbus.ExceptionError{ExceptionCode: modbus.ExceptionCodeIllegalDataValue}
+	}
+
+	vaddr := binary.BigEndian.Uint16(data)
+	slaveID, raddr, err := this.virtual2realPara(true, vaddr)
+	if err != nil {
+		return nil, err
+	}
+	binary.BigEndian.PutUint16(data, raddr) // 将实际地址填上去
+	_, err = this.Send(slaveID, &modbus.ProtocolDataUnit{
+		FuncCode: modbus.FuncCodeMaskWriteRegister,
+		Data:     data,
+	})
+	binary.BigEndian.PutUint16(data, vaddr) // 将虚拟地址填回去作回复
+	return data, err
 }
 
 // 扫描请求列表
