@@ -28,10 +28,6 @@ var (
 	dbTableInitList []DbTableInitFunc
 )
 
-func init() {
-	RegisterDbTableInitFunc(UserDbTableInit)
-}
-
 // DbInit 数据库初始化,注册相应模型
 func DbInit() error {
 	var err error

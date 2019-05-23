@@ -42,7 +42,9 @@ func PublishServerJSON(tp string, data interface{}) error {
 
 // PublishPyServerJSON 推送数据,通道推送数据
 func PublishPyServerJSON(tp string, payload interface{}) error {
-	return PublishServerJSON(tp, &ctrl.PublishData{&ctrl.BasePublishData{tp}, payload})
+	return PublishServerJSON(tp, &ctrl.PublishData{
+		BasePublishData: &ctrl.BasePublishData{Topic: tp},
+		Payload:         payload})
 }
 
 // HeartBeatStatus 网关心跳包
