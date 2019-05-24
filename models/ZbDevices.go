@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"strconv"
@@ -632,5 +633,7 @@ func DeleteZbDeveiceAndNode(sn string) error {
 
 // 地址转换成字符串,全大写
 func ToHexString(v uint64) string {
-	return strings.ToUpper(hex.EncodeToString(utils.Big_Endian.Putuint64(v)))
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, v)
+	return strings.ToUpper(hex.EncodeToString(b))
 }

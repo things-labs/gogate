@@ -11,10 +11,7 @@ import (
 )
 
 const (
-	major  = 0
-	minor  = 0
-	fixed  = 1
-	isBeta = true
+	version = "v1.2.3 Beta"
 )
 
 type gatewayInfo struct {
@@ -35,7 +32,7 @@ func init() {
 	gatewayInfos = &gatewayInfo{
 		mac:       strings.ToUpper(hex.EncodeToString(inf.HardwareAddr)),
 		MAC:       strings.ToUpper(inf.HardwareAddr.String()),
-		version:   utils.Version(major, minor, fixed, isBeta),
+		version:   version,
 		buildDate: utils.BuildDateTime(),
 	}
 }

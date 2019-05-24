@@ -23,9 +23,9 @@ require (
 	github.com/thinkgos/easyjms v0.1.1
 	github.com/thinkgos/easyws v0.0.0-20190505084523-7cd15563c23d
 	github.com/thinkgos/go-cache v2.2.0+incompatible
-	github.com/thinkgos/gomo v0.0.0-20190510003535-ac284ab58ffd
+	github.com/thinkgos/gomo v0.0.0-20190523161851-8485f8870a0b
 	github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede
-	github.com/thinkgos/utils v0.1.0
+	github.com/thinkgos/utils v0.2.0
 	go.uber.org/dig v1.7.0
 	golang.org/x/crypto v0.0.0-20190418165655-df01cb2cc480 // indirect
 	golang.org/x/net v0.0.0-20190419010253-1f3472d942ba // indirect
