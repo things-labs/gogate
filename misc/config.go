@@ -12,17 +12,20 @@ import (
 	"github.com/go-ini/ini"
 )
 
+// 配置路径
 const (
 	SmartAppCfgPath = "conf/smartapp.conf" // 应用配置路径
 	UsartCfgPath    = "conf/usart.conf"    // 串口配置
 )
 
+// 配置文件
 var (
 	APPCfg  *ini.File
 	UartCfg *ini.File
 	watcher *fsnotify.Watcher
 )
 
+// CfgInit 配置初始化
 func CfgInit() error {
 	var err error
 
@@ -56,6 +59,7 @@ func CfgInit() error {
 	return err
 }
 
+// FactorySmartAppCfg 恢复smart app为默认
 func FactorySmartAppCfg() error {
 	f, err := os.Create(SmartAppCfgPath)
 	if err != nil {
@@ -66,6 +70,7 @@ func FactorySmartAppCfg() error {
 	return nil
 }
 
+// FactoryUsartCfg 串口恢复到出厂设置
 func FactoryUsartCfg() error {
 	f, err := os.Create(UsartCfgPath)
 	if err != nil {
@@ -76,6 +81,7 @@ func FactoryUsartCfg() error {
 	return nil
 }
 
+// LogsInit log初始化
 func LogsInit() {
 	logs.Reset() // 复位日志输出流
 	sec, err := APPCfg.GetSection("logs")

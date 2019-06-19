@@ -82,7 +82,7 @@ func joinInternalString(s []string) string {
 	return strings.Join(s, ",")
 }
 
-// 是否有指定的设备
+// HasZbDevice 是否有指定的设备
 func HasZbDevice(sn string, pid int) bool {
 	if !HasProduct(pid, PTypesZigbee) || len(sn) == 0 {
 		return false
@@ -90,7 +90,7 @@ func HasZbDevice(sn string, pid int) bool {
 	return db.Where(&ZbDeviceInfo{Sn: sn}).First(&ZbDeviceInfo{}).Error == nil
 }
 
-// 有指定节点(nwkAddress nodeNum)
+// HasZbDeviceNode 有指定节点(nwkAddress nodeNum)
 func HasZbDeviceNode(nwkAddr uint16, nodeNum byte) bool {
 	return db.Where(&ZbDeviceNodeInfo{
 		NwkAddr: nwkAddr,
@@ -98,7 +98,7 @@ func HasZbDeviceNode(nwkAddr uint16, nodeNum byte) bool {
 	}).Error == nil
 }
 
-// 根据nwkAddr,nodeNum找到设备节点
+// LookupZbDeviceNodeByNN 根据nwkAddr,nodeNum找到设备节点
 func LookupZbDeviceNodeByNN(nwkAddr uint16, nodeNum byte) (*ZbDeviceNodeInfo, error) {
 	o := &ZbDeviceNodeInfo{}
 	if err := db.Where(&ZbDeviceNodeInfo{
@@ -109,7 +109,7 @@ func LookupZbDeviceNodeByNN(nwkAddr uint16, nodeNum byte) (*ZbDeviceNodeInfo, er
 	return o.parseInternalString(), nil
 }
 
-// 根据sn,nodeNum找到设备节点
+// LookupZbDeviceNodeByIN 根据sn,nodeNum找到设备节点
 func LookupZbDeviceNodeByIN(sn string, nodeNum byte) (*ZbDeviceNodeInfo, error) {
 	if len(sn) == 0 {
 		return nil, ErrInvalidParameter
@@ -123,7 +123,7 @@ func LookupZbDeviceNodeByIN(sn string, nodeNum byte) (*ZbDeviceNodeInfo, error) 
 	return o.parseInternalString(), nil
 }
 
-// 根据id找到设备节点
+// LookupZbDeviceNodeByID 根据id找到设备节点
 func LookupZbDeviceNodeByID(id string) (*ZbDeviceNodeInfo, error) {
 	return lookupZbDeviceNodeByID(db, id)
 }
@@ -142,7 +142,7 @@ func lookupZbDeviceNodeByID(db *gorm.DB, id string) (*ZbDeviceNodeInfo, error) {
 	return o.parseInternalString(), nil
 }
 
-// 绑定两个设备 要求更新 源设备节点的<目的绑定表>和目标设备节点的<源绑定表>
+// BindZbDeviceNode 绑定两个设备 要求更新 源设备节点的<目的绑定表>和目标设备节点的<源绑定表>
 func BindZbDeviceNode(SrcSn string, SrcNodeNum byte,
 	DstBindSn string, DstBindNodeNum byte,
 	BindTrunkID uint16) error {
@@ -213,7 +213,7 @@ func BindZbDeviceNode(SrcSn string, SrcNodeNum byte,
 }
 
 // 解绑两个设备节点
-// 如果两个设备节点有两个互补集绑定的,那么将进行同时解绑
+// UnZbBindDeviceNode 如果两个设备节点有两个互补集绑定的,那么将进行同时解绑
 func UnZbBindDeviceNode(SrcSn string, SrcNodeNum byte,
 	DstBindSn string, DstBindNodeNum byte, BindTrunkID uint16) error {
 	var SrcDNI *ZbDeviceNodeInfo
@@ -281,7 +281,7 @@ func UnZbBindDeviceNode(SrcSn string, SrcNodeNum byte,
 	return nil
 }
 
-// 找到绑定表的所有目标设备节点
+// BindFindZbDeviceNodeByNN 找到绑定表的所有目标设备节点
 func BindFindZbDeviceNodeByNN(NwkAddr uint16, NodeNum byte, trunkID uint16) ([]*ZbDeviceNodeInfo, error) {
 	srcDNI, err := LookupZbDeviceNodeByNN(NwkAddr, NodeNum)
 	if err != nil {

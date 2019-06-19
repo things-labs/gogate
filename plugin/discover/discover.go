@@ -69,12 +69,14 @@ func Run(params ...string) {
 	}
 }
 
+// GatewayDiscoverReq 网关发现请求
 type GatewayDiscoverReq struct {
 	Topic      string `json:"topic"`
 	ProductKey string `json:"productKey"`
 	Mac        string `json:"mac"`
 }
 
+// GatewayDiscoverRsp 网关发现回复
 type GatewayDiscoverRsp struct {
 	Topic      string `json:"topic"`
 	ProductKey string `json:"productKey"`

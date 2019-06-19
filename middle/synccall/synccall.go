@@ -18,6 +18,7 @@ type item struct {
 	value chan interface{} // 传值通道
 }
 
+// Manage 管理
 type Manage struct {
 	c          *cache.Cache
 	n          *snowflake.Node

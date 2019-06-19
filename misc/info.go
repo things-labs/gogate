@@ -6,13 +6,13 @@ import (
 	"net"
 	"runtime"
 	"strings"
-
-	"github.com/thinkgos/utils"
 )
 
 const (
 	version = "v1.2.3 Beta"
 )
+
+// BuildTime 编译时间,由外部ldflags指定
 
 type gatewayInfo struct {
 	mac       string // "0C5415B171AA"
@@ -22,6 +22,14 @@ type gatewayInfo struct {
 }
 
 var gatewayInfos *gatewayInfo
+
+// BuildTime 编译时间
+var BuildTime string
+
+// BuildDateTime 获取编译时间
+func BuildDateTime() string {
+	return strings.Replace(BuildTime, ".", " ", -1)
+}
 
 func init() {
 	inf, err := NetInterface()
@@ -33,30 +41,31 @@ func init() {
 		mac:       strings.ToUpper(hex.EncodeToString(inf.HardwareAddr)),
 		MAC:       strings.ToUpper(inf.HardwareAddr.String()),
 		version:   version,
-		buildDate: utils.BuildDateTime(),
+		buildDate: BuildDateTime(),
 	}
 }
 
-// "0C5415B171AA"
+// Mac mac地址 格式: "0C5415B171AA"
 func Mac() string {
 	return gatewayInfos.mac
 }
 
-// "0C:54:15:B1:71:AA"
+// MAC mac地址 格式: "0C:54:15:B1:71:AA"
 func MAC() string {
 	return gatewayInfos.MAC
 }
 
-// v1.2.3 Beta
+// Version v1.2.3 Beta
 func Version() string {
 	return gatewayInfos.version
 }
 
-// format 2018-12-09 15:26:26
+// BuildDate format 2018-12-09 15:26:26
 func BuildDate() string {
 	return gatewayInfos.buildDate
 }
 
+// NetInterface 获取网络接口
 func NetInterface() (*net.Interface, error) {
 	var intf *net.Interface
 	var err error

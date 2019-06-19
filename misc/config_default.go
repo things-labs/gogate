@@ -1,6 +1,7 @@
 package misc
 
 const (
+	// SmartAppDefaultCfg smart app 默认配置
 	SmartAppDefaultCfg = `#enable orm DB log 
 ormDbLog=false
 
@@ -19,6 +20,7 @@ logFCD = 0
 net = udp
 addr = 192.168.1.199:9000
 `
+	// UsartDefaultCfg 串口默认配置
 	UsartDefaultCfg = `[COM0]
 Name=/dev/ttyS1
 BaudRate=115200
