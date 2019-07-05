@@ -5,7 +5,6 @@ import (
 
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/utils"
 )
 
 // DeviceInfo 设备信息
@@ -17,7 +16,7 @@ type DeviceInfo struct {
 type DeviceStatus struct {
 	CurrentTime   string `json:"currentTime"`
 	StartDateTime string `json:"startDateTime"`
-	RunningTime   string `json:"runningTime"`
+	RunningTime   int64  `json:"runningTime"`
 	Status        string `json:"status"`
 }
 
@@ -41,14 +40,15 @@ func GetGatewayHeatbeatInfo(isonline bool) *GatewayHeatbeatInfo {
 	if !isonline {
 		status = "offline"
 	}
+
 	mac := misc.Mac()
 	return &GatewayHeatbeatInfo{
 		UID:        models.GetUsers(),
 		DeviceInfo: DeviceInfo{Sn: mac},
 		DeviceStatus: DeviceStatus{
 			CurrentTime:   time.Now().Local().Format("2006-01-02 15:04:05"),
-			StartDateTime: utils.SetupTime(),
-			RunningTime:   utils.RunningTime(),
+			StartDateTime: misc.SetupTime(),
+			RunningTime:   misc.RunningTime(),
 			Status:        status,
 		},
 		NetInfo: NetInfo{

@@ -6,6 +6,8 @@ import (
 	"net"
 	"runtime"
 	"strings"
+	"syscall"
+	"time"
 )
 
 const (
@@ -23,6 +25,9 @@ var gatewayInfos *gatewayInfo
 
 // BuildTime 编译时间,由外部ldflags指定
 var BuildTime string
+
+// 开机时间
+var setupTime = time.Now().Local().Format("2006-01-02 15:04:05")
 
 // BuildDateTime 获取编译时间
 func BuildDateTime() string {
@@ -61,6 +66,18 @@ func Version() string {
 // BuildDate format 2018-12-09 15:26:26
 func BuildDate() string {
 	return gatewayInfos.buildDate
+}
+
+// SetupTime 开机时间
+func SetupTime() string {
+	return setupTime
+}
+
+// RunningTime 运行时间
+func RunningTime() int64 {
+	sys := syscall.Sysinfo_t{}
+	_ = syscall.Sysinfo(&sys)
+	return sys.Uptime
 }
 
 // NetInterface 获取网络接口

@@ -3,19 +3,17 @@ package elinkctls
 import (
 	"net"
 
+	"github.com/astaxie/beego/logs"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gomo/elink"
-	"github.com/thinkgos/utils"
-
-	"github.com/astaxie/beego/logs"
 )
 
 // GwInfos 网关信息
 type GwInfos struct {
 	BuildDate   string `json:"buildDate"`
 	Version     string `json:"version"`
-	RunningTime string `json:"runningTime"`
+	RunningTime int64  `json:"runningTime"`
 	LocalIP     string `json:"localIP"`
 }
 
@@ -29,7 +27,7 @@ func (this *GatewayInfosController) Get() {
 	err := this.WriteResponsePyServerJSON(elink.CodeSuccess, &GwInfos{
 		misc.BuildDate(),
 		misc.Version(),
-		utils.RunningTime(),
+		misc.RunningTime(),
 		GetOutboundIP(),
 	})
 	if err != nil {

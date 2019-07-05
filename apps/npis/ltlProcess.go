@@ -52,7 +52,7 @@ func (this *ZbnpiApp) ProInReadRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rdRspSt
 		}
 		ctrl.SyncManage.Done(id, gba)
 	default:
-		return errors.New(fmt.Sprintf("trunk not implementation: %d", hdr.TrunkID))
+		return fmt.Errorf("trunk not implementation: %d", hdr.TrunkID)
 	}
 
 	return nil

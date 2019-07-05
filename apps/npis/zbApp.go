@@ -8,7 +8,6 @@ import (
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/npi"
 
-	"github.com/astaxie/beego/logs"
 	"github.com/tarm/serial"
 	"go.uber.org/dig"
 )
@@ -24,31 +23,35 @@ type ZbnpiApp struct {
 
 var ZbApps *ZbnpiApp
 
-func NewSerialConfig() (*serial.Config, error) {
-	bcfg := misc.UartCfg
-	usartcfg := &serial.Config{}
-
-	secCom0, err := bcfg.GetSection("COM0")
-	if err != nil {
-		return nil, err
+func NewSerialConfig() *serial.Config {
+	cfg := misc.APPConfig.Com0
+	parity := serial.Parity('N')
+	switch cfg.Parity {
+	case "O":
+		parity = serial.ParityOdd
+	case "E":
+		parity = serial.ParityEven
+	case "M":
+		parity = serial.ParityMark
+	case "S":
+		parity = serial.ParitySpace
 	}
 
-	usartcfg.Name = secCom0.Key("Name").MustString("COM0")
-	usartcfg.Baud = secCom0.Key("BaudRate").MustInt(115200)
-	usartcfg.Size = byte(secCom0.Key("DataBit").MustUint(8))
-	usartcfg.Parity = serial.Parity(secCom0.Key("Parity").MustInt('N'))
-	usartcfg.StopBits = serial.StopBits(secCom0.Key("StopBit").MustInt(1))
-	logs.Debug("usarcfg: %#v", usartcfg)
-
-	return usartcfg, nil
+	return &serial.Config{
+		Name:     cfg.Name,
+		Baud:     cfg.BaudRate,
+		Size:     byte(cfg.StopBit),
+		Parity:   parity,
+		StopBits: serial.StopBits(cfg.StopBit),
+	}
 }
 
 func OpenZbApp() error {
 	container := dig.New()
-	container.Provide(NewSerialConfig)
-	container.Provide(npi.Open)
-	container.Provide(NewMiddleMonitor)
-	container.Provide(func(mid *MiddleMonitor) *ZbnpiApp {
+	_ = container.Provide(NewSerialConfig)
+	_ = container.Provide(npi.Open)
+	_ = container.Provide(NewMiddleMonitor)
+	_ = container.Provide(func(mid *MiddleMonitor) *ZbnpiApp {
 		return &ZbnpiApp{
 			Ltl_t:         ltl.NewClient(mid),
 			MiddleMonitor: mid,

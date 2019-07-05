@@ -1,17 +1,14 @@
 package main
 
 import (
-	"github.com/thinkgos/gomo/elink"
-
+	"github.com/astaxie/beego"
 	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gogate/plugin/discover"
-
 	_ "github.com/thinkgos/gogate/routers"
-
-	"github.com/astaxie/beego"
+	"github.com/thinkgos/gomo/elink"
 )
 
 func init() {
@@ -31,10 +28,10 @@ func main() {
 		panic(err)
 	}
 	broad.BroadInit()
-	// err = npis.OpenZbApp()
-	// if err != nil {
-	// 	panic(err)
-	// }
+	//err = npis.OpenZbApp()
+	//if err != nil {
+	//	panic(err)
+	//}
 	go discover.Run()
 	beego.Run()
 }
