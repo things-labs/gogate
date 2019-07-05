@@ -55,24 +55,23 @@ func HeartBeatStatus() {
 	func() {
 		tp := elink.FormatPshTopic(elink.ChannelInternal, elinkmd.GatewayHeartbeat,
 			elink.MethodPatch, elink.MessageTypeTime)
-		err := PublishPyServerJSON(tp, elinkmd.GatewayHeatbeats(true))
+		err := PublishPyServerJSON(tp, elinkmd.GetGatewayHeatbeatInfo(true))
 		if err != nil {
-			logs.Error("GatewayHeatbeats:", err)
+			logs.Error("GetGatewayHeatbeatInfo:", err)
 		}
 	}()
 
 	// 系统监控信息推送
 	func() {
-		gm, err := elinkmd.GatewayMonitors()
+		gm, err := elinkmd.GetGatewayMonitorInfo()
 		if err != nil {
-			logs.Error("GatewayMonitors:", err)
+			logs.Error("GetGatewayMonitorInfo:", err)
 			return
 		}
 		tp := elink.FormatPshTopic(elink.ChannelInternal, elinkmd.SystemMonitor,
 			elink.MethodPatch, elink.MessageTypeTime)
-		err = PublishPyServerJSON(tp, gm)
-		if err != nil {
-			logs.Error("GatewayMonitors:", err)
+		if err = PublishPyServerJSON(tp, gm); err != nil {
+			logs.Error("GetGatewayMonitorInfo:", err)
 		}
 	}()
 }

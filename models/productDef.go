@@ -16,6 +16,7 @@ const (
 	PidDZSW02                 // LC_DZSW02型号二位智能开关
 	PidDZSW03                 // LC_DZSW03型号三位智能开关
 	PidDZCT01                 // LC_DZCT01型号窗帘控制器
+	PidDZSW04                 // LC_DZSW04型号一位异地开关
 	PidRESERVE = 0            // 保留pid号
 )
 
@@ -47,6 +48,10 @@ var productInfos = map[int]*ProductInfo{
 
 	PidDZCT01: &ProductInfo{0, PTypesZigbee, "smart zigbee",
 		"LC_DZCT01", "窗帘控制器", "窗帘控制器", "lchtime",
+		[]NodeDsc{
+			{[]uint16{ltl.TrunkID_GeneralOnoff}, []uint16{}}}},
+	PidDZSW04: &ProductInfo{0, PTypesZigbee, "smart zigbee",
+		"LC_DZCT04", "一位异地开关", "一位异地开关", "lchtime",
 		[]NodeDsc{
 			{[]uint16{ltl.TrunkID_GeneralOnoff}, []uint16{}}}},
 }

@@ -104,7 +104,6 @@ var SyncManage = synccall.New()
 
 func init() {
 	elink.RegisterChannelSelector(ChannelCtrl)
-
 }
 
 // Prepare 前期准备
@@ -182,24 +181,23 @@ func (this *Controller) WriteResponsePyServerJSON(code int, payload interface{})
 // GenerateSignature 签名mac + `@#$%` + timeStamp + `^&*()`拼接后md5 ,加盐值加密验证
 func GenerateSignature(mac, timestamp string) string {
 	h := md5.New()
-	io.WriteString(h, mac)
-	io.WriteString(h, SignatureSalt0)
-	io.WriteString(h, timestamp)
-	io.WriteString(h, SignatureSalt1)
+	_, _ = io.WriteString(h, mac)
+	_, _ = io.WriteString(h, SignatureSalt0)
+	_, _ = io.WriteString(h, timestamp)
+	_, _ = io.WriteString(h, SignatureSalt1)
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 // AcquireParamPid 获取主题上的productID参数,格式resource.productID
 func (this *Controller) AcquireParamPid() (int, error) {
-	spid := this.Input.Param.Get("productID")
-	if spid == "" { // never happen but deal,may be other used
+	pidStr := this.Input.Param.Get("productID")
+	if len(pidStr) == 0 { // never happen but deal,may be other used
 		return 0, errors.New("resource productID invalid")
 	}
 
-	pid, err := strconv.Atoi(spid)
+	pid, err := strconv.Atoi(pidStr)
 	if err != nil { //never happen but deal
 		return 0, errors.New("resource productID invalid")
 	}
-
 	return pid, nil
 }

@@ -38,16 +38,11 @@ func Run(params ...string) {
 		if len(strs) > 1 && strs[1] != "" {
 			// 转换错误使用默认的端口
 			if listenPort, err = strconv.Atoi(strs[1]); err != nil {
-				logs.Error("discover: ", err)
+				listenPort = DefaultDiscoverPort
 			}
 		}
 	}
-
-	if listenPort != 0 {
-		listenAddr = fmt.Sprintf("%s:%d", listenAddr, listenPort)
-	} else {
-		listenAddr = fmt.Sprintf("%s:%d", listenAddr, DefaultDiscoverPort)
-	}
+	listenAddr = fmt.Sprintf("%s:%d", listenAddr, listenPort)
 
 	addr, err := net.ResolveUDPAddr("udp", listenAddr)
 	if err != nil {
@@ -62,8 +57,7 @@ func Run(params ...string) {
 	defer conn.Close()
 	logs.Debug("discover: server Running on %s", listenAddr)
 	for {
-		err := handleClient(conn)
-		if err != nil {
+		if err := handleClient(conn); err != nil {
 			logs.Error("discover handle,", err)
 		}
 	}
@@ -93,8 +87,7 @@ func handleClient(conn *net.UDPConn) error {
 	}
 	rawData := buf[:m]
 	req := &GatewayDiscoverReq{}
-	err = jsoniter.Unmarshal(rawData, req)
-	if err != nil {
+	if err = jsoniter.Unmarshal(rawData, req); err != nil {
 		return errors.Wrap(err, "Unmarshal")
 	}
 
@@ -102,15 +95,13 @@ func handleClient(conn *net.UDPConn) error {
 		return errors.Wrap(err, "productkey not match")
 	}
 
-	rsp := &GatewayDiscoverRsp{
+	out, err := jsoniter.Marshal(&GatewayDiscoverRsp{
 		Topic:      req.Topic,
 		ProductKey: req.ProductKey,
 		Mac:        misc.Mac(),
 		BuildDate:  misc.BuildDate(),
 		Version:    misc.Version(),
-	}
-
-	out, err := jsoniter.Marshal(rsp)
+	})
 	if err != nil {
 		logs.Error(err)
 		return errors.Wrap(err, "Marshal")

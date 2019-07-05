@@ -12,8 +12,6 @@ const (
 	version = "v1.2.3 Beta"
 )
 
-// BuildTime 编译时间,由外部ldflags指定
-
 type gatewayInfo struct {
 	mac       string // "0C5415B171AA"
 	MAC       string // "0C:54:15:B1:71:AA"
@@ -23,7 +21,7 @@ type gatewayInfo struct {
 
 var gatewayInfos *gatewayInfo
 
-// BuildTime 编译时间
+// BuildTime 编译时间,由外部ldflags指定
 var BuildTime string
 
 // BuildDateTime 获取编译时间
@@ -84,10 +82,13 @@ func NetInterface() (*net.Interface, error) {
 		}
 
 		intf, err = net.InterfaceByName("eth0")
+		if err == nil {
+			return intf, nil
+		}
+		intf, err = net.InterfaceByName("wlp2s0")
 		if err != nil {
 			return nil, err
 		}
-
 	default:
 		return nil, errors.New("no os")
 	}

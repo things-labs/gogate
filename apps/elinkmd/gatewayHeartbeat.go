@@ -8,34 +8,41 @@ import (
 	"github.com/thinkgos/utils"
 )
 
+// DeviceInfo 设备信息
 type DeviceInfo struct {
 	Sn string `json:"sn"`
 }
+
+// DeviceStatus 设备状态
 type DeviceStatus struct {
 	CurrentTime   string `json:"currentTime"`
 	StartDateTime string `json:"startDateTime"`
 	RunningTime   string `json:"runningTime"`
 	Status        string `json:"status"`
 }
+
+// NetInfo 网卡信息
 type NetInfo struct {
 	MAC string `json:"MAC"`
 	Mac string `json:"mac"`
 }
 
-type GatewayHeatbeat struct {
+// GatewayHeatbeatInfo 网关心跳包信息
+type GatewayHeatbeatInfo struct {
 	UID          []int64      `json:"uid"`
 	DeviceInfo   DeviceInfo   `json:"device_info"`
 	DeviceStatus DeviceStatus `json:"device_status"`
 	NetInfo      NetInfo      `json:"net_info"`
 }
 
-func GatewayHeatbeats(isonline bool) *GatewayHeatbeat {
+// GetGatewayHeatbeatInfo 心跳包
+func GetGatewayHeatbeatInfo(isonline bool) *GatewayHeatbeatInfo {
 	status := "online"
 	if !isonline {
 		status = "offline"
 	}
 	mac := misc.Mac()
-	return &GatewayHeatbeat{
+	return &GatewayHeatbeatInfo{
 		UID:        models.GetUsers(),
 		DeviceInfo: DeviceInfo{Sn: mac},
 		DeviceStatus: DeviceStatus{
