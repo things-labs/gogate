@@ -1,10 +1,11 @@
 package elinkpsh
 
 import (
+	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
-	"github.com/thinkgos/gomo/elink"
+	"github.com/thinkgos/utils"
 )
 
 // DevSn 设备通知payload
@@ -19,7 +20,6 @@ func DeviceAnnce(pid int, sn string, isjoin bool) error {
 	if isjoin {
 		method = elink.MethodPost
 	}
-	tp := elink.FormatPshTopic(ctrl.ChannelData, elink.FormatResouce(elinkmd.Devices, pid),
-		method, elink.MessageTypeAnnce)
+	tp := ctrl.EncodePushTopic(ctrl.ChannelData, elink.FormatResource(elinkmd.Devices, utils.FormatBaseTypes(pid)), method, elink.MessageTypeAnnce)
 	return broad.PublishPyServerJSON(tp, &DevSn{pid, sn})
 }

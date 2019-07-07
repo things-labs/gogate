@@ -2,10 +2,10 @@ package elinkctls
 
 import (
 	"github.com/thinkgos/easyjms"
+	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/npis"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/protocol/limp"
 
@@ -43,13 +43,13 @@ func (this *DevPropertysController) Get() {
 
 	pid, err := this.AcquireParamPid()
 	if err != nil {
-		code = elink.CodeErrCommonResourceNotSupport
+		code = elink.CodeErrSysResourceNotSupport
 		return
 	}
 	// 确定产品Id是否注册过
 	pInfo, err := models.LookupProduct(pid)
 	if err != nil {
-		code = elink.CodeErrProudctUndefined
+		code = ctrl.CodeErrProudctUndefined
 		return
 	}
 
@@ -57,7 +57,7 @@ func (this *DevPropertysController) Get() {
 	case models.PTypesZigbee:
 		code = this.zbDevicePropertysGet(pid)
 	default:
-		code = elink.CodeErrProudctFeatureUndefined
+		code = ctrl.CodeErrProudctFeatureUndefined
 	}
 }
 
@@ -74,20 +74,20 @@ func (this *DevPropertysController) zbDevicePropertysGet(pid int) int {
 		case "basic":
 			dinfo, err := models.LookupZbDeviceByIeeeAddr(rpl.Sn)
 			if err != nil {
-				return elink.CodeErrDeviceNotExist
+				return ctrl.CodeErrDeviceNotExist
 			}
 			id := this.SyncManage.ObainID()
 			if err = npis.ZbApps.SendReadReqBasic(dinfo.NwkAddr, id); err != nil {
-				return elink.CodeErrDeviceCommandOperationFailed
+				return ctrl.CodeErrDeviceCommandOperationFailed
 			}
 
 			v, ok := this.SyncManage.Wait(id)
 			if !ok {
-				return elink.CodeErrDeviceCommandOperationFailed
+				return ctrl.CodeErrDeviceCommandOperationFailed
 			}
 			item, ok := v.(*limp.GenerlBasicAttribute)
 			if !ok {
-				return elink.CodeErrDeviceCommandOperationFailed
+				return ctrl.CodeErrDeviceCommandOperationFailed
 			}
 
 			err = this.WriteResponsePyServerJSON(elink.CodeSuccess,
@@ -96,7 +96,7 @@ func (this *DevPropertysController) zbDevicePropertysGet(pid int) int {
 				return elink.CodeErrSysException
 			}
 		default:
-			return elink.CodeErrDevicePropertysNotSupport
+			return ctrl.CodeErrDevicePropertysNotSupport
 		}
 		return elink.CodeSuccess
 	}

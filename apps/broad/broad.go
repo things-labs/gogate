@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/thinkgos/easyws"
-	"github.com/thinkgos/gomo/elink"
+	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gomo/lmax"
 
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
@@ -53,8 +53,8 @@ func HeartBeatStatus() {
 
 	// 心跳包推送
 	func() {
-		tp := elink.FormatPshTopic(elink.ChannelInternal, elinkmd.GatewayHeartbeat,
-			elink.MethodPatch, elink.MessageTypeTime)
+		tp := ctrl.EncodePushTopic(elink.ChannelInternal, elinkmd.GatewayHeartbeat,
+			elink.MethodPut, elink.MessageTypeTime)
 		err := PublishPyServerJSON(tp, elinkmd.GetGatewayHeatbeatInfo(true))
 		if err != nil {
 			logs.Error("GetGatewayHeatbeatInfo:", err)
@@ -68,8 +68,8 @@ func HeartBeatStatus() {
 			logs.Error("GetGatewayMonitorInfo:", err)
 			return
 		}
-		tp := elink.FormatPshTopic(elink.ChannelInternal, elinkmd.SystemMonitor,
-			elink.MethodPatch, elink.MessageTypeTime)
+		tp := ctrl.EncodePushTopic(elink.ChannelInternal, elinkmd.SystemMonitor,
+			elink.MethodPut, elink.MessageTypeTime)
 		if err = PublishPyServerJSON(tp, gm); err != nil {
 			logs.Error("GetGatewayMonitorInfo:", err)
 		}

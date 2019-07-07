@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/thinkgos/easyws"
-	"github.com/thinkgos/gomo/elink"
+	"github.com/thinkgos/elink"
 
 	jsoniter "github.com/json-iterator/go"
 )

@@ -62,7 +62,6 @@ func CfgInit() {
 	if err := appCfg.MapTo(APPConfig); err != nil {
 		logs.Error(err)
 	}
-	logs.Debug(APPConfig)
 }
 
 // NewWithDefaultConfig 创建一个带默认值的配置

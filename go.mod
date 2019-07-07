@@ -20,8 +20,9 @@ require (
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
 	github.com/thinkgos/easyjms v0.2.1
 	github.com/thinkgos/easyws v0.0.0-20190505084523-7cd15563c23d
+	github.com/thinkgos/elink v0.0.3
 	github.com/thinkgos/go-cache v2.2.0+incompatible
-	github.com/thinkgos/gomo v0.0.0-20190523161851-8485f8870a0b
+	github.com/thinkgos/gomo v0.0.0-20190706150745-36a26203bd81
 	github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede
 	github.com/thinkgos/utils v0.2.4
 	go.uber.org/dig v1.7.0

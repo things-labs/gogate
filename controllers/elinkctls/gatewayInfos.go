@@ -4,9 +4,9 @@ import (
 	"net"
 
 	"github.com/astaxie/beego/logs"
+	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/misc"
-	"github.com/thinkgos/gomo/elink"
 )
 
 // GwInfos 网关信息

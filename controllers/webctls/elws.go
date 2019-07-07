@@ -12,8 +12,7 @@ type ElwsController struct {
 }
 
 func (this *ElwsController) ConnectWs() {
-	err := broad.WsHub.UpgradeWithRun(this.Ctx.ResponseWriter, this.Ctx.Request)
-	if err != nil {
+	if err := broad.WsHub.UpgradeWithRun(this.Ctx.ResponseWriter, this.Ctx.Request); err != nil {
 		logs.Error(err)
 	}
 	return

@@ -1,9 +1,9 @@
 package elinkctls
 
 import (
+	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego/logs"
 	jsoniter "github.com/json-iterator/go"
@@ -11,12 +11,12 @@ import (
 
 // SysMultiUserPy 多用户负载
 type SysMultiUserPy struct {
-	UID []int64 `json:"uid"`
+	UID []string `json:"uid"`
 }
 
 // SysUserPy 单用户负载
 type SysUserPy struct {
-	UID int64 `json:"uid"`
+	UID string `json:"uid"`
 }
 
 // SysMultiUserRequest 多用户请求
@@ -51,7 +51,7 @@ func (this *SysUserController) Delete() {
 }
 
 func (this *SysUserController) userDeal(isDel bool) {
-	var uid []int64
+	var uid []string
 	var isArray bool
 	var err error
 
@@ -62,8 +62,8 @@ func (this *SysUserController) userDeal(isDel bool) {
 
 	juid := jsoniter.Get(this.Input.Payload, "payload", "uid")
 	switch juid.ValueType() {
-	case jsoniter.NumberValue:
-		uid = append(uid, juid.ToInt64())
+	case jsoniter.StringValue:
+		uid = append(uid, juid.ToString())
 	case jsoniter.ArrayValue:
 		isArray = true
 		req := &SysMultiUserRequest{}
@@ -78,7 +78,7 @@ func (this *SysUserController) userDeal(isDel bool) {
 		return
 	}
 
-	sucUID := make([]int64, 0, len(uid))
+	sucUID := make([]string, 0, len(uid))
 	for _, v := range uid {
 		if isDel {
 			err = models.DeleteUser(v)

@@ -1,10 +1,10 @@
 package elinkctls
 
 import (
+	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/npis"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/ltl/ltlspec"
 
@@ -40,14 +40,14 @@ type DevCommandController struct {
 func (this *DevCommandController) Post() {
 	pid, err := this.AcquireParamPid()
 	if err != nil {
-		this.ErrorResponse(elink.CodeErrCommonResourceNotSupport)
+		this.ErrorResponse(elink.CodeErrSysResourceNotSupport)
 		return
 	}
 
 	// 确定是否支持此产品
 	pInfo, err := models.LookupProduct(pid)
 	if err != nil {
-		this.ErrorResponse(elink.CodeErrProudctUndefined)
+		this.ErrorResponse(ctrl.CodeErrProudctUndefined)
 		return
 	}
 
@@ -56,7 +56,7 @@ func (this *DevCommandController) Post() {
 	case models.PTypesZigbee:
 		this.zbDeviceCommandDeal(pid)
 	default:
-		this.ErrorResponse(elink.CodeErrProudctFeatureUndefined)
+		this.ErrorResponse(ctrl.CodeErrProudctFeatureUndefined)
 	}
 }
 
@@ -76,7 +76,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 	if rpl.NodeNo == ltl.NodeNumReserved {
 		dev, err := models.LookupZbDeviceByIeeeAddr(rpl.Sn)
 		if err != nil {
-			code = elink.CodeErrDeviceNotExist
+			code = ctrl.CodeErrDeviceNotExist
 			return
 		}
 		switch rpl.Params.Command {
@@ -90,11 +90,11 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 			err = npis.ZbApps.SendSpecificCmdBasic(dev.NwkAddr,
 				ltlspec.COMMAND_BASIC_IDENTIFY)
 		default:
-			code = elink.CodeErrDeviceCommandNotSupport
+			code = ctrl.CodeErrDeviceCommandNotSupport
 			return
 		}
 		if err != nil {
-			code = elink.CodeErrDeviceCommandOperationFailed
+			code = ctrl.CodeErrDeviceCommandOperationFailed
 			return
 		}
 		if err = this.WriteResponsePyServerJSON(elink.CodeSuccess, nil); err != nil {
@@ -106,7 +106,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 
 	dinfo, err := models.LookupZbDeviceNodeByIN(rpl.Sn, byte(rpl.NodeNo))
 	if err != nil {
-		code = elink.CodeErrDeviceNotExist
+		code = ctrl.CodeErrDeviceNotExist
 		return
 	}
 
@@ -121,19 +121,19 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 		} else if cmd == "toggle" {
 			cmdID = 2
 		} else {
-			code = elink.CodeErrDeviceCommandNotSupport
+			code = ctrl.CodeErrDeviceCommandNotSupport
 			return
 		}
 		err := npis.ZbApps.SendSpecificCmd(dinfo.GetNwkAddr(), ltl.TrunkID_GeneralOnoff,
 			byte(rpl.NodeNo), ltl.LTL_FRAMECTL_CLIENT_SERVER_DIR, ltl.RESPONSETYPE_NO, cmdID, nil, nil)
 		if err != nil {
-			code = elink.CodeErrDeviceCommandOperationFailed
+			code = ctrl.CodeErrDeviceCommandOperationFailed
 			return
 		}
 		if err = this.WriteResponsePyServerJSON(elink.CodeSuccess, nil); err != nil {
 			code = elink.CodeErrSysException
 		}
 	default:
-		code = elink.CodeErrProudctFeatureUndefined
+		code = ctrl.CodeErrProudctFeatureUndefined
 	}
 }

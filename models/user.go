@@ -9,19 +9,19 @@ import (
 
 // 超级用户
 const (
-	SupperUser = 0 // 超级用户,超级权限,必定存在
+	SupperUser = "0" // 超级用户,超级权限,必定存在
 )
 
 // User 用户表
 type User struct {
 	gorm.Model
-	UID int64 `gorm:"UNIQUE;NOT NULL"`
+	UID string `gorm:"UNIQUE;NOT NULL"`
 }
 
 // UserInfo 用户信息
 type UserInfo struct {
 	sync.RWMutex
-	tab []int64
+	tab []string
 }
 
 var localUser *UserInfo
@@ -34,7 +34,7 @@ func UserDbTableInit() error {
 	localUser = new(UserInfo)
 	users := []User{}
 	db.Find(&users)
-	localUser.tab = make([]int64, 0, len(users))
+	localUser.tab = make([]string, 0, len(users))
 	for _, v := range users {
 		localUser.tab = append(localUser.tab, v.UID)
 	}
@@ -42,18 +42,18 @@ func UserDbTableInit() error {
 }
 
 // HasUser 是否有对应用户,用户0为超级用户,永远存在
-func HasUser(uid int64) bool {
+func HasUser(uid string) bool {
 	if uid == SupperUser {
 		return true
 	}
 	localUser.RLock()
-	b := utils.IsSliceContainsInt64(localUser.tab, uid)
+	b := utils.IsSliceContainsStr(localUser.tab, uid)
 	localUser.RUnlock()
 	return b
 }
 
 // AddUser 添加用户
-func AddUser(uid int64) error {
+func AddUser(uid string) error {
 	if HasUser(uid) {
 		return nil
 	}
@@ -69,7 +69,7 @@ func AddUser(uid int64) error {
 }
 
 // DeleteUser 删除用户
-func DeleteUser(uid int64) error {
+func DeleteUser(uid string) error {
 	if !HasUser(uid) {
 		return nil
 	}
@@ -78,14 +78,14 @@ func DeleteUser(uid int64) error {
 		return err
 	}
 	localUser.Lock()
-	localUser.tab = utils.DeleteFromSliceInt64All(localUser.tab, uid)
+	localUser.tab = utils.DeleteFromSliceStrAll(localUser.tab, uid)
 	localUser.Unlock()
 	return nil
 }
 
 // GetUsers 获取用户列表
-func GetUsers() []int64 {
-	tb := make([]int64, len(localUser.tab))
+func GetUsers() []string {
+	tb := make([]string, len(localUser.tab))
 	localUser.RLock()
 	copy(tb, localUser.tab) // 拷贝
 	localUser.RUnlock()

@@ -11,8 +11,8 @@ import (
 
 	"github.com/thinkgos/gogate/middle/synccall"
 
+	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gomo/elink"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/pkg/errors"
@@ -108,15 +108,15 @@ func init() {
 
 // Prepare 前期准备
 func (this *Controller) Prepare() {
-	if !models.HasUser(this.Input.Topic.UserID) {
-		this.ErrorResponse(elink.CodeErrCommonUserNoAccess)
+	if !models.HasUser(this.Input.Topic.UserKey) {
+		this.ErrorResponse(CodeErrCommonUserNoAccess)
 		this.StopRun()
 	}
 	utimes := jsoniter.Get(this.Input.Payload, "timestamp").ToString()
 	Expsign := jsoniter.Get(this.Input.Payload, "signature").ToString()
 	sign := GenerateSignature(this.Input.Topic.Mac, utimes)
 	if !strings.EqualFold(sign, Expsign) { // 验证签名
-		this.ErrorResponse(elink.CodeErrCommonAuthorizationSignatureVerificationFailed)
+		this.ErrorResponse(CodeErrCommonAuthorizationSignatureVerificationFailed)
 		this.StopRun()
 	}
 	// 初始化必要资源
@@ -125,27 +125,27 @@ func (this *Controller) Prepare() {
 
 // Get 方法
 func (this *Controller) Get() {
-	this.ErrorResponse(elink.CodeErrCommonResourceMethodNotImplemented)
+	this.ErrorResponse(elink.CodeErrSysResourceMethodNotImplemented)
 }
 
 // Post 方法
 func (this *Controller) Post() {
-	this.ErrorResponse(elink.CodeErrCommonResourceMethodNotImplemented)
+	this.ErrorResponse(elink.CodeErrSysResourceMethodNotImplemented)
 }
 
 // Put 方法
 func (this *Controller) Put() {
-	this.ErrorResponse(elink.CodeErrCommonResourceMethodNotImplemented)
+	this.ErrorResponse(elink.CodeErrSysResourceMethodNotImplemented)
 }
 
 // Patch 方法
 func (this *Controller) Patch() {
-	this.ErrorResponse(elink.CodeErrCommonResourceMethodNotImplemented)
+	this.ErrorResponse(elink.CodeErrSysResourceMethodNotImplemented)
 }
 
 // Delete 方法
 func (this *Controller) Delete() {
-	this.ErrorResponse(elink.CodeErrCommonResourceMethodNotImplemented)
+	this.ErrorResponse(elink.CodeErrSysResourceMethodNotImplemented)
 }
 
 // ErrorResponse 不带Payload错误回复,code为CodeSuccess将不进行回复
@@ -158,7 +158,7 @@ func (this *Controller) ErrorResponse(code int) error {
 
 // WriteResponsePyServerJSON 回复,只关注payload即可,json序列化由底层处理
 func (this *Controller) WriteResponsePyServerJSON(code int, payload interface{}) error {
-	tp := elink.FromatRspTopic(this.Input.Topic)
+	tp := elink.EncodeReplyTopic(this.Input.Topic)
 	brsp := &BaseResponse{
 		Topic:    tp,
 		PacketID: jsoniter.Get(this.Input.Payload, "packetID").ToInt(),
@@ -200,4 +200,27 @@ func (this *Controller) AcquireParamPid() (int, error) {
 		return 0, errors.New("resource productID invalid")
 	}
 	return pid, nil
+}
+
+// TopicInfo 注册的主题信息
+type TopicInfo struct {
+	Mac        string // "0C5415B171AA"
+	ProductKey string // 网关产品Key
+}
+
+// TpInfos 注册的主题信息
+var TpInfos *TopicInfo
+
+// RegisterTopicInfo 注册mac地址和产品key
+func RegisterTopicInfo(mac string, productKey string) {
+	TpInfos = &TopicInfo{
+		Mac:        mac,
+		ProductKey: productKey,
+	}
+}
+
+// FormatPishTopic 推送主题
+func EncodePushTopic(channel, resource, method, messageType string) string {
+	return elink.EncodePushTopic(channel, TpInfos.ProductKey, TpInfos.Mac, resource,
+		strings.ToLower(method), strings.ToLower(messageType))
 }

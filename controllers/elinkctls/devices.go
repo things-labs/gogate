@@ -1,9 +1,9 @@
 package elinkctls
 
 import (
+	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego/logs"
 	jsoniter "github.com/json-iterator/go"
@@ -41,13 +41,13 @@ func (this *DevicesController) Get() {
 
 	pid, err := this.AcquireParamPid()
 	if err != nil {
-		code = elink.CodeErrCommonResourceNotSupport
+		code = elink.CodeErrSysResourceNotSupport
 		return
 	}
 
 	pInfo, err := models.LookupProduct(pid)
 	if err != nil {
-		code = elink.CodeErrProudctUndefined
+		code = ctrl.CodeErrProudctUndefined
 		return
 	}
 
@@ -59,7 +59,7 @@ func (this *DevicesController) Get() {
 			code = elink.CodeErrSysException
 		}
 	default:
-		code = elink.CodeErrProudctFeatureUndefined
+		code = ctrl.CodeErrProudctFeatureUndefined
 	}
 }
 
@@ -97,7 +97,7 @@ func (this *DevicesController) dealAddDelGernalDevices(isDel bool) {
 
 	pInfo, err := models.LookupProduct(int(pid))
 	if err != nil {
-		code = elink.CodeErrProudctUndefined
+		code = ctrl.CodeErrProudctUndefined
 		return
 	}
 
@@ -106,7 +106,7 @@ func (this *DevicesController) dealAddDelGernalDevices(isDel bool) {
 	case models.PTypesGeneral: // 通用设备处理s
 		code = this.addDelGernalDevices(isDel, int(pid))
 	default:
-		code = elink.CodeErrProudctFeatureUndefined
+		code = ctrl.CodeErrProudctFeatureUndefined
 	}
 }
 
@@ -155,7 +155,7 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) int {
 		sucSn = append(sucSn, v)
 	}
 	if len(sucSn) == 0 {
-		return elink.CodeErrDeviceCommandOperationFailed
+		return ctrl.CodeErrDeviceCommandOperationFailed
 	}
 
 	var py interface{}
@@ -163,7 +163,7 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) int {
 		py = &DevMultiSn{pid, sucSn}
 	} else {
 		if sucSn[0] == "" {
-			return elink.CodeErrDeviceCommandOperationFailed
+			return ctrl.CodeErrDeviceCommandOperationFailed
 		}
 		py = &DevSn{pid, sucSn[0]}
 	}

@@ -28,7 +28,7 @@ type NetInfo struct {
 
 // GatewayHeatbeatInfo 网关心跳包信息
 type GatewayHeatbeatInfo struct {
-	UID          []int64      `json:"uid"`
+	UID          []string     `json:"uid"`
 	DeviceInfo   DeviceInfo   `json:"device_info"`
 	DeviceStatus DeviceStatus `json:"device_status"`
 	NetInfo      NetInfo      `json:"net_info"`

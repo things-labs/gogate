@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/misc"
-	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego/logs"
 	jsoniter "github.com/json-iterator/go"
@@ -91,7 +91,7 @@ func handleClient(conn *net.UDPConn) error {
 		return errors.Wrap(err, "Unmarshal")
 	}
 
-	if req.ProductKey != elink.TpInfos.ProductKey {
+	if req.ProductKey != ctrl.TpInfos.ProductKey {
 		return errors.Wrap(err, "productkey not match")
 	}
 

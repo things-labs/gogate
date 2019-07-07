@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gogate/misc"
-	"github.com/thinkgos/gomo/elink"
 
 	"github.com/astaxie/beego/logs"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -51,8 +51,8 @@ func NewMqClient(productKey, mac string) mqtt.Client {
 		logs.Warn("mqtt client connection lost, ", err)
 	})
 
-	tp := elink.FormatPshTopic(elink.ChannelInternal, elinkmd.GatewayHeartbeat,
-		elink.MethodPatch, elink.MessageTypeTime)
+	tp := ctrl.EncodePushTopic(elink.ChannelInternal, elinkmd.GatewayHeartbeat,
+		elink.MethodPut, elink.MessageTypeTime)
 	if out, err := jsoniter.Marshal(&ctrl.PublishData{
 		BasePublishData: &ctrl.BasePublishData{Topic: tp},
 		Payload:         elinkmd.GetGatewayHeatbeatInfo(false)}); err != nil {
@@ -77,14 +77,14 @@ func NewMqClient(productKey, mac string) mqtt.Client {
 			return
 		}
 		t := time.NewTimer(time.Second * 30)
+		defer t.Stop()
 		for {
 			<-t.C
 			if err := connect(); err != nil {
 				t.Reset(time.Second * 30)
 				continue
 			}
-			t.Stop()
-			return
+			break
 		}
 	}()
 

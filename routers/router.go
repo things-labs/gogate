@@ -2,10 +2,10 @@ package routers
 
 import (
 	"github.com/astaxie/beego"
+	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/controllers/elinkctls"
 	"github.com/thinkgos/gogate/controllers/webctls"
-	"github.com/thinkgos/gomo/elink"
 )
 
 // elink router setting

@@ -2,7 +2,7 @@ package broad
 
 import (
 	"github.com/thinkgos/easyws"
-	"github.com/thinkgos/gomo/elink"
+	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gomo/lmax"
 
 	"github.com/astaxie/beego/logs"

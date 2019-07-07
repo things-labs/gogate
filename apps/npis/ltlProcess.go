@@ -4,12 +4,14 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/thinkgos/utils"
+
+	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gogate/controllers/elinkpsh"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gomo/elink"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/protocol/limp"
 
@@ -110,9 +112,9 @@ func (this *ZbnpiApp) ProInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []l
 		return errors.New("no fix trunkid")
 	}
 
-	tp := elink.FormatPshTopic(ctrl.ChannelData,
-		elink.FormatResouce(elinkmd.DevicePropertys, zbdnode.ProductID),
-		elink.MethodPatch, elink.MessageTypeAnnce)
+	tp := ctrl.EncodePushTopic(ctrl.ChannelData,
+		elink.FormatResource(elinkmd.DevicePropertys, utils.FormatBaseTypes(zbdnode.ProductID)),
+		elink.MethodPut, elink.MessageTypeAnnce)
 
 	return broad.PublishPyServerJSON(tp, v)
 }

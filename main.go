@@ -3,12 +3,12 @@ package main
 import (
 	"github.com/astaxie/beego"
 	"github.com/thinkgos/gogate/apps/broad"
+	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gogate/plugin/discover"
 	_ "github.com/thinkgos/gogate/routers"
-	"github.com/thinkgos/gomo/elink"
 )
 
 func init() {
@@ -20,7 +20,7 @@ func init() {
 }
 
 func main() {
-	elink.RegisterTopicInfo(misc.Mac(), elinkmd.ProductKey) // 注册网关产品Key
+	ctrl.RegisterTopicInfo(misc.Mac(), elinkmd.ProductKey) // 注册网关产品Key
 	misc.CfgInit()
 	misc.LogsInit()
 	err := models.DbInit()

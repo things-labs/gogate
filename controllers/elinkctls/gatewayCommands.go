@@ -3,8 +3,8 @@ package elinkctls
 import (
 	"os/exec"
 
+	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
-	"github.com/thinkgos/gomo/elink"
 
 	jsoniter "github.com/json-iterator/go"
 )
