@@ -1,6 +1,10 @@
 package main
 
 import (
+	"log"
+	"net/http"
+
+	_ "github.com/thinkgos/anytool"
 	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
@@ -30,5 +34,8 @@ func main() {
 	//if err != nil {
 	//	panic(err)
 	//}
-	discover.Run()
+	go discover.Run()
+	if err := http.ListenAndServe(":9090", nil); err != nil {
+		log.Printf("http listen and serve failed, %v", err)
+	}
 }

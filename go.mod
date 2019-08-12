@@ -14,6 +14,7 @@ require (
 	github.com/smartystreets/assertions v0.0.0-20190401211740-f487f9de1cd3 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
+	github.com/thinkgos/anytool v0.1.0
 	github.com/thinkgos/easyjms v0.2.1
 	github.com/thinkgos/elink v0.0.3
 	github.com/thinkgos/go-cache v2.2.0+incompatible

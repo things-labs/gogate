@@ -114,6 +114,8 @@ github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07 h1:UyzmZLoiDWMRywV4DUYb9Fbt8uiOSooupjTq10vpvnU=
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07/go.mod h1:kDXzergiv9cbyO7IOYJZWg1U88JhDg3PB6klq9Hg2pA=
+github.com/thinkgos/anytool v0.1.0 h1:RqxR1D0phldikjvaMJL6JCw7YppzdPcoO0VKxwbocUw=
+github.com/thinkgos/anytool v0.1.0/go.mod h1:MEmHvWOvOnV6Pm11klfVxBBXgDG3sR5XHLKRs6ki0Rw=
 github.com/thinkgos/easyjms v0.2.1 h1:mEz7qyVEaYMObMnfftkZaxq58bNHnDuhr5hKr0L4gIQ=
 github.com/thinkgos/easyjms v0.2.1/go.mod h1:CfZuNxXAZx3RxmrN0nhvpG7yJE5ppE/fkFixNUPJGn8=
 github.com/thinkgos/elink v0.0.3 h1:9f8xXf/ERGEEQghrC540IWs283ACHo5HNfd+Ee2ODk0=
