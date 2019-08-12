@@ -3,7 +3,6 @@ package broad
 import (
 	"time"
 
-	"github.com/thinkgos/easyws"
 	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gomo/lmax"
 	"github.com/thinkgos/memlog"
@@ -19,14 +18,12 @@ const (
 	HeartBeatTime = 30 * time.Second
 )
 
-var WsHub *easyws.Hub
 var Disrup *lmax.Lmax
 
 func BroadInit() {
 	Disrup = lmax.New()
 	mqCli := NewMqClient(elinkmd.ProductKey, misc.Mac())
-	WsHub = NewWsHub()
-	go Disrup.Run(&mqConsume{mqCli, Disrup}, &wsConsume{WsHub, Disrup})
+	go Disrup.Run(&mqConsume{mqCli, Disrup})
 	time.Sleep(time.Millisecond * 1)
 	HeartBeatStatus()
 }
