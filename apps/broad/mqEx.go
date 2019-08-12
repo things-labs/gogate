@@ -55,7 +55,7 @@ func NewMqClient(productKey, mac string) mqtt.Client {
 		elink.MethodPut, elink.MessageTypeTime)
 	if out, err := jsoniter.Marshal(&ctrl.PublishData{
 		BasePublishData: &ctrl.BasePublishData{Topic: tp},
-		Payload:         elinkmd.GetGatewayHeatbeatInfo(false)}); err != nil {
+		Payload:         elinkmd.GetGatewayHeartbeatInfo(false)}); err != nil {
 		memlog.Error("mqtt %s", err.Error())
 	} else {
 		opts.SetBinaryWill(tp, out, 2, false)

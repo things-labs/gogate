@@ -26,23 +26,23 @@ type NetInfo struct {
 	Mac string `json:"mac"`
 }
 
-// GatewayHeatbeatInfo 网关心跳包信息
-type GatewayHeatbeatInfo struct {
+// GatewayHeartbeatInfo 网关心跳包信息
+type GatewayHeartbeatInfo struct {
 	UID          []string     `json:"uid"`
 	DeviceInfo   DeviceInfo   `json:"device_info"`
 	DeviceStatus DeviceStatus `json:"device_status"`
 	NetInfo      NetInfo      `json:"net_info"`
 }
 
-// GetGatewayHeatbeatInfo 心跳包
-func GetGatewayHeatbeatInfo(isonline bool) *GatewayHeatbeatInfo {
+// GetGatewayHeartbeatInfo 心跳包
+func GetGatewayHeartbeatInfo(isonline bool) *GatewayHeartbeatInfo {
 	status := "online"
 	if !isonline {
 		status = "offline"
 	}
 
 	mac := misc.Mac()
-	return &GatewayHeatbeatInfo{
+	return &GatewayHeartbeatInfo{
 		UID:        models.GetUsers(),
 		DeviceInfo: DeviceInfo{Sn: mac},
 		DeviceStatus: DeviceStatus{

@@ -49,9 +49,9 @@ func HeartBeatStatus() {
 	func() {
 		tp := ctrl.EncodePushTopic(elink.ChannelInternal, elinkmd.GatewayHeartbeat,
 			elink.MethodPut, elink.MessageTypeTime)
-		err := PublishPyServerJSON(tp, elinkmd.GetGatewayHeatbeatInfo(true))
+		err := PublishPyServerJSON(tp, elinkmd.GetGatewayHeartbeatInfo(true))
 		if err != nil {
-			memlog.Error("GetGatewayHeatbeatInfo:", err)
+			memlog.Error("GetGatewayHeartbeatInfo:", err)
 		}
 	}()
 
