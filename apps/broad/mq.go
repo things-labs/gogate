@@ -2,7 +2,6 @@ package broad
 
 import (
 	"github.com/thinkgos/elink"
-	"github.com/thinkgos/gomo/lmax"
 	"github.com/thinkgos/memlog"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -37,18 +36,4 @@ func MessageHandle(client mqtt.Client, message mqtt.Message) {
 		return
 	}
 	elink.Server(&MqProvider{client}, message.Topic(), message.Payload())
-}
-
-type mqConsume struct {
-	mqtt.Client
-	L *lmax.Lmax
-}
-
-func (this *mqConsume) Consume(lower, upper int64) {
-	for seq := lower; seq <= upper; seq++ {
-		msg := this.L.RingBuffer[seq&lmax.RingBufferDefaultMask]
-		if err := this.Client.Publish(msg.Topic, 1, false, msg.Data).Error(); err != nil {
-			memlog.Debug(err)
-		}
-	}
 }

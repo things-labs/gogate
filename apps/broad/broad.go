@@ -3,40 +3,38 @@ package broad
 import (
 	"time"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/thinkgos/elink"
-	"github.com/thinkgos/gomo/lmax"
 	"github.com/thinkgos/memlog"
 
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gogate/misc"
-
-	jsoniter "github.com/json-iterator/go"
 )
 
 const (
 	HeartBeatTime = 30 * time.Second
 )
 
-var Disrup *lmax.Lmax
+var mqCli mqtt.Client
 
 func BroadInit() {
-	Disrup = lmax.New()
-	mqCli := NewMqClient(elinkmd.ProductKey, misc.Mac())
-	go Disrup.Run(&mqConsume{mqCli, Disrup})
+	mqCli = NewMqClient(elinkmd.ProductKey, misc.Mac())
 	time.Sleep(time.Millisecond * 1)
 	HeartBeatStatus()
 }
 
+// PublishServerJSON 推送json数据
 func PublishServerJSON(tp string, data interface{}) error {
 	out, err := jsoniter.Marshal(data)
 	if err != nil {
 		return err
 	}
-	return Disrup.Publish(tp, out)
+	return mqCli.Publish(tp, 1, false, out).Error()
 }
 
-// PublishPyServerJSON 推送数据,通道推送数据
+// PublishPyServerJSON 推送数据,通道推送数据,只给出负载
 func PublishPyServerJSON(tp string, payload interface{}) error {
 	return PublishServerJSON(tp, &ctrl.PublishData{
 		BasePublishData: &ctrl.BasePublishData{Topic: tp},

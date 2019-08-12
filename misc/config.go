@@ -18,18 +18,7 @@ const (
 var (
 	APPConfig *Config
 	appCfg    *ini.File
-	//watcher   *fsnotify.Watcher
 )
-
-type Logs struct {
-	Adapter string `ini:"adapter"`
-	Level   int    `ini:"level"`
-	IsEFCD  bool   `ini:"isEFCD"`
-	IsAsync bool   `ini:"isAsync"`
-	LogFCD  int    `ini:"logFCD"`
-	Net     string `ini:"net"`
-	Addr    string `ini:"addr"`
-}
 
 type Usart struct {
 	Name     string
@@ -42,7 +31,6 @@ type Usart struct {
 
 type Config struct {
 	OrmDbLog bool  `ini:"ormDbLog"`
-	Logs     Logs  `ini:"memlog"`
 	Com0     Usart `ini:"com0"`
 }
 
@@ -67,15 +55,6 @@ func CfgInit() {
 func NewWithDefaultConfig() *Config {
 	return &Config{
 		OrmDbLog: false,
-		Logs: Logs{
-			Adapter: memlog.AdapterConsole,
-			Level:   7,
-			IsEFCD:  false,
-			IsAsync: false,
-			LogFCD:  0,
-			Net:     "udp",
-			Addr:    "127.0.0.1:9000",
-		},
 		Com0: Usart{
 			Name:     "/dev/ttyS1",
 			BaudRate: 115200,

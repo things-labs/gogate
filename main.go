@@ -12,6 +12,7 @@ import (
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gogate/plugin/discover"
 	_ "github.com/thinkgos/gogate/routers"
+	"github.com/thinkgos/memlog"
 )
 
 func init() {
@@ -23,6 +24,7 @@ func init() {
 }
 
 func main() {
+	memlog.SetLogger(memlog.AdapterConsole)
 	ctrl.RegisterTopicInfo(misc.Mac(), elinkmd.ProductKey) // 注册网关产品Key
 	misc.CfgInit()
 	err := models.DbInit()
