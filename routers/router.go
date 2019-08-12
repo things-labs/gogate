@@ -1,11 +1,9 @@
 package routers
 
 import (
-	"github.com/astaxie/beego"
 	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/controllers/elinkctls"
-	"github.com/thinkgos/gogate/controllers/webctls"
 )
 
 // elink router setting
@@ -17,8 +15,4 @@ func init() {
 	elink.Router(ctrl.ChannelCtrl, "device.commands.@", &elinkctls.DevCommandController{})
 	elink.Router(ctrl.ChannelCtrl, "device.propertys.@", &elinkctls.DevPropertysController{})
 	elink.Router(ctrl.ChannelCtrl, "zigbee.network", &elinkctls.ZbNetworkController{})
-}
-
-func init() {
-	beego.Router("/elws", &webctls.ElwsController{}, "*:ConnectWs")
 }

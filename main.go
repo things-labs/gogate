@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/astaxie/beego"
 	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
@@ -32,6 +31,5 @@ func main() {
 	//if err != nil {
 	//	panic(err)
 	//}
-	go discover.Run()
-	beego.Run()
+	discover.Run()
 }
