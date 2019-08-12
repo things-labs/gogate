@@ -26,7 +26,7 @@ func init() {
 func main() {
 	memlog.SetLogger(memlog.AdapterConsole)
 	ctrl.RegisterTopicInfo(misc.Mac(), elinkmd.ProductKey) // 注册网关产品Key
-	misc.CfgInit()
+	misc.ConfigInit()
 	err := models.DbInit()
 	if err != nil {
 		panic(err)
