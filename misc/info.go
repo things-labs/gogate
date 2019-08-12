@@ -77,7 +77,7 @@ func SetupTime() string {
 func RunningTime() int64 {
 	sys := syscall.Sysinfo_t{}
 	_ = syscall.Sysinfo(&sys)
-	return sys.Uptime
+	return int64(sys.Uptime)
 }
 
 // NetInterface 获取网络接口
