@@ -18,7 +18,7 @@ require (
 	github.com/thinkgos/easyjms v0.2.1
 	github.com/thinkgos/elink v0.0.3
 	github.com/thinkgos/go-cache v2.2.0+incompatible
-	github.com/thinkgos/gomo v0.0.0-20190812140853-a3650dd16d01
+	github.com/thinkgos/gomo v0.0.0-20190812152622-6898050be11b
 	github.com/thinkgos/memlog v0.1.3
 	github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede
 	github.com/thinkgos/utils v0.2.4
