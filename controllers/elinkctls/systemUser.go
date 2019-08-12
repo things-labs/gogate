@@ -4,8 +4,8 @@ import (
 	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/models"
+	"github.com/thinkgos/memlog"
 
-	"github.com/astaxie/beego/logs"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -36,7 +36,7 @@ func (this *SysUserController) Get() {
 		&SysMultiUserPy{UID: models.GetUsers()})
 	if err != nil {
 		this.ErrorResponse(elink.CodeErrSysException)
-		logs.Error("response", err)
+		memlog.Error("response", err)
 	}
 }
 

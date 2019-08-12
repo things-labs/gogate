@@ -5,8 +5,7 @@ import (
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/npis"
 	"github.com/thinkgos/gomo/npi"
-
-	"github.com/astaxie/beego/logs"
+	"github.com/thinkgos/memlog"
 )
 
 // ZbNetworkController zigbee 网络控制器
@@ -31,12 +30,12 @@ func (this *ZbNetworkController) Post() {
 		return
 	}
 	npis.SetNetworkSteering(true)
-	logs.Debug("elinkctls: zigbee network steering open")
+	memlog.Debug("elinkctls: zigbee network steering open")
 
 	err = this.WriteResponsePyServerJSON(elink.CodeSuccess, nil)
 	if err != nil {
 		this.ErrorResponse(elink.CodeErrSysException)
-		logs.Error("response failed", err)
+		memlog.Error("response failed", err)
 	}
 }
 
@@ -48,11 +47,11 @@ func (this *ZbNetworkController) Delete() {
 		return
 	}
 	npis.SetNetworkSteering(false)
-	logs.Debug("elinkctls: zigbee network steering close")
+	memlog.Debug("elinkctls: zigbee network steering close")
 
 	err = this.WriteResponsePyServerJSON(elink.CodeSuccess, nil)
 	if err != nil {
 		this.ErrorResponse(elink.CodeErrSysException)
-		logs.Error("response failed", err)
+		memlog.Error("response failed", err)
 	}
 }

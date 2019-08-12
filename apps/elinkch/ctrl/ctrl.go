@@ -4,6 +4,7 @@ package ctrl
 
 import (
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -15,7 +16,6 @@ import (
 	"github.com/thinkgos/gogate/models"
 
 	jsoniter "github.com/json-iterator/go"
-	"github.com/pkg/errors"
 )
 
 // 签名加盐值
@@ -173,7 +173,7 @@ func (this *Controller) WriteResponsePyServerJSON(code int, payload interface{})
 
 	out, err := jsoniter.Marshal(&Response{brsp, payload})
 	if err != nil {
-		return errors.Wrap(err, "json marshal failed")
+		return err
 	}
 	return this.WriteResponse(tp, out)
 }

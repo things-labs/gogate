@@ -10,10 +10,9 @@ import (
 
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/misc"
+	"github.com/thinkgos/memlog"
 
-	"github.com/astaxie/beego/logs"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/pkg/errors"
 )
 
 // 默认端口
@@ -46,19 +45,19 @@ func Run(params ...string) {
 
 	addr, err := net.ResolveUDPAddr("udp", listenAddr)
 	if err != nil {
-		logs.Critical("discover: ", err)
+		memlog.Critical("discover: ", err)
 		return
 	}
 	conn, err := net.ListenUDP("udp", addr)
 	if err != nil {
-		logs.Critical("discover: ", err)
+		memlog.Critical("discover: ", err)
 		return
 	}
 	defer conn.Close()
-	logs.Debug("discover: server Running on %s", listenAddr)
+	memlog.Debug("discover: server Running on %s", listenAddr)
 	for {
 		if err := handleClient(conn); err != nil {
-			logs.Error("discover handle,", err)
+			memlog.Error("discover handle,", err)
 		}
 	}
 }
@@ -83,16 +82,16 @@ func handleClient(conn *net.UDPConn) error {
 	buf := make([]byte, 2048)
 	m, remoteAddr, err := conn.ReadFromUDP(buf)
 	if err != nil {
-		return errors.Wrap(err, "read failed")
+		return fmt.Errorf("read failed,%v", err)
 	}
 	rawData := buf[:m]
 	req := &GatewayDiscoverReq{}
 	if err = jsoniter.Unmarshal(rawData, req); err != nil {
-		return errors.Wrap(err, "Unmarshal")
+		return err
 	}
 
 	if req.ProductKey != ctrl.TpInfos.ProductKey {
-		return errors.Wrap(err, "productkey not match")
+		return fmt.Errorf("productkey not match, %v", err)
 	}
 
 	out, err := jsoniter.Marshal(&GatewayDiscoverRsp{
@@ -103,8 +102,8 @@ func handleClient(conn *net.UDPConn) error {
 		Version:    misc.Version(),
 	})
 	if err != nil {
-		logs.Error(err)
-		return errors.Wrap(err, "Marshal")
+		memlog.Error(err)
+		return err
 	}
 
 	_, err = conn.WriteToUDP(out, remoteAddr)

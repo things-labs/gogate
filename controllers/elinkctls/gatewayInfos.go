@@ -3,10 +3,10 @@ package elinkctls
 import (
 	"net"
 
-	"github.com/astaxie/beego/logs"
 	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/misc"
+	"github.com/thinkgos/memlog"
 )
 
 // GwInfos 网关信息
@@ -32,7 +32,7 @@ func (this *GatewayInfosController) Get() {
 	})
 	if err != nil {
 		this.ErrorResponse(elink.CodeErrSysException)
-		logs.Error("GatewayInfo: ", err)
+		memlog.Error("GatewayInfo: ", err)
 	}
 }
 

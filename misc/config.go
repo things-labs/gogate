@@ -1,12 +1,11 @@
 package misc
 
 import (
-	"fmt"
 	"os"
 	"path"
 
-	"github.com/astaxie/beego/logs"
 	"github.com/go-ini/ini"
+	"github.com/thinkgos/memlog"
 	"github.com/thinkgos/utils"
 )
 
@@ -43,7 +42,7 @@ type Usart struct {
 
 type Config struct {
 	OrmDbLog bool  `ini:"ormDbLog"`
-	Logs     Logs  `ini:"logs"`
+	Logs     Logs  `ini:"memlog"`
 	Com0     Usart `ini:"com0"`
 }
 
@@ -60,7 +59,7 @@ func CfgInit() {
 	}
 	APPConfig = NewWithDefaultConfig()
 	if err := appCfg.MapTo(APPConfig); err != nil {
-		logs.Error(err)
+		memlog.Error(err)
 	}
 }
 
@@ -69,7 +68,7 @@ func NewWithDefaultConfig() *Config {
 	return &Config{
 		OrmDbLog: false,
 		Logs: Logs{
-			Adapter: logs.AdapterConsole,
+			Adapter: memlog.AdapterConsole,
 			Level:   7,
 			IsEFCD:  false,
 			IsAsync: false,
@@ -95,27 +94,4 @@ func SaveConfig() error {
 		return err
 	}
 	return cfg.SaveTo(SmartAppCfgPath)
-}
-
-// LogsInit log初始化
-func LogsInit() {
-	logs.Reset() // 复位日志输出流
-
-	if APPConfig.Logs.Adapter == logs.AdapterConn {
-		/* default: {"net":"udp","addr":"127.0.0.1:8080","level":7,"reconnect":true,"color":true} */
-		_ = logs.SetLogger(logs.AdapterConn,
-			fmt.Sprintf(`{"net":"%s","addr":"%s","level":%d,"reconnect":true,"color":true}`,
-				APPConfig.Logs.Net, APPConfig.Logs.Addr, APPConfig.Logs.Level))
-	} else {
-		_ = logs.SetLogger(logs.AdapterConsole,
-			fmt.Sprintf(`{"level":%d,"color":true}`, APPConfig.Logs.Level)) // out to console
-	}
-	// Enable output filename and line
-	logs.EnableFuncCallDepth(APPConfig.Logs.IsEFCD)
-	// Enalbe async output log
-	if APPConfig.Logs.IsAsync {
-		logs.Async()
-	}
-
-	return
 }

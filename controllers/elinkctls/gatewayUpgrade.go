@@ -9,8 +9,8 @@ import (
 
 	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
+	"github.com/thinkgos/memlog"
 
-	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/validation"
 	update "github.com/inconshreveable/go-update"
 	jsoniter "github.com/json-iterator/go"
@@ -76,20 +76,20 @@ func (this *GatewayUpgradeController) Post() {
 		return
 	}
 	if err := this.WriteResponsePyServerJSON(elink.CodeSuccess, nil); err != nil {
-		logs.Error("response failed!", err)
+		memlog.Error("response failed!", err)
 	}
 	time.Sleep(time.Second) // give enough time to send the message to client
 	bin, err := os.Executable()
 	if err != nil {
 		code = elink.CodeErrSysException
-		logs.Error("path: find failed!", err)
+		memlog.Error("path: find failed!", err)
 		return
 	}
 	_, file := filepath.Split(bin)
 	err = syscall.Exec(bin, []string{file}, os.Environ())
 	if err != nil {
 		code = elink.CodeErrSysException
-		logs.Error("exec failed!", err.Error())
+		memlog.Error("exec failed!", err.Error())
 		return
 	}
 }
@@ -118,14 +118,14 @@ func doUpdate(iop *GwUpReqPy) error {
 
 	resp, err := http.Get(iop.URL) // get the new file
 	if err != nil {
-		logs.Debug("failed go get:　%s\n", err)
+		memlog.Debug("failed go get:　%s\n", err)
 		return err
 	}
 	defer resp.Body.Close()
 	err = update.Apply(resp.Body, opt)
 	if err != nil {
 		if rerr := update.RollbackError(err); rerr != nil {
-			logs.Debug("Failed to rollback from bad update: %v", rerr)
+			memlog.Debug("Failed to rollback from bad update: %v", rerr)
 		}
 	}
 

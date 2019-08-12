@@ -15,7 +15,7 @@ require (
 	github.com/json-iterator/go v1.1.6
 	github.com/lib/pq v1.2.0 // indirect
 	github.com/mattn/go-sqlite3 v1.11.0
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.8.1 // indirect
 	github.com/shiena/ansicolor v0.0.0-20151119151921-a422bbe96644 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
@@ -25,6 +25,7 @@ require (
 	github.com/thinkgos/go-cache v2.2.0+incompatible
 	github.com/thinkgos/go-disruptor v0.0.0-20190812125759-25048b1bbf0b // indirect
 	github.com/thinkgos/gomo v0.0.0-20190812123154-9eba8e8b9772
+	github.com/thinkgos/memlog v0.1.3
 	github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede
 	github.com/thinkgos/tsm v0.2.3 // indirect
 	github.com/thinkgos/utils v0.2.4

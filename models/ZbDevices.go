@@ -10,7 +10,6 @@ import (
 	"github.com/thinkgos/utils"
 
 	"github.com/jinzhu/gorm"
-	"github.com/pkg/errors"
 )
 
 // 设备表
@@ -58,7 +57,7 @@ const zbdevicenodeinfosSql = `CREATE TABLE "zb_device_node_infos" (
 // zigbee设备表初始化
 func ZbDeviceDbTableInit() error {
 	if err := db.AutoMigrate(&ZbDeviceInfo{}).Error; err != nil {
-		return errors.Wrap(err, "db AutoMigrate failed")
+		return fmt.Errorf("db AutoMigrate failed,%v", err)
 	}
 
 	if !db.HasTable("zb_device_node_infos") {

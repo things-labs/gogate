@@ -184,6 +184,8 @@ github.com/thinkgos/go-disruptor v0.0.0-20190812125759-25048b1bbf0b h1:BWRulNDoe
 github.com/thinkgos/go-disruptor v0.0.0-20190812125759-25048b1bbf0b/go.mod h1:ZD4JFGnHht3W7Yuf+b+JHKykxVMYVJXFwH/HQv4BAYw=
 github.com/thinkgos/gomo v0.0.0-20190812123154-9eba8e8b9772 h1:GQYPHnWSdFxOyZNVhSQ+U5l0P0mL0zli3lew3UbOqcg=
 github.com/thinkgos/gomo v0.0.0-20190812123154-9eba8e8b9772/go.mod h1:TXp8pNyCoiubBAyzrPmf49oTzyKO0BZYOdk8zQ43h/0=
+github.com/thinkgos/memlog v0.1.3 h1:GbO17uyx4QhW63qjPxwdMtPRTQ3BqUBOf2R+FJ6uIKU=
+github.com/thinkgos/memlog v0.1.3/go.mod h1:VdyTN06wOmbPJKa2oeb5YNxQvf8Il5AH4VTr2uYaTxU=
 github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede h1:qz2UFWBp31P1KdLdFlXVqK2yANHV078UdzDgxcZRVWU=
 github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede/go.mod h1:JCgYwOUDeijVmjhw3JPjVEZuo0v4b7uhJNGpbCCuz0k=
 github.com/thinkgos/tsm v0.2.2 h1:/jRJUtdO84MH7GuQzAJ7RBpsgcbq+0oAVTJt21LaKbk=

@@ -21,7 +21,6 @@ func init() {
 func main() {
 	ctrl.RegisterTopicInfo(misc.Mac(), elinkmd.ProductKey) // 注册网关产品Key
 	misc.CfgInit()
-	misc.LogsInit()
 	err := models.DbInit()
 	if err != nil {
 		panic(err)

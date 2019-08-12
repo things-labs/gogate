@@ -4,8 +4,8 @@ import (
 	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/models"
+	"github.com/thinkgos/memlog"
 
-	"github.com/astaxie/beego/logs"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -140,14 +140,14 @@ func (this *DevicesController) addDelGernalDevices(isDel bool, pid int) int {
 		if models.HasGeneralDevice(pid, v) { // 设备存在
 			if isDel {
 				if err = models.DeleteGeneralDevice(pid, v); err != nil {
-					logs.Debug(err)
+					memlog.Debug(err)
 					continue
 				}
 			}
 		} else { // 设备不存在
 			if !isDel {
 				if err = models.CreateGeneralDevice(pid, v); err != nil {
-					logs.Debug(err)
+					memlog.Debug(err)
 					continue
 				}
 			}

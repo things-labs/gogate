@@ -1,14 +1,15 @@
 package broad
 
 import (
+	"fmt"
+
 	"github.com/thinkgos/easyws"
 	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gomo/lmax"
+	"github.com/thinkgos/memlog"
 
-	"github.com/astaxie/beego/logs"
 	"github.com/gorilla/websocket"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/pkg/errors"
 )
 
 var _ elink.Provider = (*WsProvider)(nil)
@@ -25,7 +26,7 @@ type DefaultError struct {
 func (this *WsProvider) ErrorDefaultResponse(topic string) error {
 	o, err := jsoniter.Marshal(DefaultError{topic})
 	if err != nil {
-		return errors.Wrap(err, "websocket")
+		return fmt.Errorf("websocket %v", err)
 	}
 
 	return this.sess.WriteMessage(websocket.BinaryMessage, o)
@@ -47,7 +48,7 @@ func (this *wsConsume) Consume(lower, upper int64) {
 
 		err := this.Hub.BroadCast(websocket.BinaryMessage, msg.Data)
 		if err != nil {
-			logs.Debug(err)
+			memlog.Debug(err)
 		}
 	}
 }

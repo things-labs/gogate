@@ -11,8 +11,8 @@ import (
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gogate/misc"
+	"github.com/thinkgos/memlog"
 
-	"github.com/astaxie/beego/logs"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -39,7 +39,7 @@ func NewMqClient(productKey, mac string) mqtt.Client {
 	//	opts.SetTLSConfig(tlscfg)
 
 	opts.SetOnConnectHandler(func(cli mqtt.Client) {
-		logs.Info("mqtt client connection success")
+		memlog.Info("mqtt client connection success")
 		chList := elink.ChannelSelectorList()
 		for _, ch := range chList {
 			s := fmt.Sprintf("%s/%s/%s/+/+/+/#", ch, productKey, mac)
@@ -48,7 +48,7 @@ func NewMqClient(productKey, mac string) mqtt.Client {
 	})
 
 	opts.SetConnectionLostHandler(func(cli mqtt.Client, err error) {
-		logs.Warn("mqtt client connection lost, ", err)
+		memlog.Warn("mqtt client connection lost, ", err)
 	})
 
 	tp := ctrl.EncodePushTopic(elink.ChannelInternal, elinkmd.GatewayHeartbeat,
@@ -56,7 +56,7 @@ func NewMqClient(productKey, mac string) mqtt.Client {
 	if out, err := jsoniter.Marshal(&ctrl.PublishData{
 		BasePublishData: &ctrl.BasePublishData{Topic: tp},
 		Payload:         elinkmd.GetGatewayHeatbeatInfo(false)}); err != nil {
-		logs.Error("mqtt %s", err.Error())
+		memlog.Error("mqtt %s", err.Error())
 	} else {
 		opts.SetBinaryWill(tp, out, 2, false)
 	}
@@ -64,10 +64,10 @@ func NewMqClient(productKey, mac string) mqtt.Client {
 
 	go func() {
 		connect := func() error {
-			logs.Info("mqtt client connecting...")
+			memlog.Info("mqtt client connecting...")
 			if token := c.Connect(); !token.WaitTimeout(time.Second*10) ||
 				(token.Error() != nil) {
-				logs.Warn("mqtt client connect failed, ", token.Error())
+				memlog.Warn("mqtt client connect failed, ", token.Error())
 				return errors.New("mqtt client connect failed")
 			}
 			return nil

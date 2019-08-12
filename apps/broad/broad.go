@@ -6,14 +6,13 @@ import (
 	"github.com/thinkgos/easyws"
 	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gomo/lmax"
+	"github.com/thinkgos/memlog"
 
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gogate/misc"
 
-	"github.com/astaxie/beego/logs"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -35,7 +34,7 @@ func BroadInit() {
 func PublishServerJSON(tp string, data interface{}) error {
 	out, err := jsoniter.Marshal(data)
 	if err != nil {
-		return errors.Wrap(err, "json marshal failed")
+		return err
 	}
 	return Disrup.Publish(tp, out)
 }
@@ -57,7 +56,7 @@ func HeartBeatStatus() {
 			elink.MethodPut, elink.MessageTypeTime)
 		err := PublishPyServerJSON(tp, elinkmd.GetGatewayHeatbeatInfo(true))
 		if err != nil {
-			logs.Error("GetGatewayHeatbeatInfo:", err)
+			memlog.Error("GetGatewayHeatbeatInfo:", err)
 		}
 	}()
 
@@ -65,13 +64,13 @@ func HeartBeatStatus() {
 	func() {
 		gm, err := elinkmd.GetGatewayMonitorInfo()
 		if err != nil {
-			logs.Error("GetGatewayMonitorInfo:", err)
+			memlog.Error("GetGatewayMonitorInfo:", err)
 			return
 		}
 		tp := ctrl.EncodePushTopic(elink.ChannelInternal, elinkmd.SystemMonitor,
 			elink.MethodPut, elink.MessageTypeTime)
 		if err = PublishPyServerJSON(tp, gm); err != nil {
-			logs.Error("GetGatewayMonitorInfo:", err)
+			memlog.Error("GetGatewayMonitorInfo:", err)
 		}
 	}()
 }
