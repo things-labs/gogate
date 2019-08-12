@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/thinkgos/utils"
-
 	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
@@ -14,8 +12,8 @@ import (
 	"github.com/thinkgos/gogate/models"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/protocol/limp"
-
-	"github.com/astaxie/beego/logs"
+	"github.com/thinkgos/memlog"
+	"github.com/thinkgos/utils"
 )
 
 type deviceAnnce struct {
@@ -41,7 +39,7 @@ func (this *ZbnpiApp) ProInReadRspCmd(srcAddr uint16, hdr *ltl.FrameHdr, rdRspSt
 			if !ok || srcAddr != itm.nwkaddr {
 				return errors.New("no this address")
 			}
-			logs.Debug("New device-productID: %d,sn: %s, srcAddress: %d",
+			memlog.Debug("New device-productID: %d,sn: %s, srcAddress: %d",
 				gba.ProductIdentifier, itm.sn, srcAddr)
 			err := models.UpdateZbDeviceAndNode(itm.sn, srcAddr, 1, gba.ProductIdentifier)
 			if err != nil {
@@ -108,7 +106,7 @@ func (this *ZbnpiApp) ProInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []l
 			Data:      ms,
 		}
 	default:
-		logs.Error("no fix trunkid")
+		memlog.Error("no fix trunkid")
 		return errors.New("no fix trunkid")
 	}
 

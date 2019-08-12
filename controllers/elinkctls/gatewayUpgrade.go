@@ -11,8 +11,7 @@ import (
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/memlog"
 
-	"github.com/astaxie/beego/validation"
-	update "github.com/inconshreveable/go-update"
+	"github.com/inconshreveable/go-update"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -61,15 +60,15 @@ func (this *GatewayUpgradeController) Post() {
 	}
 	rpl := req.Payload
 	// check request parameter valid
-	valid := validation.Validation{}
-	valid.Required(rpl.URL, "url")
+	//valid := validation.Validation{}
+	//valid.Required(rpl.URL, "url")
 	//	valid.Required(rpl.Checksum, "checksum")
 	//	valid.Required(rpl.Signature, "signature")
 	//	valid.Required(rpl.PublicKey, "publicKey")
-	if valid.HasErrors() {
-		code = elink.CodeErrSysInvalidParameter
-		return
-	}
+	//if valid.HasErrors() {
+	//	code = elink.CodeErrSysInvalidParameter
+	//	return
+	//}
 
 	if err := doUpdate(&rpl); err != nil {
 		code = elink.CodeErrSysOperationFailed

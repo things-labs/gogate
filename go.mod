@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	cloud.google.com/go v0.37.4 // indirect
-	github.com/astaxie/beego v1.12.0
+	github.com/astaxie/beego v1.12.0 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.2.0
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/go-ini/ini v1.42.0
