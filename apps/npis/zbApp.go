@@ -54,10 +54,21 @@ func OpenZbApp() error {
 	}
 
 	mid := NewMiddleMonitor(monitor)
-	ZbApps := &ZbnpiApp{
+	ZbApps = &ZbnpiApp{
 		Ltl_t:         ltl.NewClient(mid),
 		MiddleMonitor: mid,
 	}
+
+	ZbApps.AddAsyncCbs(map[uint16]func(*npi.Npdu){
+		npi.MT_AF_DATA_CONFIRM:                        Af_DataConfirm,
+		npi.MT_AF_INCOMING_MSG:                        Af_IncomingMsg,
+		npi.MT_ZDO_MGMT_PERMIT_JOIN_RSP:               Zdo_MgmtPermitJoinRsp,
+		npi.MT_ZDO_STATE_CHANGE_IND:                   Zdo_StateChangeInd,
+		npi.MT_ZDO_END_DEVICE_ANNCE_IND:               Zdo_EnddeviceAnnceInd,
+		npi.MT_ZDO_LEAVE_IND:                          Zdo_LeaveInd,
+		npi.MT_SYS_RESET_IND:                          Sys_ResetInd,
+		npi.MT_APP_CNF_BDB_COMMISSIONING_NOTIFICATION: Appcfg_BdbCommissioningNotice,
+	})
 
 	go ZbApps.ServerInApdu(ZbApps.Context(), ZbApps)
 	return ZbApps.NetworkFormation()
