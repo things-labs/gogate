@@ -10,7 +10,6 @@ import (
 	"github.com/thinkgos/memlog"
 
 	"github.com/tarm/serial"
-	"go.uber.org/dig"
 )
 
 const Incomming_msg_size_max = 256
@@ -49,22 +48,19 @@ func NewSerialConfig() *serial.Config {
 }
 
 func OpenZbApp() error {
-	container := dig.New()
-	_ = container.Provide(NewSerialConfig)
-	_ = container.Provide(npi.Open)
-	_ = container.Provide(NewMiddleMonitor)
-	_ = container.Provide(func(mid *MiddleMonitor) *ZbnpiApp {
-		return &ZbnpiApp{
-			Ltl_t:         ltl.NewClient(mid),
-			MiddleMonitor: mid,
-		}
-	})
+	monitor, err := npi.Open(NewSerialConfig())
+	if err != nil {
+		return err
+	}
 
-	return container.Invoke(func(app *ZbnpiApp) {
-		go app.ServerInApdu(app.Context(), app)
-		app.NetworkFormation()
-		ZbApps = app
-	})
+	mid := NewMiddleMonitor(monitor)
+	ZbApps := &ZbnpiApp{
+		Ltl_t:         ltl.NewClient(mid),
+		MiddleMonitor: mid,
+	}
+
+	go ZbApps.ServerInApdu(ZbApps.Context(), ZbApps)
+	return ZbApps.NetworkFormation()
 }
 
 func CloseZbApp() {

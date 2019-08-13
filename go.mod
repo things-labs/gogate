@@ -22,7 +22,6 @@ require (
 	github.com/thinkgos/memlog v0.1.3
 	github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede
 	github.com/thinkgos/utils v0.2.4
-	go.uber.org/dig v1.7.0
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80 // indirect
 	gopkg.in/yaml.v2 v2.2.2
