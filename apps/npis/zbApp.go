@@ -7,6 +7,7 @@ import (
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/npi"
+	"github.com/thinkgos/memlog"
 
 	"github.com/tarm/serial"
 	"go.uber.org/dig"
@@ -25,6 +26,7 @@ var ZbApps *ZbnpiApp
 
 func NewSerialConfig() *serial.Config {
 	cfg := misc.APPConfig.Com0
+	memlog.Debug(cfg)
 	parity := serial.Parity('N')
 	switch cfg.Parity {
 	case "O":
@@ -40,7 +42,7 @@ func NewSerialConfig() *serial.Config {
 	return &serial.Config{
 		Name:     cfg.Name,
 		Baud:     cfg.BaudRate,
-		Size:     byte(cfg.StopBit),
+		Size:     byte(cfg.DataBit),
 		Parity:   parity,
 		StopBits: serial.StopBits(cfg.StopBit),
 	}
