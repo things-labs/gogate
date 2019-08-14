@@ -18,11 +18,12 @@ require (
 	github.com/thinkgos/easyjms v0.2.1
 	github.com/thinkgos/elink v0.0.3
 	github.com/thinkgos/go-cache v2.2.0+incompatible
-	github.com/thinkgos/gomo v0.0.0-20190812152622-6898050be11b
+	github.com/thinkgos/gomo v0.0.0-20190814051140-66ddf9f584b7
 	github.com/thinkgos/memlog v0.1.3
 	github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede
 	github.com/thinkgos/utils v0.2.4
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80 // indirect
+	golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a // indirect
 	gopkg.in/yaml.v2 v2.2.2
 )
