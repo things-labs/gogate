@@ -190,7 +190,7 @@ func GenerateSignature(mac, timestamp string) string {
 
 // AcquireParamPid 获取主题上的productID参数,格式resource.productID
 func (this *Controller) AcquireParamPid() (int, error) {
-	pidStr := this.Input.Param.Get("productID")
+	pidStr := this.Input.Param.Get("splat")
 	if len(pidStr) == 0 { // never happen but deal,may be other used
 		return 0, errors.New("resource productID invalid")
 	}

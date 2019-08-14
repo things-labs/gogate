@@ -112,7 +112,7 @@ func (this *DevCommandController) zbDeviceCommandDeal(pid int) {
 
 	var cmdID byte
 	switch pid {
-	case models.PidDZSW01, models.PidDZSW02, models.PidDZSW03:
+	case models.PidDZSW01, models.PidDZSW02, models.PidDZSW03, models.PidDZSW04:
 		cmd := rpl.Params.Command
 		if cmd == "off" {
 			cmdID = 0
