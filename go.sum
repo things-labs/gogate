@@ -57,8 +57,6 @@ github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.0.1 h1:HjfetcXq097iXP0uoPCdnM4Efp5/9MsM0/M+XOTeR3M=
 github.com/jinzhu/now v1.0.1/go.mod h1:d3SSVoowX0Lcu0IBviAWJpolVfI5UJVZZ7cO71lE/z8=
-github.com/json-iterator/go v1.1.6 h1:MrUvLMLTMxbqFJ9kzlvat/rYZqZnW3u4wkLzWTaFwKs=
-github.com/json-iterator/go v1.1.6/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
 github.com/json-iterator/go v1.1.7 h1:KfgG9LzI+pYjr4xvmz/5H4FXjokeP+rlHLhv3iH62Fo=
 github.com/json-iterator/go v1.1.7/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
@@ -117,10 +115,10 @@ github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07 h1:UyzmZLoiDWMRywV4DUYb9Fbt8uiOSooupjTq10vpvnU=
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07/go.mod h1:kDXzergiv9cbyO7IOYJZWg1U88JhDg3PB6klq9Hg2pA=
-github.com/thinkgos/anytool v0.1.1 h1:BWQm+dNNrjapTZb5vESrnmcjeufPkXGd1kjsXR30cdg=
-github.com/thinkgos/anytool v0.1.1/go.mod h1:MEmHvWOvOnV6Pm11klfVxBBXgDG3sR5XHLKRs6ki0Rw=
-github.com/thinkgos/easyjms v0.2.1 h1:mEz7qyVEaYMObMnfftkZaxq58bNHnDuhr5hKr0L4gIQ=
-github.com/thinkgos/easyjms v0.2.1/go.mod h1:CfZuNxXAZx3RxmrN0nhvpG7yJE5ppE/fkFixNUPJGn8=
+github.com/thinkgos/anytool v0.1.2 h1:pVDDAHXsaFE8Xl51wc3a0UnclEc5jNJKgxgYAxKvAlc=
+github.com/thinkgos/anytool v0.1.2/go.mod h1:MEmHvWOvOnV6Pm11klfVxBBXgDG3sR5XHLKRs6ki0Rw=
+github.com/thinkgos/easyjms v0.2.2 h1:0rlJKXpmBxkmgU+K3QdQCN3u4lLs8UxRWiBEz3Uvyv0=
+github.com/thinkgos/easyjms v0.2.2/go.mod h1:2NTI4t7tDMuF0DLJt8taCdQnDbsoL5QiQRcPuqQM1Vk=
 github.com/thinkgos/elink v0.0.3 h1:9f8xXf/ERGEEQghrC540IWs283ACHo5HNfd+Ee2ODk0=
 github.com/thinkgos/elink v0.0.3/go.mod h1:eMejY87mzvjkQEaKKp9qdSdu/UnOJWl8JKxmkjex2+Q=
 github.com/thinkgos/go-cache v2.2.0+incompatible h1:xx18hxj956l/nj+1VS5pJYuJKDUUPQ7cyCqvUX0/T0M=
