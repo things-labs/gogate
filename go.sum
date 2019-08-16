@@ -117,6 +117,8 @@ github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07 h1:UyzmZLoiDWMRywV4DUY
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07/go.mod h1:kDXzergiv9cbyO7IOYJZWg1U88JhDg3PB6klq9Hg2pA=
 github.com/thinkgos/anytool v0.1.2 h1:pVDDAHXsaFE8Xl51wc3a0UnclEc5jNJKgxgYAxKvAlc=
 github.com/thinkgos/anytool v0.1.2/go.mod h1:MEmHvWOvOnV6Pm11klfVxBBXgDG3sR5XHLKRs6ki0Rw=
+github.com/thinkgos/anytool v0.1.3 h1:uWeM/9BMMA4bpEFGW2SjZywxMasfnPdW99x/UJmeF40=
+github.com/thinkgos/anytool v0.1.3/go.mod h1:jbj/qcRV5V09xmf5+/98hmEWDrukRBWgw0ui7/p3oaE=
 github.com/thinkgos/easyjms v0.2.2 h1:0rlJKXpmBxkmgU+K3QdQCN3u4lLs8UxRWiBEz3Uvyv0=
 github.com/thinkgos/easyjms v0.2.2/go.mod h1:2NTI4t7tDMuF0DLJt8taCdQnDbsoL5QiQRcPuqQM1Vk=
 github.com/thinkgos/elink v0.0.3 h1:9f8xXf/ERGEEQghrC540IWs283ACHo5HNfd+Ee2ODk0=
@@ -127,6 +129,8 @@ github.com/thinkgos/gomo v0.0.0-20190814051140-66ddf9f584b7 h1:Jb3YcThAAF3NuJpZF
 github.com/thinkgos/gomo v0.0.0-20190814051140-66ddf9f584b7/go.mod h1:GCIr9dgq2KD9BR+fDnpH4Rqpf91Duvz5cB5UpMIMo7U=
 github.com/thinkgos/memlog v0.1.3 h1:GbO17uyx4QhW63qjPxwdMtPRTQ3BqUBOf2R+FJ6uIKU=
 github.com/thinkgos/memlog v0.1.3/go.mod h1:VdyTN06wOmbPJKa2oeb5YNxQvf8Il5AH4VTr2uYaTxU=
+github.com/thinkgos/memlog v0.1.4 h1:kGzrVBNA/mhy+1OpftphCDV6ypmulb0LaMPgDDafCRk=
+github.com/thinkgos/memlog v0.1.4/go.mod h1:VdyTN06wOmbPJKa2oeb5YNxQvf8Il5AH4VTr2uYaTxU=
 github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede h1:qz2UFWBp31P1KdLdFlXVqK2yANHV078UdzDgxcZRVWU=
 github.com/thinkgos/snowflake v0.0.0-20180412010544-68117e6bbede/go.mod h1:JCgYwOUDeijVmjhw3JPjVEZuo0v4b7uhJNGpbCCuz0k=
 github.com/thinkgos/tsm v0.2.3 h1:jSemz9MCBQETU8EChCwzGeVqaVJnNZRPRyjAMHZ12lM=

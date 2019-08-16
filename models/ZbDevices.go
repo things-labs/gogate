@@ -620,7 +620,7 @@ func UpdateZbDeviceAndNode(sn string, nwkAddr uint16, capacity byte, productID i
 	return nil
 }
 
-//删除这个设备及设备的所有节点
+// DeleteZbDeveiceAndNode 删除这个设备及设备的所有节点
 func DeleteZbDeveiceAndNode(sn string) error {
 	dev, err := LookupZbDeviceByIeeeAddr(sn)
 	if err != nil {
@@ -630,7 +630,7 @@ func DeleteZbDeveiceAndNode(sn string) error {
 	return dev.DeleteZbDeveiceAndNode()
 }
 
-// 地址转换成字符串,全大写
+// ToHexString 地址转换成字符串,全大写
 func ToHexString(v uint64) string {
 	b := make([]byte, 8)
 	binary.BigEndian.PutUint64(b, v)
