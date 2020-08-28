@@ -3,8 +3,8 @@ package npis
 import (
 	"github.com/thinkgos/gogate/controllers/elinkpsh"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gomo/ltl"
-	"github.com/thinkgos/gomo/npi"
+	"github.com/thinkgos/gogate/pkg/ltl"
+	"github.com/thinkgos/gogate/pkg/npi"
 	"github.com/thinkgos/memlog"
 )
 

@@ -11,8 +11,8 @@ import (
 	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gogate/controllers/elinkpsh"
 	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gomo/ltl"
-	"github.com/thinkgos/gomo/protocol/limp"
+	"github.com/thinkgos/gogate/pkg/ltl"
+	"github.com/thinkgos/gogate/pkg/protocol/limp"
 	"github.com/thinkgos/memlog"
 )
 

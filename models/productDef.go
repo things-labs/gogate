@@ -1,6 +1,6 @@
 package models
 
-import "github.com/thinkgos/gomo/ltl"
+import "github.com/thinkgos/gogate/pkg/ltl"
 
 // 设备产品类型
 const (

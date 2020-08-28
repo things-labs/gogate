@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/thinkgos/gogate/misc"
-	"github.com/thinkgos/gomo/ltl"
-	"github.com/thinkgos/gomo/npi"
+	"github.com/thinkgos/gogate/pkg/ltl"
+	"github.com/thinkgos/gogate/pkg/npi"
 	"github.com/thinkgos/memlog"
 
 	"github.com/tarm/serial"
