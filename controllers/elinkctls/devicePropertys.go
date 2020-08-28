@@ -1,15 +1,10 @@
 package elinkctls
 
 import (
-	"github.com/thinkgos/easyjms"
 	"github.com/thinkgos/elink"
-	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
-	"github.com/thinkgos/gogate/apps/npis"
-	"github.com/thinkgos/gogate/models"
-	"github.com/thinkgos/gomo/ltl"
-	"github.com/thinkgos/gomo/protocol/limp"
 
-	jsoniter "github.com/json-iterator/go"
+	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
+	"github.com/thinkgos/gogate/models"
 )
 
 type DevPropReqPy struct {
@@ -62,44 +57,45 @@ func (this *DevPropertysController) Get() {
 }
 
 func (this *DevPropertysController) zbDevicePropertysGet(pid int) int {
-	req := &DevPropRequest{}
-	if err := jsoniter.Unmarshal(this.Input.Payload, req); err != nil {
-		return elink.CodeErrSysInvalidParameter
-	}
+	// req := &DevPropRequest{}
+	// if err := jsoniter.Unmarshal(this.Input.Payload, req); err != nil {
+	// 	return elink.CodeErrSysInvalidParameter
+	// }
+	//
+	// rpl := req.Payload
 
-	rpl := req.Payload
-	jp := easyjms.NewFromMap(rpl.Params)
-	if rpl.NodeNo == ltl.NodeNumReserved {
-		switch jp.Get("types").MustString() {
-		case "basic":
-			dinfo, err := models.LookupZbDeviceByIeeeAddr(rpl.Sn)
-			if err != nil {
-				return ctrl.CodeErrDeviceNotExist
-			}
-			id := this.SyncManage.ObainID()
-			if err = npis.ZbApps.SendReadReqBasic(dinfo.NwkAddr, id); err != nil {
-				return ctrl.CodeErrDeviceCommandOperationFailed
-			}
-
-			v, ok := this.SyncManage.Wait(id)
-			if !ok {
-				return ctrl.CodeErrDeviceCommandOperationFailed
-			}
-			item, ok := v.(*limp.GenerlBasicAttribute)
-			if !ok {
-				return ctrl.CodeErrDeviceCommandOperationFailed
-			}
-
-			err = this.WriteResponsePyServerJSON(elink.CodeSuccess,
-				&DevPropRspPy{rpl.ProductID, rpl.Sn, rpl.NodeNo, item})
-			if err != nil {
-				return elink.CodeErrSysException
-			}
-		default:
-			return ctrl.CodeErrDevicePropertysNotSupport
-		}
-		return elink.CodeSuccess
-	}
+	// jp := easyjms.NewFromMap(rpl.Params)
+	// if rpl.NodeNo == ltl.NodeNumReserved {
+	// 	switch jp.Get("types").MustString() {
+	// 	case "basic":
+	// 		dinfo, err := models.LookupZbDeviceByIeeeAddr(rpl.Sn)
+	// 		if err != nil {
+	// 			return ctrl.CodeErrDeviceNotExist
+	// 		}
+	// 		id := this.SyncManage.ObainID()
+	// 		if err = npis.ZbApps.SendReadReqBasic(dinfo.NwkAddr, id); err != nil {
+	// 			return ctrl.CodeErrDeviceCommandOperationFailed
+	// 		}
+	//
+	// 		v, ok := this.SyncManage.Wait(id)
+	// 		if !ok {
+	// 			return ctrl.CodeErrDeviceCommandOperationFailed
+	// 		}
+	// 		item, ok := v.(*limp.GenerlBasicAttribute)
+	// 		if !ok {
+	// 			return ctrl.CodeErrDeviceCommandOperationFailed
+	// 		}
+	//
+	// 		err = this.WriteResponsePyServerJSON(elink.CodeSuccess,
+	// 			&DevPropRspPy{rpl.ProductID, rpl.Sn, rpl.NodeNo, item})
+	// 		if err != nil {
+	// 			return elink.CodeErrSysException
+	// 		}
+	// 	default:
+	// 		return ctrl.CodeErrDevicePropertysNotSupport
+	// 	}
+	// 	return elink.CodeSuccess
+	// }
 
 	return elink.CodeSuccess
 }

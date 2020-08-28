@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/thinkgos/utils"
-
 	"github.com/jinzhu/gorm"
+	"github.com/spf13/cast"
+	"github.com/thinkgos/strext"
 )
 
 // 设备表
@@ -158,25 +158,25 @@ func BindZbDeviceNode(SrcSn string, SrcNodeNum byte,
 		return err
 	}
 
-	strBindTkid := utils.FormatBaseTypes(BindTrunkID)
+	strBindTkid := cast.ToString(BindTrunkID)
 	// 只有源设备节点输出集和目的设备输入集互补,即都含有要绑定的集,才进行绑定
-	if !utils.IsSliceContainsStrNocase(SrcDNI.outTrunk, strBindTkid) ||
-		!utils.IsSliceContainsStrNocase(DstBindDNI.inTrunk, strBindTkid) {
+	if !strext.ContainsFold(SrcDNI.outTrunk, strBindTkid) ||
+		!strext.ContainsFold(DstBindDNI.inTrunk, strBindTkid) {
 		return ErrTrunkNotComplementary
 	}
 
-	srcID := utils.FormatBaseTypes(SrcDNI.ID)
-	dstBindID := utils.FormatBaseTypes(DstBindDNI.ID)
+	srcID := cast.ToString(SrcDNI.ID)
+	dstBindID := cast.ToString(DstBindDNI.ID)
 	// 源设备节点 目的绑定表 不含目标设备节点 或 目标设备节点 源绑定表 不含源设备节点 将进行绑定添加,
 	// 都有直接返回成功
-	if utils.IsSliceContainsStrNocase(SrcDNI.dstBind, dstBindID) &&
-		utils.IsSliceContainsStrNocase(DstBindDNI.srcBind, srcID) {
+	if strext.ContainsFold(SrcDNI.dstBind, dstBindID) &&
+		strext.ContainsFold(DstBindDNI.srcBind, srcID) {
 		return nil
 	}
 	// 将目的设备id号添加到 源设备的 目的绑定表
-	SrcDNI_DstBd := utils.AppendStr(SrcDNI.dstBind, dstBindID)
+	SrcDNI_DstBd := strext.Append(SrcDNI.dstBind, dstBindID)
 	// 将源设备id号添加到 目的设备的 源绑定表
-	DstBindDNI_SrcBd := utils.AppendStr(DstBindDNI.srcBind, srcID)
+	DstBindDNI_SrcBd := strext.Append(DstBindDNI.srcBind, srcID)
 
 	SrcDNI.DstBindList = joinInternalString(SrcDNI_DstBd)
 	DstBindDNI.SrcBindList = joinInternalString(DstBindDNI_SrcBd)
@@ -228,25 +228,25 @@ func UnZbBindDeviceNode(SrcSn string, SrcNodeNum byte,
 		return nil
 	}
 
-	strBindtkid := utils.FormatBaseTypes(BindTrunkID)
+	strBindtkid := cast.ToString(BindTrunkID)
 	// 只有源设备节点输出集和目的设备输入集互补,即都含有要绑定的集,才进行解绑定,否则认为是成功的
-	if !utils.IsSliceContainsStrNocase(SrcDNI.outTrunk, strBindtkid) ||
-		!utils.IsSliceContainsStrNocase(DstBindDNI.inTrunk, strBindtkid) {
+	if !strext.ContainsFold(SrcDNI.outTrunk, strBindtkid) ||
+		!strext.ContainsFold(DstBindDNI.inTrunk, strBindtkid) {
 		return nil
 	}
 
-	dstid := utils.FormatBaseTypes(DstBindDNI.ID)
-	srcid := utils.FormatBaseTypes(SrcDNI.ID)
+	dstid := cast.ToString(DstBindDNI.ID)
+	srcid := cast.ToString(SrcDNI.ID)
 
 	// 源设备节点的<目的绑定表>不含目标设备节点
 	//或 目标设备节点<源绑定表>不含源设备节点 将进行绑定解绑直接返回成功
-	if !utils.IsSliceContainsStrNocase(SrcDNI.dstBind, dstid) ||
-		!utils.IsSliceContainsStrNocase(DstBindDNI.srcBind, srcid) {
+	if !strext.ContainsFold(SrcDNI.dstBind, dstid) ||
+		!strext.ContainsFold(DstBindDNI.srcBind, srcid) {
 		return nil
 	}
 	// 删除源的目标绑定 和 目标的源绑定
-	SrcDNI_DstBdd := utils.DeleteFromSliceStr(SrcDNI.dstBind, dstid)
-	DstBindDNI_SrcBd := utils.DeleteFromSliceStr(DstBindDNI.srcBind, srcid)
+	SrcDNI_DstBdd := strext.Delete(SrcDNI.dstBind, dstid)
+	DstBindDNI_SrcBd := strext.Delete(DstBindDNI.srcBind, srcid)
 
 	SrcDNI.DstBindList = joinInternalString(SrcDNI_DstBdd)
 	DstBindDNI.SrcBindList = joinInternalString(DstBindDNI_SrcBd)
@@ -286,9 +286,9 @@ func BindFindZbDeviceNodeByNN(NwkAddr uint16, NodeNum byte, trunkID uint16) ([]*
 	if err != nil {
 		return nil, err
 	}
-	strTkid := utils.FormatBaseTypes(trunkID)
+	strTkid := cast.ToString(trunkID)
 	// 源设备 是否包含输出集
-	if !utils.IsSliceContainsStrNocase(srcDNI.outTrunk, strTkid) {
+	if !strext.ContainsFold(srcDNI.outTrunk, strTkid) {
 		return nil, ErrNotContainTrunk
 	}
 
@@ -300,7 +300,7 @@ func BindFindZbDeviceNodeByNN(NwkAddr uint16, NodeNum byte, trunkID uint16) ([]*
 		}
 
 		// 只有目标设备含有输入集才加入
-		if utils.IsSliceContainsStrNocase(tmpdni.inTrunk, strTkid) {
+		if strext.ContainsFold(tmpdni.inTrunk, strTkid) {
 			dni = append(dni, tmpdni)
 		}
 	}
@@ -314,9 +314,9 @@ func BindFindZbDeviceNodeByIN(sn string, NodeNum byte, trunkID uint16) ([]*ZbDev
 	if err != nil {
 		return nil, err
 	}
-	strTkid := utils.FormatBaseTypes(trunkID)
+	strTkid := cast.ToString(trunkID)
 	// 源设备 是否包含输出集
-	if !utils.IsSliceContainsStrNocase(src.outTrunk, strTkid) {
+	if !strext.ContainsFold(src.outTrunk, strTkid) {
 		return nil, ErrNotContainTrunk
 	}
 
@@ -328,7 +328,7 @@ func BindFindZbDeviceNodeByIN(sn string, NodeNum byte, trunkID uint16) ([]*ZbDev
 		}
 
 		// 只有目标设备含有输入集才加入
-		if utils.IsSliceContainsStrNocase(tmpdni.inTrunk, strTkid) {
+		if strext.ContainsFold(tmpdni.inTrunk, strTkid) {
 			dni = append(dni, tmpdni)
 		}
 	}
@@ -514,14 +514,14 @@ func (this *ZbDeviceInfo) DeleteZbDeveiceAndNode() error {
 
 	for _, v := range devNodes {
 		v.parseInternalString() // 将集与绑定表解析一下
-		vid := utils.FormatBaseTypes(v.ID)
+		vid := cast.ToString(v.ID)
 		// 是否有源绑定,有则删除每一个 源的目标绑定
 		if len(v.srcBind) > 0 {
 			for _, tv := range v.srcBind { // 扫描每一个源 的目标绑定,让它删除对应id
 				tmpdevNode, err := lookupZbDeviceNodeByID(tx, tv)
 				if err == nil && len(tmpdevNode.dstBind) > 0 &&
-					utils.IsSliceContainsStrNocase(tmpdevNode.dstBind, vid) {
-					tmpdevNode.dstBind = utils.DeleteFromSliceStrAll(tmpdevNode.dstBind, vid)
+					strext.ContainsFold(tmpdevNode.dstBind, vid) {
+					tmpdevNode.dstBind = strext.DeleteAll(tmpdevNode.dstBind, vid)
 					tmpdevNode.DstBindList = joinInternalString(tmpdevNode.dstBind)
 
 					err = tx.Model(tmpdevNode).
@@ -539,8 +539,8 @@ func (this *ZbDeviceInfo) DeleteZbDeveiceAndNode() error {
 			for _, tv := range v.dstBind { // 扫描每一个目标 的源绑定,让它删除对应id
 				tmpdevNode, err := lookupZbDeviceNodeByID(tx, tv)
 				if err == nil && len(tmpdevNode.srcBind) > 0 &&
-					utils.IsSliceContainsStrNocase(tmpdevNode.srcBind, vid) {
-					tmpdevNode.srcBind = utils.DeleteFromSliceStrAll(tmpdevNode.srcBind, vid)
+					strext.ContainsFold(tmpdevNode.srcBind, vid) {
+					tmpdevNode.srcBind = strext.DeleteAll(tmpdevNode.srcBind, vid)
 					tmpdevNode.SrcBindList = joinInternalString(tmpdevNode.srcBind)
 
 					err = tx.Model(tmpdevNode).

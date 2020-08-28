@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/spf13/cast"
 	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
@@ -13,7 +14,6 @@ import (
 	"github.com/thinkgos/gomo/ltl"
 	"github.com/thinkgos/gomo/protocol/limp"
 	"github.com/thinkgos/memlog"
-	"github.com/thinkgos/utils"
 )
 
 type deviceAnnce struct {
@@ -111,7 +111,7 @@ func (this *ZbnpiApp) ProInReportCmd(srcAddr uint16, hdr *ltl.FrameHdr, rRec []l
 	}
 
 	tp := ctrl.EncodePushTopic(ctrl.ChannelData,
-		elink.FormatResource(elinkmd.DevicePropertys, utils.FormatBaseTypes(zbdnode.ProductID)),
+		elink.FormatResource(elinkmd.DevicePropertys, cast.ToString(zbdnode.ProductID)),
 		elink.MethodPut, elink.MessageTypeAnnce)
 
 	return broad.PublishPyServerJSON(tp, v)

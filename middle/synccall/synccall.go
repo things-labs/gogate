@@ -3,8 +3,8 @@ package synccall
 import (
 	"time"
 
-	cache "github.com/thinkgos/go-cache"
-	"github.com/thinkgos/snowflake"
+	"github.com/bwmarrin/snowflake"
+	cache "github.com/patrickmn/go-cache"
 )
 
 // 默认配置
@@ -103,12 +103,14 @@ func (this *Manage) Wait(id string, t ...time.Duration) (interface{}, bool) {
 	itm := &item{
 		value: make(chan interface{}, 1),
 	}
-	this.c.Set(id, itm)
+	this.c.SetDefault(id, itm)
 
+	tick := time.NewTicker(tm)
 	select {
 	case v := <-itm.value:
 		return v, true
-	case <-time.NewTicker(tm).C:
+	case <-tick.C:
+		tick.Stop()
 	}
 	return nil, false
 }

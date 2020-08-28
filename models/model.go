@@ -7,9 +7,9 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/thinkgos/go-core-package/extos"
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/memlog"
-	"github.com/thinkgos/utils"
 )
 
 const (
@@ -31,7 +31,7 @@ func DbInit() error {
 	var errs error
 
 	// 判断目录是否存在,不存在着创建对应的所有目录
-	if !utils.IsExist(_DbName) {
+	if !extos.IsExist(_DbName) {
 		if err = os.MkdirAll(path.Dir(_DbName), os.ModePerm); err != nil {
 			return err
 		}
