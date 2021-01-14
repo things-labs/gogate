@@ -1,9 +1,9 @@
 package routers
 
 import (
-	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/controllers/elinkctls"
+	"github.com/thinkgos/gogate/pkg/elink"
 )
 
 // elink router setting

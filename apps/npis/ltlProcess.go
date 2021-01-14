@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/spf13/cast"
-	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gogate/controllers/elinkpsh"
 	"github.com/thinkgos/gogate/models"
+	"github.com/thinkgos/gogate/pkg/elink"
 	"github.com/thinkgos/gogate/pkg/ltl"
 	"github.com/thinkgos/gogate/pkg/protocol/limp"
 	"github.com/thinkgos/memlog"

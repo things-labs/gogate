@@ -1,7 +1,7 @@
 package elinkctls
 
 import (
-	"github.com/thinkgos/elink"
+	"github.com/thinkgos/gogate/pkg/elink"
 
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/models"

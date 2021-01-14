@@ -12,8 +12,8 @@ import (
 
 	"github.com/thinkgos/gogate/middle/synccall"
 
-	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/models"
+	"github.com/thinkgos/gogate/pkg/elink"
 
 	jsoniter "github.com/json-iterator/go"
 )

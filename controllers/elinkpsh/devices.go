@@ -2,10 +2,10 @@ package elinkpsh
 
 import (
 	"github.com/spf13/cast"
-	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
+	"github.com/thinkgos/gogate/pkg/elink"
 )
 
 // DevSn 设备通知payload

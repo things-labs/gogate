@@ -3,10 +3,9 @@ package limp
 import (
 	"encoding/hex"
 
-	"github.com/thinkgos/digital"
-
 	"github.com/thinkgos/gogate/pkg/ltl"
 	"github.com/thinkgos/gogate/pkg/ltl/ltlspec"
+	"github.com/thinkgos/x/numeric"
 )
 
 type GenerlBasicAttribute struct {
@@ -52,7 +51,7 @@ func BasicAttribute(rRec []ltl.ReadRspStatus) *GenerlBasicAttribute {
 		case ltlspec.ATTRID_BASIC_SERIAL_NUMBER:
 			if v.Status == ltl.LTL_SUCCESS {
 				o.SerialNumber =
-					hex.EncodeToString(digital.ReverseBytes(v.MustArrayUint8()))
+					hex.EncodeToString(numeric.ReverseBytes(v.MustArrayUint8()))
 			}
 		case ltlspec.ATTRID_BASIC_POWER_SOURCE:
 			if v.Status == ltl.LTL_SUCCESS {

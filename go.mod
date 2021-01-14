@@ -1,6 +1,6 @@
 module github.com/thinkgos/gogate
 
-go 1.15
+go 1.16
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0
@@ -19,13 +19,9 @@ require (
 	github.com/spf13/cast v1.3.1
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
 	github.com/thinkgos/anytool v0.2.3
-	github.com/thinkgos/digital v0.1.0
-	github.com/thinkgos/elink v0.0.3
-	github.com/thinkgos/go-core-package v0.0.7
 	github.com/thinkgos/memlog v0.2.1
-	github.com/thinkgos/strext v0.3.2
+	github.com/thinkgos/x v0.2.1
 	github.com/willf/bitset v1.1.11
 	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
-	golang.org/x/sys v0.0.0-20200826173525-f9321e4c35a6 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )

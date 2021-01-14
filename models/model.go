@@ -7,9 +7,9 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/thinkgos/go-core-package/extos"
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/memlog"
+	"github.com/thinkgos/x/extos"
 )
 
 const (

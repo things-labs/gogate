@@ -3,9 +3,9 @@ package elinkctls
 import (
 	"net"
 
-	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/misc"
+	"github.com/thinkgos/gogate/pkg/elink"
 	"github.com/thinkgos/memlog"
 )
 

@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/thinkgos/digital"
+	"github.com/thinkgos/x/numeric"
 
 	"github.com/tarm/serial"
 )
@@ -202,7 +202,7 @@ func (this *Monitor) usartReadRoutine() {
 				msg := tmpbuf[(MT_RPC_FRAME_HEAD_SZ + MT_RPC_PDU_LEN_SZ):(framelen - MT_RPC_FRAME_FCS_SZ)]
 
 				// 处理pdu帧
-				this.Procframe(digital.BuildUint16(msg[1], msg[0]), msg[2:])
+				this.Procframe(numeric.BuildUint16(msg[1], msg[0]), msg[2:])
 			}
 
 			// foc 校验失败还是成功,跳过或丢弃这个npi帧,获得余下的帧数据

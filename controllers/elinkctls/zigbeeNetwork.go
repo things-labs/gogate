@@ -1,9 +1,9 @@
 package elinkctls
 
 import (
-	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/npis"
+	"github.com/thinkgos/gogate/pkg/elink"
 	"github.com/thinkgos/gogate/pkg/npi"
 	"github.com/thinkgos/memlog"
 )

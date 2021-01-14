@@ -1,7 +1,7 @@
 package ctrl
 
 import (
-	"github.com/thinkgos/elink"
+	"github.com/thinkgos/gogate/pkg/elink"
 )
 
 const (

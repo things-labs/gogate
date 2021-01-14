@@ -1,7 +1,7 @@
 package broad
 
 import (
-	"github.com/thinkgos/elink"
+	"github.com/thinkgos/gogate/pkg/elink"
 	"github.com/thinkgos/memlog"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"

@@ -5,7 +5,7 @@ import (
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/thinkgos/elink"
+	"github.com/thinkgos/gogate/pkg/elink"
 	"github.com/thinkgos/memlog"
 
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"

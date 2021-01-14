@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/thinkgos/elink"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
 	"github.com/thinkgos/gogate/misc"
+	"github.com/thinkgos/gogate/pkg/elink"
 	"github.com/thinkgos/memlog"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
