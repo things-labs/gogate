@@ -4,13 +4,13 @@ go 1.16
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0
-	github.com/eclipse/paho.mqtt.golang v1.2.0
+	github.com/eclipse/paho.mqtt.golang v1.3.1
 	github.com/gopherjs/gopherjs v0.0.0-20190411002643-bd77b112433e // indirect
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/jinzhu/gorm v1.9.16
 	github.com/json-iterator/go v1.1.10
 	github.com/lib/pq v1.2.0 // indirect
-	github.com/mattn/go-sqlite3 v1.14.1
+	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -22,6 +22,7 @@ require (
 	github.com/thinkgos/memlog v0.2.1
 	github.com/thinkgos/x v0.2.1
 	github.com/willf/bitset v1.1.11
-	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
-	gopkg.in/yaml.v2 v2.3.0
+	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
+	golang.org/x/sys v0.0.0-20210113181707-4bcb84eeeb78 // indirect
+	gopkg.in/yaml.v2 v2.4.0
 )
