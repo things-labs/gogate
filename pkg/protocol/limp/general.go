@@ -5,7 +5,7 @@ import (
 
 	"github.com/thinkgos/gogate/pkg/ltl"
 	"github.com/thinkgos/gogate/pkg/ltl/ltlspec"
-	"github.com/thinkgos/x/numeric"
+	"github.com/thinkgos/gogate/pkg/numeric"
 )
 
 type GenerlBasicAttribute struct {

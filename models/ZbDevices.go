@@ -4,12 +4,12 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/cast"
-	"github.com/thinkgos/x/extstr"
 )
 
 // 设备表
@@ -160,8 +160,8 @@ func BindZbDeviceNode(SrcSn string, SrcNodeNum byte,
 
 	strBindTkid := cast.ToString(BindTrunkID)
 	// 只有源设备节点输出集和目的设备输入集互补,即都含有要绑定的集,才进行绑定
-	if !extstr.ContainsFold(SrcDNI.outTrunk, strBindTkid) ||
-		!extstr.ContainsFold(DstBindDNI.inTrunk, strBindTkid) {
+	if !ContainsFold(SrcDNI.outTrunk, strBindTkid) ||
+		!ContainsFold(DstBindDNI.inTrunk, strBindTkid) {
 		return ErrTrunkNotComplementary
 	}
 
@@ -169,14 +169,15 @@ func BindZbDeviceNode(SrcSn string, SrcNodeNum byte,
 	dstBindID := cast.ToString(DstBindDNI.ID)
 	// 源设备节点 目的绑定表 不含目标设备节点 或 目标设备节点 源绑定表 不含源设备节点 将进行绑定添加,
 	// 都有直接返回成功
-	if extstr.ContainsFold(SrcDNI.dstBind, dstBindID) &&
-		extstr.ContainsFold(DstBindDNI.srcBind, srcID) {
+	if ContainsFold(SrcDNI.dstBind, dstBindID) &&
+		ContainsFold(DstBindDNI.srcBind, srcID) {
 		return nil
 	}
 	// 将目的设备id号添加到 源设备的 目的绑定表
-	SrcDNI_DstBd := extstr.Append(SrcDNI.dstBind, dstBindID)
+
+	SrcDNI_DstBd := slices.Compact(append(SrcDNI.dstBind, dstBindID))
 	// 将源设备id号添加到 目的设备的 源绑定表
-	DstBindDNI_SrcBd := extstr.Append(DstBindDNI.srcBind, srcID)
+	DstBindDNI_SrcBd := slices.Compact(append(DstBindDNI.srcBind, srcID))
 
 	SrcDNI.DstBindList = joinInternalString(SrcDNI_DstBd)
 	DstBindDNI.SrcBindList = joinInternalString(DstBindDNI_SrcBd)
@@ -230,8 +231,8 @@ func UnZbBindDeviceNode(SrcSn string, SrcNodeNum byte,
 
 	strBindtkid := cast.ToString(BindTrunkID)
 	// 只有源设备节点输出集和目的设备输入集互补,即都含有要绑定的集,才进行解绑定,否则认为是成功的
-	if !extstr.ContainsFold(SrcDNI.outTrunk, strBindtkid) ||
-		!extstr.ContainsFold(DstBindDNI.inTrunk, strBindtkid) {
+	if !ContainsFold(SrcDNI.outTrunk, strBindtkid) ||
+		!ContainsFold(DstBindDNI.inTrunk, strBindtkid) {
 		return nil
 	}
 
@@ -240,13 +241,13 @@ func UnZbBindDeviceNode(SrcSn string, SrcNodeNum byte,
 
 	// 源设备节点的<目的绑定表>不含目标设备节点
 	//或 目标设备节点<源绑定表>不含源设备节点 将进行绑定解绑直接返回成功
-	if !extstr.ContainsFold(SrcDNI.dstBind, dstid) ||
-		!extstr.ContainsFold(DstBindDNI.srcBind, srcid) {
+	if !ContainsFold(SrcDNI.dstBind, dstid) ||
+		!ContainsFold(DstBindDNI.srcBind, srcid) {
 		return nil
 	}
 	// 删除源的目标绑定 和 目标的源绑定
-	SrcDNI_DstBdd := extstr.Delete(SrcDNI.dstBind, dstid)
-	DstBindDNI_SrcBd := extstr.Delete(DstBindDNI.srcBind, srcid)
+	SrcDNI_DstBdd := slices.DeleteFunc(SrcDNI.dstBind, func(s string) bool { return s == dstid })
+	DstBindDNI_SrcBd := slices.DeleteFunc(DstBindDNI.srcBind, func(s string) bool { return s == srcid })
 
 	SrcDNI.DstBindList = joinInternalString(SrcDNI_DstBdd)
 	DstBindDNI.SrcBindList = joinInternalString(DstBindDNI_SrcBd)
@@ -288,7 +289,8 @@ func BindFindZbDeviceNodeByNN(NwkAddr uint16, NodeNum byte, trunkID uint16) ([]*
 	}
 	strTkid := cast.ToString(trunkID)
 	// 源设备 是否包含输出集
-	if !extstr.ContainsFold(srcDNI.outTrunk, strTkid) {
+
+	if !ContainsFold(srcDNI.outTrunk, strTkid) {
 		return nil, ErrNotContainTrunk
 	}
 
@@ -300,7 +302,7 @@ func BindFindZbDeviceNodeByNN(NwkAddr uint16, NodeNum byte, trunkID uint16) ([]*
 		}
 
 		// 只有目标设备含有输入集才加入
-		if extstr.ContainsFold(tmpdni.inTrunk, strTkid) {
+		if ContainsFold(tmpdni.inTrunk, strTkid) {
 			dni = append(dni, tmpdni)
 		}
 	}
@@ -316,7 +318,7 @@ func BindFindZbDeviceNodeByIN(sn string, NodeNum byte, trunkID uint16) ([]*ZbDev
 	}
 	strTkid := cast.ToString(trunkID)
 	// 源设备 是否包含输出集
-	if !extstr.ContainsFold(src.outTrunk, strTkid) {
+	if !ContainsFold(src.outTrunk, strTkid) {
 		return nil, ErrNotContainTrunk
 	}
 
@@ -328,7 +330,7 @@ func BindFindZbDeviceNodeByIN(sn string, NodeNum byte, trunkID uint16) ([]*ZbDev
 		}
 
 		// 只有目标设备含有输入集才加入
-		if extstr.ContainsFold(tmpdni.inTrunk, strTkid) {
+		if ContainsFold(tmpdni.inTrunk, strTkid) {
 			dni = append(dni, tmpdni)
 		}
 	}
@@ -520,8 +522,8 @@ func (this *ZbDeviceInfo) DeleteZbDeveiceAndNode() error {
 			for _, tv := range v.srcBind { // 扫描每一个源 的目标绑定,让它删除对应id
 				tmpdevNode, err := lookupZbDeviceNodeByID(tx, tv)
 				if err == nil && len(tmpdevNode.dstBind) > 0 &&
-					extstr.ContainsFold(tmpdevNode.dstBind, vid) {
-					tmpdevNode.dstBind = extstr.DeleteAll(tmpdevNode.dstBind, vid)
+					ContainsFold(tmpdevNode.dstBind, vid) {
+					tmpdevNode.dstBind = slices.DeleteFunc(tmpdevNode.dstBind, func(s string) bool { return s == vid })
 					tmpdevNode.DstBindList = joinInternalString(tmpdevNode.dstBind)
 
 					err = tx.Model(tmpdevNode).
@@ -539,8 +541,8 @@ func (this *ZbDeviceInfo) DeleteZbDeveiceAndNode() error {
 			for _, tv := range v.dstBind { // 扫描每一个目标 的源绑定,让它删除对应id
 				tmpdevNode, err := lookupZbDeviceNodeByID(tx, tv)
 				if err == nil && len(tmpdevNode.srcBind) > 0 &&
-					extstr.ContainsFold(tmpdevNode.srcBind, vid) {
-					tmpdevNode.srcBind = extstr.DeleteAll(tmpdevNode.srcBind, vid)
+					ContainsFold(tmpdevNode.srcBind, vid) {
+					tmpdevNode.srcBind = slices.DeleteFunc(tmpdevNode.srcBind, func(s string) bool { return s == vid })
 					tmpdevNode.SrcBindList = joinInternalString(tmpdevNode.srcBind)
 
 					err = tx.Model(tmpdevNode).
@@ -635,4 +637,8 @@ func ToHexString(v uint64) string {
 	b := make([]byte, 8)
 	binary.BigEndian.PutUint64(b, v)
 	return strings.ToUpper(hex.EncodeToString(b))
+}
+
+func ContainsFold(sl []string, str string) bool {
+	return slices.ContainsFunc(sl, func(s string) bool { return strings.EqualFold(s, str) })
 }

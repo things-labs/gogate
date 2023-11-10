@@ -1,10 +1,10 @@
 package models
 
 import (
+	"slices"
 	"sync"
 
 	"github.com/jinzhu/gorm"
-	"github.com/thinkgos/x/extstr"
 )
 
 // 超级用户
@@ -47,7 +47,7 @@ func HasUser(uid string) bool {
 		return true
 	}
 	localUser.RLock()
-	b := extstr.Contains(localUser.tab, uid)
+	b := slices.Contains(localUser.tab, uid)
 	localUser.RUnlock()
 	return b
 }
@@ -78,7 +78,9 @@ func DeleteUser(uid string) error {
 		return err
 	}
 	localUser.Lock()
-	localUser.tab = extstr.DeleteAll(localUser.tab, uid)
+	localUser.tab = slices.DeleteFunc(localUser.tab, func(s string) bool {
+		return s == uid
+	})
 	localUser.Unlock()
 	return nil
 }

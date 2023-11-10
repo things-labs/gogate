@@ -9,7 +9,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/thinkgos/gogate/misc"
 	"github.com/thinkgos/memlog"
-	"github.com/thinkgos/x/extos"
 )
 
 const (
@@ -31,7 +30,7 @@ func DbInit() error {
 	var errs error
 
 	// 判断目录是否存在,不存在着创建对应的所有目录
-	if !extos.IsExist(_DbName) {
+	if !IsPathExist(_DbName) {
 		if err = os.MkdirAll(path.Dir(_DbName), os.ModePerm); err != nil {
 			return err
 		}
@@ -62,4 +61,11 @@ func RegisterDbTableInitFunc(f DbTableInitFunc) {
 	if f != nil {
 		dbTableInitList = append(dbTableInitList, f)
 	}
+}
+
+// IsPathExist checks whether a file or directory exists.
+// It returns false when the file or directory does not exist.
+func IsPathExist(paths string) bool {
+	_, err := os.Stat(paths)
+	return err == nil || os.IsExist(err)
 }

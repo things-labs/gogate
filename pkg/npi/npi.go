@@ -9,12 +9,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/thinkgos/x/numeric"
+	"github.com/thinkgos/gogate/pkg/numeric"
 
 	"github.com/tarm/serial"
 )
 
-//	frame 帧结构 -- | 帧头 | 命令0 | 命令1 | 数据域Adu | xor |
+// frame 帧结构 -- | 帧头 | 命令0 | 命令1 | 数据域Adu | xor |
 const (
 	npi_async_size_max       = 256             // 异步npdu缓冲chan大小
 	npi_sync_reponse_timeout = 6 * time.Second // 同步请求超时时间
@@ -137,7 +137,7 @@ func (this *Monitor) matchAsyncCb(commandID uint16) (func(*Npdu), bool) {
 	return cb.(func(*Npdu)), true
 }
 
-//根据id删除回调
+// 根据id删除回调
 func (this *Monitor) DeleteAsyncCb(commandID uint16) {
 	this.cb.Delete(commandID)
 }

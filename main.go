@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	_ "github.com/thinkgos/anytool"
+	_ "github.com/things-labs/fwu"
 	"github.com/thinkgos/gogate/apps/broad"
 	"github.com/thinkgos/gogate/apps/elinkch/ctrl"
 	"github.com/thinkgos/gogate/apps/elinkmd"
